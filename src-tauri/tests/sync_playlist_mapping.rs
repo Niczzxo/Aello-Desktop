@@ -2,11 +2,11 @@
 //! the item's `added_at_ms`, 0 when unknown; an item from Android (no `raw`) brings its `added_at_ms`
 //! back in when known (non-zero), and a merge keeps the earliest known time.
 
-use flow_desktop_lib::sync::canonical::{Hlc, Playlist, PlaylistItem, PlaylistOrigin};
-use flow_desktop_lib::sync::mapping::{
+use aello_desktop_lib::sync::canonical::{Hlc, Playlist, PlaylistItem, PlaylistOrigin};
+use aello_desktop_lib::sync::mapping::{
     WATCH_LATER_SYNC_ID, parse_playlists_blob, playlists_to_blob,
 };
-use flow_desktop_lib::sync::merge::merge_playlists;
+use aello_desktop_lib::sync::merge::merge_playlists;
 use serde_json::Value;
 
 const CREATED: &str = "2025-01-01T00:00:00.000Z";

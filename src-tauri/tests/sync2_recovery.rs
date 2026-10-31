@@ -3,14 +3,14 @@
 
 mod sync2_common;
 
-use flow_desktop_lib::sync2::engine::{EngineError, Session};
-use flow_desktop_lib::sync2::keys::{MemberSecrets, member_secrets};
-use flow_desktop_lib::sync2::linking::DeviceMeta;
-use flow_desktop_lib::sync2::recovery::{recovery_keys, recovery_secret};
-use flow_desktop_lib::sync2::recovery_flow::restore;
-use flow_desktop_lib::sync2::roster::Role;
-use flow_desktop_lib::sync2::sealed::random_bytes;
-use flow_desktop_lib::sync2::state::{GroupRecord, add_roster_entries, load_group, save_group};
+use aello_desktop_lib::sync2::engine::{EngineError, Session};
+use aello_desktop_lib::sync2::keys::{MemberSecrets, member_secrets};
+use aello_desktop_lib::sync2::linking::DeviceMeta;
+use aello_desktop_lib::sync2::recovery::{recovery_keys, recovery_secret};
+use aello_desktop_lib::sync2::recovery_flow::restore;
+use aello_desktop_lib::sync2::roster::Role;
+use aello_desktop_lib::sync2::sealed::random_bytes;
+use aello_desktop_lib::sync2::state::{GroupRecord, add_roster_entries, load_group, save_group};
 use sqlx::SqlitePool;
 use sync2_common::{Group, LINK, device_pool, empty_pool, exported, group, head};
 

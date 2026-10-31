@@ -5,13 +5,13 @@ use serde_json::{Value, json};
 use sqlx::SqlitePool;
 use sqlx::sqlite::SqlitePoolOptions;
 
-use flow_desktop_lib::sync::apply::apply_payload;
-use flow_desktop_lib::sync::canonical::{
+use aello_desktop_lib::sync::apply::apply_payload;
+use aello_desktop_lib::sync::canonical::{
     Collection, Hlc, Like, LikeKind, LikeState, Playlist, SubscriptionGroup, WatchHistoryRecord,
 };
-use flow_desktop_lib::sync::export::export_collections;
-use flow_desktop_lib::sync::local_edits;
-use flow_desktop_lib::sync::protocol::StagedCollection;
+use aello_desktop_lib::sync::export::export_collections;
+use aello_desktop_lib::sync::local_edits;
+use aello_desktop_lib::sync::protocol::StagedCollection;
 
 const DESK: &str = "ddesk";
 const PEER: &str = "dpeer";
@@ -439,7 +439,7 @@ async fn a_deleted_group_travels() {
 }
 
 // --------------------------------------------------------------------------------------------
-// Android-shaped records (synthetic, field-for-field with Flow for Android's canonical model)
+// Android-shaped records (synthetic, field-for-field with Aello for Android's canonical model)
 // --------------------------------------------------------------------------------------------
 
 /// Sends `from`'s groups to `to`.

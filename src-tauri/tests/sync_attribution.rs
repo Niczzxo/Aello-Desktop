@@ -5,13 +5,13 @@ use serde_json::{Value, json};
 use sqlx::SqlitePool;
 use sqlx::sqlite::SqlitePoolOptions;
 
-use flow_desktop_lib::sync::apply::apply_payload;
-use flow_desktop_lib::sync::brain_attrib::legacy_own_count;
-use flow_desktop_lib::sync::canonical::{
-    AffinityWire, Collection, FlowNeuroBrainSnapshot, GCounter, Hlc, MusicBrainSnapshot, OrSet,
+use aello_desktop_lib::sync::apply::apply_payload;
+use aello_desktop_lib::sync::brain_attrib::legacy_own_count;
+use aello_desktop_lib::sync::canonical::{
+    AffinityWire, Collection, AelloNeuroBrainSnapshot, GCounter, Hlc, MusicBrainSnapshot, OrSet,
 };
-use flow_desktop_lib::sync::export::export_collections;
-use flow_desktop_lib::sync::protocol::StagedCollection;
+use aello_desktop_lib::sync::export::export_collections;
+use aello_desktop_lib::sync::protocol::StagedCollection;
 
 const OUR: &str = "dlocal";
 const PEER: &str = "dpeer";
@@ -81,13 +81,13 @@ fn stage<T: serde::Serialize>(collection: Collection, record: &T, hash: &str) ->
     }
 }
 
-/// A correct peer (like current Flow for Android): its own counter entry holds only its own count.
-fn peer_flow(docs: u64, extra: &[(&str, u64)], hlc_ms: u64) -> FlowNeuroBrainSnapshot {
+/// A correct peer (like current Aello for Android): its own counter entry holds only its own count.
+fn peer_flow(docs: u64, extra: &[(&str, u64)], hlc_ms: u64) -> AelloNeuroBrainSnapshot {
     let mut counter = GCounter::single(PEER, docs);
     for (device, count) in extra {
         counter.set(device, *count);
     }
-    let mut snap = FlowNeuroBrainSnapshot {
+    let mut snap = AelloNeuroBrainSnapshot {
         schema: 1,
         device_id: PEER.to_string(),
         hlc: Hlc::new(hlc_ms, 0, PEER),
@@ -117,7 +117,7 @@ async fn repeated_syncs_never_inflate_the_flow_counters() {
         OUR,
         PEER,
         &[stage(
-            Collection::FlowNeuroBrain,
+            Collection::AelloNeuroBrain,
             &peer_flow(10, &[], 1),
             "r1",
         )],
@@ -134,7 +134,7 @@ async fn repeated_syncs_never_inflate_the_flow_counters() {
             OUR,
             PEER,
             &[stage(
-                Collection::FlowNeuroBrain,
+                Collection::AelloNeuroBrain,
                 &peer_flow(10, &[], 1),
                 hash,
             )],
@@ -158,7 +158,7 @@ async fn repeated_syncs_never_inflate_the_flow_counters() {
         OUR,
         PEER,
         &[stage(
-            Collection::FlowNeuroBrain,
+            Collection::AelloNeuroBrain,
             &peer_flow(12, &[], 2),
             "r4",
         )],
@@ -179,7 +179,7 @@ async fn export_ships_only_this_devices_own_count() {
         OUR,
         PEER,
         &[stage(
-            Collection::FlowNeuroBrain,
+            Collection::AelloNeuroBrain,
             &peer_flow(10, &[], 1),
             "r1",
         )],
@@ -187,10 +187,10 @@ async fn export_ships_only_this_devices_own_count() {
     .await
     .unwrap();
 
-    let out = export_collections(&pool, OUR, &[Collection::FlowNeuroBrain])
+    let out = export_collections(&pool, OUR, &[Collection::AelloNeuroBrain])
         .await
         .unwrap();
-    let first: FlowNeuroBrainSnapshot =
+    let first: AelloNeuroBrainSnapshot =
         serde_json::from_slice(out[0].ndjson.split(|&b| b == b'\n').next().unwrap()).unwrap();
     let counter = &first.counters.idf_total_documents;
     assert_eq!(
@@ -210,7 +210,7 @@ async fn a_peer_copy_of_our_own_entry_is_ignored() {
         OUR,
         PEER,
         &[stage(
-            Collection::FlowNeuroBrain,
+            Collection::AelloNeuroBrain,
             &peer_flow(10, &[], 1),
             "r1",
         )],
@@ -224,7 +224,7 @@ async fn a_peer_copy_of_our_own_entry_is_ignored() {
         &pool,
         OUR,
         PEER,
-        &[stage(Collection::FlowNeuroBrain, &stale, "r2")],
+        &[stage(Collection::AelloNeuroBrain, &stale, "r2")],
     )
     .await
     .unwrap();
@@ -257,7 +257,7 @@ async fn an_inflated_pre_fix_counter_is_corrected_once() {
         OUR,
         PEER,
         &[stage(
-            Collection::FlowNeuroBrain,
+            Collection::AelloNeuroBrain,
             &peer_flow(10, &[(OUR, 25)], 3),
             "new",
         )],
@@ -272,7 +272,7 @@ async fn an_inflated_pre_fix_counter_is_corrected_once() {
         OUR,
         PEER,
         &[stage(
-            Collection::FlowNeuroBrain,
+            Collection::AelloNeuroBrain,
             &peer_flow(10, &[(OUR, 25)], 4),
             "next",
         )],
@@ -307,7 +307,7 @@ async fn an_unblock_survives_a_sync_with_a_peer_that_still_has_the_block() {
         &pool,
         OUR,
         PEER,
-        &[stage(Collection::FlowNeuroBrain, &with_block, "r1")],
+        &[stage(Collection::AelloNeuroBrain, &with_block, "r1")],
     )
     .await
     .unwrap();
@@ -321,7 +321,7 @@ async fn an_unblock_survives_a_sync_with_a_peer_that_still_has_the_block() {
         &pool,
         OUR,
         PEER,
-        &[stage(Collection::FlowNeuroBrain, &with_block, "r2")],
+        &[stage(Collection::AelloNeuroBrain, &with_block, "r2")],
     )
     .await
     .unwrap();
@@ -331,7 +331,7 @@ async fn an_unblock_survives_a_sync_with_a_peer_that_still_has_the_block() {
     );
 
     // The export carries the remove so the peer learns about the unblock too.
-    let out = export_collections(&pool, OUR, &[Collection::FlowNeuroBrain])
+    let out = export_collections(&pool, OUR, &[Collection::AelloNeuroBrain])
         .await
         .unwrap();
     let text = String::from_utf8(out[0].ndjson.clone()).unwrap();

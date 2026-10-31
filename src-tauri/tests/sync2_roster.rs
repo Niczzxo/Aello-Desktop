@@ -5,8 +5,8 @@ use std::path::PathBuf;
 
 use base64::Engine;
 use base64::engine::general_purpose::URL_SAFE_NO_PAD;
-use flow_desktop_lib::sync2::meta::open_device_meta;
-use flow_desktop_lib::sync2::roster::{
+use aello_desktop_lib::sync2::meta::open_device_meta;
+use aello_desktop_lib::sync2::roster::{
     Entry, Role, RosterState, apply_entry, entry_hash, fork_winner, parse_entry, replay_roster,
 };
 use serde_json::{Value, json};

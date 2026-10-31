@@ -5,15 +5,15 @@ mod sync2_common;
 
 use std::sync::Mutex;
 
-use flow_desktop_lib::sync2::batches::apply_batches;
-use flow_desktop_lib::sync2::codes::{Code, StoreLocation, new_offer, read_code};
-use flow_desktop_lib::sync2::engine::{EngineError, Session, now_ms};
-use flow_desktop_lib::sync2::keys::member_secrets;
-use flow_desktop_lib::sync2::linking::{
+use aello_desktop_lib::sync2::batches::apply_batches;
+use aello_desktop_lib::sync2::codes::{Code, StoreLocation, new_offer, read_code};
+use aello_desktop_lib::sync2::engine::{EngineError, Session, now_ms};
+use aello_desktop_lib::sync2::keys::member_secrets;
+use aello_desktop_lib::sync2::linking::{
     DeviceMeta, add_device, add_scanned, answer_shown, finish_join, join,
 };
-use flow_desktop_lib::sync2::pipe::listen_on;
-use flow_desktop_lib::sync2::sealed::random_bytes;
+use aello_desktop_lib::sync2::pipe::listen_on;
+use aello_desktop_lib::sync2::sealed::random_bytes;
 use sync2_common::{device_pool, empty_pool, exported, group, head, memory_welcome};
 
 fn meta() -> DeviceMeta {

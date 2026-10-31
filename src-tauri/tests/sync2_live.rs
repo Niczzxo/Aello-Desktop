@@ -5,8 +5,8 @@ use std::sync::{Arc, Mutex};
 
 use base64::Engine as _;
 use base64::engine::general_purpose::URL_SAFE_NO_PAD;
-use flow_desktop_lib::sync2::keys::member_secrets;
-use flow_desktop_lib::sync2::server::ServerStore;
+use aello_desktop_lib::sync2::keys::member_secrets;
+use aello_desktop_lib::sync2::server::ServerStore;
 use futures_util::{SinkExt, StreamExt};
 use serde_json::json;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};

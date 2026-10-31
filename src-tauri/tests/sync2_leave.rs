@@ -6,12 +6,12 @@ mod sync2_common;
 use std::collections::BTreeMap;
 use std::sync::Mutex;
 
-use flow_desktop_lib::sync2::engine::{EngineError, Session};
-use flow_desktop_lib::sync2::entries::build_entry;
-use flow_desktop_lib::sync2::membership::{leave_group, member_keys, new_epoch};
-use flow_desktop_lib::sync2::roster::{Entry, Op, entry_hash};
-use flow_desktop_lib::sync2::server::{Appended, ChangedObject, Result};
-use flow_desktop_lib::sync2::store::Store;
+use aello_desktop_lib::sync2::engine::{EngineError, Session};
+use aello_desktop_lib::sync2::entries::build_entry;
+use aello_desktop_lib::sync2::membership::{leave_group, member_keys, new_epoch};
+use aello_desktop_lib::sync2::roster::{Entry, Op, entry_hash};
+use aello_desktop_lib::sync2::server::{Appended, ChangedObject, Result};
+use aello_desktop_lib::sync2::store::Store;
 use sync2_common::{Group, MemoryStore, device_pool, draft, group, head};
 
 /// The group after A left: B and the recovery member remain, and a rotate is due.

@@ -4,27 +4,27 @@
 use std::convert::Infallible;
 use std::path::PathBuf;
 
-use flow_desktop_lib::sync::canonical::to_canonical_json;
-use flow_desktop_lib::sync2::blob::open_blob;
-use flow_desktop_lib::sync2::curve::{agreement_public_key, is_valid_signing_key, verify};
-use flow_desktop_lib::sync2::envelope::{
+use aello_desktop_lib::sync::canonical::to_canonical_json;
+use aello_desktop_lib::sync2::blob::open_blob;
+use aello_desktop_lib::sync2::curve::{agreement_public_key, is_valid_signing_key, verify};
+use aello_desktop_lib::sync2::envelope::{
     ObjectType, StreamPosition, next_in_stream, next_live_counter, open_object, parse_object,
     verify_object,
 };
-use flow_desktop_lib::sync2::epoch::{
+use aello_desktop_lib::sync2::epoch::{
     Purpose, check_epoch_key, epoch_commitment, open_chain, purpose_key,
 };
-use flow_desktop_lib::sync2::kdf::{derive, labeled_hash};
-use flow_desktop_lib::sync2::keys::member_secrets;
-use flow_desktop_lib::sync2::lan::{
+use aello_desktop_lib::sync2::kdf::{derive, labeled_hash};
+use aello_desktop_lib::sync2::keys::member_secrets;
+use aello_desktop_lib::sync2::lan::{
     LanRole, lan_frame_aad, lan_hello_aad, lan_session_keys, lan_tag, lan_transcript,
 };
-use flow_desktop_lib::sync2::pairing::{pairing_aad, pairing_keys, pairing_slot};
-use flow_desktop_lib::sync2::payload::{decode_payload, padded_size};
-use flow_desktop_lib::sync2::recovery::{recovery_keys, recovery_secret, recovery_words};
-use flow_desktop_lib::sync2::sealed::{open, seal_with_salt};
-use flow_desktop_lib::sync2::wrap::{unwrap_epoch_key, wrap_epoch_key_with_rng};
-use flow_desktop_lib::sync2::{Error, Result};
+use aello_desktop_lib::sync2::pairing::{pairing_aad, pairing_keys, pairing_slot};
+use aello_desktop_lib::sync2::payload::{decode_payload, padded_size};
+use aello_desktop_lib::sync2::recovery::{recovery_keys, recovery_secret, recovery_words};
+use aello_desktop_lib::sync2::sealed::{open, seal_with_salt};
+use aello_desktop_lib::sync2::wrap::{unwrap_epoch_key, wrap_epoch_key_with_rng};
+use aello_desktop_lib::sync2::{Error, Result};
 use hpke::rand_core::{TryCryptoRng, TryRng};
 use serde_json::Value;
 

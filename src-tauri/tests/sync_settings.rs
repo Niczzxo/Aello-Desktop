@@ -1,14 +1,14 @@
-//! Settings travel under Flow for Android's canonical keys with typed values, local changes keep
+//! Settings travel under Aello for Android's canonical keys with typed values, local changes keep
 //! their real timestamp, and the video codec preference never syncs.
 
 use serde_json::{Value, json};
 use sqlx::SqlitePool;
 use sqlx::sqlite::SqlitePoolOptions;
 
-use flow_desktop_lib::sync::apply::apply_payload;
-use flow_desktop_lib::sync::canonical::{Collection, Hlc, SettingEntry};
-use flow_desktop_lib::sync::export::export_collections;
-use flow_desktop_lib::sync::protocol::StagedCollection;
+use aello_desktop_lib::sync::apply::apply_payload;
+use aello_desktop_lib::sync::canonical::{Collection, Hlc, SettingEntry};
+use aello_desktop_lib::sync::export::export_collections;
+use aello_desktop_lib::sync::protocol::StagedCollection;
 
 const OUR: &str = "dlocal";
 const PEER: &str = "dpeer";

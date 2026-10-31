@@ -6,17 +6,17 @@ mod sync2_common;
 
 use base64::Engine as _;
 use base64::engine::general_purpose::URL_SAFE_NO_PAD;
-use flow_desktop_lib::sync::canonical::Collection;
-use flow_desktop_lib::sync::export::export_collections;
-use flow_desktop_lib::sync2::batches::apply_batches;
-use flow_desktop_lib::sync2::engine::{EngineError, Session, now_ms};
-use flow_desktop_lib::sync2::entries::{build_entry, epoch_draft, member_subject};
-use flow_desktop_lib::sync2::epoch::seal_chain;
-use flow_desktop_lib::sync2::keys::{MemberSecrets, member_secrets};
-use flow_desktop_lib::sync2::paths::log_path;
-use flow_desktop_lib::sync2::roster::{Op, Role};
-use flow_desktop_lib::sync2::sealed::random_bytes;
-use flow_desktop_lib::sync2::store::Store;
+use aello_desktop_lib::sync::canonical::Collection;
+use aello_desktop_lib::sync::export::export_collections;
+use aello_desktop_lib::sync2::batches::apply_batches;
+use aello_desktop_lib::sync2::engine::{EngineError, Session, now_ms};
+use aello_desktop_lib::sync2::entries::{build_entry, epoch_draft, member_subject};
+use aello_desktop_lib::sync2::epoch::seal_chain;
+use aello_desktop_lib::sync2::keys::{MemberSecrets, member_secrets};
+use aello_desktop_lib::sync2::paths::log_path;
+use aello_desktop_lib::sync2::roster::{Op, Role};
+use aello_desktop_lib::sync2::sealed::random_bytes;
+use aello_desktop_lib::sync2::store::Store;
 use sqlx::SqlitePool;
 use sync2_common::{MemoryStore, device_pool, draft, exported, group, head, watch, watched, wraps};
 

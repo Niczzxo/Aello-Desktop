@@ -1,4 +1,4 @@
-# Every place Flow Desktop keeps data, and who owns it once there are profiles.
+# Every place Aello Desktop keeps data, and who owns it once there are profiles.
 # kind	name	scope	class	reason
 # scope: DEVICE (one per install), PROFILE (one per profile), CACHE (disposable), DEFAULT_ONLY (sync state), DEAD (unused)
 # class: settings | library | private | identity | sync | - (Android StoreScope classes)
@@ -26,14 +26,14 @@ table	sync2_consent	DEFAULT_ONLY	sync	Only Default syncs; which devices may cont
 table	sync2_pending	DEFAULT_ONLY	sync	Only Default syncs; objects written while the server was out of reach
 table	watch_history	PROFILE	library	Video and music history (is_music)
 table	notifications	PROFILE	library	New-upload inbox written by the poll loop for this profile's subscriptions
-table	recommendation_events	PROFILE	private	FlowNeuro event log
+table	recommendation_events	PROFILE	private	AelloNeuro event log
 table	seen_videos	PROFILE	private	Cards this viewer has seen
-table	neuro_channel_categories	PROFILE	private	FlowNeuro v4 side store
-table	neuro_cowatch_sources	PROFILE	private	FlowNeuro v4 side store
-table	neuro_content_topics	PROFILE	private	FlowNeuro v4 side store
+table	neuro_channel_categories	PROFILE	private	AelloNeuro v4 side store
+table	neuro_cowatch_sources	PROFILE	private	AelloNeuro v4 side store
+table	neuro_content_topics	PROFILE	private	AelloNeuro v4 side store
 table	home_feed_cache	PROFILE	private	Ranked Home output for this profile
 table	home_channel_memory	PROFILE	private	Channels watched without subscribing
-table	home_neighbour_channels	PROFILE	private	FlowNeuro v5 neighbour channels
+table	home_neighbour_channels	PROFILE	private	AelloNeuro v5 neighbour channels
 table	subscription_watermarks	PROFILE	private	A shared watermark would swallow another profile's alerts
 table	music_queue_state	PROFILE	private	Last music queue
 table	music_resume_positions	PROFILE	private	Long-track resume points
@@ -54,7 +54,7 @@ table	video_kind_checks	CACHE	-	Fact about a video; kept in each profile's file
 table	music_home_sections	DEAD	-	No code reads or writes it
 table	music_home_chips	DEAD	-	No code reads or writes it
 table	settings	PROFILE	settings	Mixed table: device keys are routed to Default's file by key
-setting	user_neuro_brain	PROFILE	private	FlowNeuro brain
+setting	user_neuro_brain	PROFILE	private	AelloNeuro brain
 setting	user_neuro_brain_before_v14	PROFILE	private	Pre-migration copy, written for any brain that lacks one
 setting	user_music_brain	PROFILE	private	MusicBrain
 setting	music_brain_backfilled	PROFILE	private	Follows user_music_brain
@@ -76,9 +76,9 @@ setting	stable_volume_enabled	PROFILE	settings	Playback preference
 setting	sponsorblock_categories	PROFILE	settings	SponsorBlock preference
 setting	sponsorblock_enabled	PROFILE	settings	SponsorBlock preference
 setting	sponsorblock_server	PROFILE	settings	SponsorBlock preference
-setting	sync_neuro_merged	DEFAULT_ONLY	sync	FlowNeuro CRDT state
+setting	sync_neuro_merged	DEFAULT_ONLY	sync	AelloNeuro CRDT state
 setting	sync_music_merged	DEFAULT_ONLY	sync	MusicBrain CRDT state
-setting	sync_neuro_baseline	DEFAULT_ONLY	sync	FlowNeuro CRDT baseline
+setting	sync_neuro_baseline	DEFAULT_ONLY	sync	AelloNeuro CRDT baseline
 setting	sync_music_baseline	DEFAULT_ONLY	sync	MusicBrain CRDT baseline
 setting	sync_last_backup	DEFAULT_ONLY	sync	Pre-apply snapshot of the last sync
 setting	sync_clock_hwm	DEFAULT_ONLY	sync	Newest stamp applied; local edits are stamped after it
@@ -89,7 +89,7 @@ setting	download_location	DEVICE	-	Downloads
 setting	music_download_location	DEVICE	-	Downloads
 setting	download_poster_sidecar	DEVICE	-	Downloads
 setting	download_lyrics_file	DEVICE	-	Downloads
-file	flow-desktop.sqlite	PROFILE	library	Default at the app data root, others under profiles/<id>/
+file	aello-desktop.sqlite	PROFILE	library	Default at the app data root, others under profiles/<id>/
 file	visitor_identity.json	PROFILE	identity	One YouTube visitor identity per profile
 file	logs	DEVICE	-	Diagnostics and logs are device-wide
 file	lyrics	CACHE	-	Shared content cache keyed by video id

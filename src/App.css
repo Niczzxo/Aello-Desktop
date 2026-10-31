@@ -15,7 +15,7 @@
   --color-on-surface-variant: var(--color-on-surface-variant-val);
   --color-error: #F44336;
 
-  /* Profile colours: Flow for Android's eight seeds keep their hue and take the tones of
+  /* Profile colours: Aello for Android's eight seeds keep their hue and take the tones of
      ProfileColors.kt (light: container 90, content 10; dark: container 30, content 90). */
   --color-profile-blue-container: var(--profile-blue-container-val);
   --color-profile-blue-content: var(--profile-blue-content-val);
@@ -195,12 +195,12 @@
   @apply bg-chrome-red-950/40 text-primary border-l-4 border-primary;
 }
 
-.deep-flow-topbar-active {
+.deep-aello-topbar-active {
   color: var(--color-primary);
   background-color: color-mix(in srgb, var(--color-primary) 15%, transparent);
 }
 
-.deep-flow-topbar-active:hover {
+.deep-aello-topbar-active:hover {
   color: var(--color-primary);
   background-color: color-mix(in srgb, var(--color-primary) 22%, transparent);
 }

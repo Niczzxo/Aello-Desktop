@@ -30,7 +30,7 @@ export const Logo: React.FC<LogoProps> = ({ className = "", size = 48, showText 
       </svg>
       {showText && (
         <span className="font-extrabold text-xl tracking-tight text-chrome-neutral-100">
-          Flow
+          Aello
         </span>
       )}
     </div>

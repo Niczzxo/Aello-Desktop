@@ -2,8 +2,8 @@
 //! differently-keyed `meta`. `likes_to_blob` must still emit the desktop frontend's shape
 //! (`{kind,id,likedAt, song|video:{…}}`) so `useLikes` never crashes on a missing nested object.
 
-use flow_desktop_lib::sync::canonical::{Hlc, Like, LikeKind, LikeState};
-use flow_desktop_lib::sync::mapping::{likes_to_blob, parse_likes_blob};
+use aello_desktop_lib::sync::canonical::{Hlc, Like, LikeKind, LikeState};
+use aello_desktop_lib::sync::mapping::{likes_to_blob, parse_likes_blob};
 use serde_json::Value;
 
 fn like(kind: LikeKind, id: &str, meta: Value) -> Like {

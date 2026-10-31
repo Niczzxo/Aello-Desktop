@@ -11,22 +11,22 @@ use sqlx::SqlitePool;
 use sqlx::sqlite::SqlitePoolOptions;
 
 use common::bind_loopback;
-use flow_desktop_lib::flow_neuro::keyspec::{KeySpec, VERSION};
-use flow_desktop_lib::sync::apply::apply_payload;
-use flow_desktop_lib::sync::canonical::{
-    Collection, FlowNeuroBrainSnapshot, GCounter, Hlc, Lww, RejectionSignalWire,
+use aello_desktop_lib::aello_neuro::keyspec::{KeySpec, VERSION};
+use aello_desktop_lib::sync::apply::apply_payload;
+use aello_desktop_lib::sync::canonical::{
+    Collection, AelloNeuroBrainSnapshot, GCounter, Hlc, Lww, RejectionSignalWire,
 };
-use flow_desktop_lib::sync::crypto::{
+use aello_desktop_lib::sync::crypto::{
     Role, SessionCipher, generate_master_secret, generate_session_id,
 };
-use flow_desktop_lib::sync::frames::{
+use aello_desktop_lib::sync::frames::{
     ApplyResultEntry, ApplyResultFrame, CapabilitiesFrame, Capability, HelloFrame, Platform,
 };
-use flow_desktop_lib::sync::protocol::{
+use aello_desktop_lib::sync::protocol::{
     ApplyOutput, OutgoingCollection, StagedCollection, run_receiver, run_sender,
 };
-use flow_desktop_lib::sync::session::desktop_capabilities;
-use flow_desktop_lib::sync::transport;
+use aello_desktop_lib::sync::session::desktop_capabilities;
+use aello_desktop_lib::sync::transport;
 
 const OUR: &str = "dlocal";
 const PEER: &str = "dpeer";
@@ -77,7 +77,7 @@ fn peer_caps(key_spec: i32, key_language: &str) -> CapabilitiesFrame {
         collections: BTreeMap::from([
             (Collection::Likes.key().to_string(), cap(0, "")),
             (
-                Collection::FlowNeuroBrain.key().to_string(),
+                Collection::AelloNeuroBrain.key().to_string(),
                 cap(key_spec, key_language),
             ),
         ]),
@@ -117,11 +117,11 @@ async fn offered_to(their_caps: CapabilitiesFrame) -> Vec<String> {
                     ndjson: br#"{"id":"a","state":"liked"}"#.to_vec(),
                 },
                 OutgoingCollection {
-                    collection: Collection::FlowNeuroBrain,
+                    collection: Collection::AelloNeuroBrain,
                     ndjson: br#"{"deviceId":"desktop"}"#.to_vec(),
                 },
             ],
-            vec![Collection::Likes, Collection::FlowNeuroBrain],
+            vec![Collection::Likes, Collection::AelloNeuroBrain],
             false,
             || async {},
         )
@@ -193,9 +193,9 @@ async fn get(pool: &SqlitePool, key: &str) -> Value {
     serde_json::from_str(&raw).unwrap()
 }
 
-async fn apply(pool: &SqlitePool, snap: &FlowNeuroBrainSnapshot, hash: &str) {
+async fn apply(pool: &SqlitePool, snap: &AelloNeuroBrainSnapshot, hash: &str) {
     let staged = StagedCollection {
-        collection: Collection::FlowNeuroBrain,
+        collection: Collection::AelloNeuroBrain,
         ndjson: serde_json::to_vec(snap).unwrap(),
         record_count: 1,
         hash: hash.to_string(),
@@ -207,8 +207,8 @@ fn peer_snapshot(
     topics: &[(&str, f64)],
     words: &[(&str, u64)],
     docs: u64,
-) -> FlowNeuroBrainSnapshot {
-    let mut snap = FlowNeuroBrainSnapshot {
+) -> AelloNeuroBrainSnapshot {
+    let mut snap = AelloNeuroBrainSnapshot {
         schema: 13,
         device_id: PEER.to_string(),
         hlc: Hlc::new(1_000, 0, PEER),
@@ -414,11 +414,11 @@ async fn traditional_keys_from_a_key_spec_2_peer_join_their_simplified_ones() {
 
 #[test]
 fn a_brain_held_back_says_why() {
-    use flow_desktop_lib::sync::protocol::{Withheld, WithheldReason, withheld};
+    use aello_desktop_lib::sync::protocol::{Withheld, WithheldReason, withheld};
     let ours = desktop_capabilities("en");
     let brain = |reason| {
         vec![Withheld {
-            collection: Collection::FlowNeuroBrain,
+            collection: Collection::AelloNeuroBrain,
             reason,
         }]
     };
@@ -447,7 +447,7 @@ async fn send_to(
     their_caps: CapabilitiesFrame,
     outgoing: Vec<OutgoingCollection>,
 ) -> (
-    flow_desktop_lib::sync::protocol::HostOutcome,
+    aello_desktop_lib::sync::protocol::HostOutcome,
     Vec<StagedCollection>,
 ) {
     let master = generate_master_secret();
@@ -484,16 +484,16 @@ async fn send_to(
     .await
     .unwrap();
     let staged = match received {
-        flow_desktop_lib::sync::protocol::ClientOutcome::Completed(payload) => payload.applied,
-        flow_desktop_lib::sync::protocol::ClientOutcome::Declined => Vec::new(),
+        aello_desktop_lib::sync::protocol::ClientOutcome::Completed(payload) => payload.applied,
+        aello_desktop_lib::sync::protocol::ClientOutcome::Declined => Vec::new(),
     };
     (host.await.unwrap(), staged)
 }
 
 #[tokio::test]
 async fn a_spec_2_desktop_brain_reaches_a_spec_3_phone_in_simplified_keys() {
-    use flow_desktop_lib::sync::export::export_collections;
-    use flow_desktop_lib::sync::protocol::{HostOutcome, WithheldReason};
+    use aello_desktop_lib::sync::export::export_collections;
+    use aello_desktop_lib::sync::protocol::{HostOutcome, WithheldReason};
 
     let pool = memory_pool().await;
     put(
@@ -504,7 +504,7 @@ async fn a_spec_2_desktop_brain_reaches_a_spec_3_phone_in_simplified_keys() {
                  "idf_word_frequency": { "機器學習": 3, "guitar": 2 }, "idf_total_documents": 3 }),
     )
     .await;
-    let outgoing = export_collections(&pool, OUR, &[Collection::FlowNeuroBrain])
+    let outgoing = export_collections(&pool, OUR, &[Collection::AelloNeuroBrain])
         .await
         .unwrap();
 
@@ -516,9 +516,9 @@ async fn a_spec_2_desktop_brain_reaches_a_spec_3_phone_in_simplified_keys() {
     assert!(sent.withheld.is_empty());
     let brain = staged
         .iter()
-        .find(|c| c.collection == Collection::FlowNeuroBrain)
+        .find(|c| c.collection == Collection::AelloNeuroBrain)
         .expect("the brain went to the phone");
-    let snapshots: Vec<FlowNeuroBrainSnapshot> = String::from_utf8(brain.ndjson.clone())
+    let snapshots: Vec<AelloNeuroBrainSnapshot> = String::from_utf8(brain.ndjson.clone())
         .unwrap()
         .lines()
         .map(|line| serde_json::from_str(line).unwrap())
@@ -539,7 +539,7 @@ async fn a_spec_2_desktop_brain_reaches_a_spec_3_phone_in_simplified_keys() {
     assert!(
         staged
             .iter()
-            .all(|c| c.collection != Collection::FlowNeuroBrain)
+            .all(|c| c.collection != Collection::AelloNeuroBrain)
     );
     assert_eq!(sent.withheld.len(), 1);
     assert_eq!(sent.withheld[0].reason, WithheldReason::PeerOlder);

@@ -3,13 +3,13 @@
 //! panic = a remote crash. These tests feed undersized, wrong-version, garbage, and randomized wire
 //! bytes, plus a gzip-bomb, and assert graceful failures.
 
-use flow_desktop_lib::sync::codec::{
+use aello_desktop_lib::sync::codec::{
     decode_chunk, decode_message, encode_message, gunzip, gunzip_limited, gzip,
 };
-use flow_desktop_lib::sync::crypto::{
+use aello_desktop_lib::sync::crypto::{
     Role, SessionCipher, generate_master_secret, generate_session_id,
 };
-use flow_desktop_lib::sync::frames::{ChunkHeader, FrameType};
+use aello_desktop_lib::sync::frames::{ChunkHeader, FrameType};
 
 fn cipher_pair() -> (SessionCipher, SessionCipher) {
     let master = generate_master_secret();
@@ -116,7 +116,7 @@ fn decode_chunk_handles_edge_shapes() {
     let (h, nd) = decode_chunk(&body).unwrap();
     assert!(h.last);
     assert!(nd.is_empty());
-    // Header with no separator at all: Flow for Android ≤ 2.2.0 frames a zero-record collection
+    // Header with no separator at all: Aello for Android ≤ 2.2.0 frames a zero-record collection
     // this way, so it must decode as an empty chunk rather than fail the session (issues #30/#49).
     let (h, nd) = decode_chunk(&header_json).unwrap();
     assert!(h.last);

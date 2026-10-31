@@ -5,9 +5,9 @@ use serde_json::Value;
 use sqlx::SqlitePool;
 use sqlx::sqlite::SqlitePoolOptions;
 
-use flow_desktop_lib::sync::apply::{apply_payload, apply_stream_payload};
-use flow_desktop_lib::sync::canonical::{Collection, to_canonical_json};
-use flow_desktop_lib::sync::protocol::StagedCollection;
+use aello_desktop_lib::sync::apply::{apply_payload, apply_stream_payload};
+use aello_desktop_lib::sync::canonical::{Collection, to_canonical_json};
+use aello_desktop_lib::sync::protocol::StagedCollection;
 
 async fn memory_pool() -> SqlitePool {
     let pool = SqlitePoolOptions::new()

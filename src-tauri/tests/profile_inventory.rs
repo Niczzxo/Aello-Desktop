@@ -289,7 +289,7 @@ fn device_tables_go_through_the_device_pool() {
 
 #[test]
 fn device_settings_in_the_inventory_are_routed_as_device_keys() {
-    use flow_desktop_lib::profiles::device_keys::is_device_key;
+    use aello_desktop_lib::profiles::device_keys::is_device_key;
     let wrong: Vec<String> = inventory()
         .into_iter()
         .filter(|((kind, _), _)| kind == "setting")

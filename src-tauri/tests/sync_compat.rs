@@ -1,7 +1,7 @@
 //! Cross-platform tolerance tests for the sync wire model.
 //!
-//! These lock the two things that made phone→desktop sync fail in the field: the FlowNeuro brain
-//! envelope Flow for Android actually sends (issue #46) and the LAN address the QR advertises when
+//! These lock the two things that made phone→desktop sync fail in the field: the AelloNeuro brain
+//! envelope Aello for Android actually sends (issue #46) and the LAN address the QR advertises when
 //! a VPN or container bridge is present (issue #41). The Android payloads below are shaped exactly
 //! as `sync/canonical/Canonical.kt` + `sync/mapping/BrainMapper.kt` serialize them.
 //!
@@ -10,14 +10,14 @@
 
 use std::net::IpAddr;
 
-use flow_desktop_lib::sync::canonical::{FlowNeuroBrainSnapshot, GCounter, Hlc, Lww, OrSet};
-use flow_desktop_lib::sync::merge::merge_flow_neuro;
-use flow_desktop_lib::sync::transport::rank_lan_candidates;
+use aello_desktop_lib::sync::canonical::{AelloNeuroBrainSnapshot, GCounter, Hlc, Lww, OrSet};
+use aello_desktop_lib::sync::merge::merge_aello_neuro;
+use aello_desktop_lib::sync::transport::rank_lan_candidates;
 
 const ANDROID_DEVICE: &str = "d68ec770-8084-4f42-9914-132eca886f13";
 const ANDROID_HLC: &str = "1784462799000:0:d68ec770";
 
-/// One `flow_neuro_brain` NDJSON record exactly as Flow for Android v2.2.0 emits it: counters,
+/// One `flow_neuro_brain` NDJSON record exactly as Aello for Android v2.2.0 emits it: counters,
 /// per-video maps, sets, LWW-maps and flags all at the top level, G-Counters wrapped in
 /// `perDevice`, vector dimensions inline, and no stamps on the sets/registers.
 fn android_brain_record() -> String {
@@ -105,7 +105,7 @@ fn lww_accepts_a_bare_value_and_the_stamped_register() {
 fn androids_flat_brain_envelope_parses_instead_of_aborting_the_apply() {
     // Before the compat layer this failed with `invalid type: map, expected u64`, which rolled back
     // the whole apply transaction — so nothing synced at all whenever the brain was selected.
-    let snapshot: FlowNeuroBrainSnapshot =
+    let snapshot: AelloNeuroBrainSnapshot =
         serde_json::from_str(&android_brain_record()).expect("android brain record must parse");
 
     assert_eq!(snapshot.schema, 13);
@@ -115,7 +115,7 @@ fn androids_flat_brain_envelope_parses_instead_of_aborting_the_apply() {
 
 #[test]
 fn androids_top_level_fields_land_in_their_grouped_homes() {
-    let snapshot: FlowNeuroBrainSnapshot = serde_json::from_str(&android_brain_record()).unwrap();
+    let snapshot: AelloNeuroBrainSnapshot = serde_json::from_str(&android_brain_record()).unwrap();
 
     // counters / idf words
     assert_eq!(
@@ -160,7 +160,7 @@ fn androids_top_level_fields_land_in_their_grouped_homes() {
 
 #[test]
 fn androids_inline_vector_dimensions_are_folded_into_dims() {
-    let snapshot: FlowNeuroBrainSnapshot = serde_json::from_str(&android_brain_record()).unwrap();
+    let snapshot: AelloNeuroBrainSnapshot = serde_json::from_str(&android_brain_record()).unwrap();
 
     let global = &snapshot.vectors.global_vector;
     assert_eq!(global.topics["music"], 0.8);
@@ -176,7 +176,7 @@ fn androids_screaming_snake_bucket_keys_are_rewritten_on_ingest() {
     // Android keys its time vectors by the Kotlin enum name. Rewriting must happen here, at the
     // decode boundary — left alone, `WEEKDAY_EVENING` and our `WeekdayEvening` survive as two
     // distinct keys through the whole CRDT merge and never blend.
-    let snapshot: FlowNeuroBrainSnapshot = serde_json::from_str(&android_brain_record()).unwrap();
+    let snapshot: AelloNeuroBrainSnapshot = serde_json::from_str(&android_brain_record()).unwrap();
 
     assert_eq!(
         snapshot.vectors.time_vectors["WeekdayEvening"].topics["music"],
@@ -196,7 +196,7 @@ fn an_already_canonical_bucket_key_wins_a_collision() {
         "WEEKDAY_EVENING":{"topics":{"music":0.9}},
         "WeekdayEvening":{"topics":{"coding":0.3}}
     }}}"#;
-    let snapshot: FlowNeuroBrainSnapshot = serde_json::from_str(raw).unwrap();
+    let snapshot: AelloNeuroBrainSnapshot = serde_json::from_str(raw).unwrap();
 
     assert_eq!(snapshot.vectors.time_vectors.len(), 1);
     assert_eq!(
@@ -208,7 +208,7 @@ fn an_already_canonical_bucket_key_wins_a_collision() {
 #[test]
 fn an_unrecognized_bucket_key_is_passed_through_rather_than_dropped() {
     let raw = r#"{"vectors":{"timeVectors":{"SomeFutureBucket":{"topics":{"music":0.9}}}}}"#;
-    let snapshot: FlowNeuroBrainSnapshot = serde_json::from_str(raw).unwrap();
+    let snapshot: AelloNeuroBrainSnapshot = serde_json::from_str(raw).unwrap();
 
     assert_eq!(
         snapshot.vectors.time_vectors["SomeFutureBucket"].topics["music"],
@@ -220,7 +220,7 @@ fn an_unrecognized_bucket_key_is_passed_through_rather_than_dropped() {
 fn unstamped_sets_and_registers_inherit_the_snapshot_hlc() {
     // Left at the zero stamp they would lose every merge against a local write, and an old remove
     // tombstone would silently un-block a channel the user just blocked on the phone.
-    let snapshot: FlowNeuroBrainSnapshot = serde_json::from_str(&android_brain_record()).unwrap();
+    let snapshot: AelloNeuroBrainSnapshot = serde_json::from_str(&android_brain_record()).unwrap();
     let expected = Hlc::new(1_784_462_799_000, 0, "d68ec770");
 
     assert_eq!(snapshot.sets.blocked_topics.adds["politics"], expected);
@@ -237,8 +237,8 @@ fn unstamped_sets_and_registers_inherit_the_snapshot_hlc() {
 fn an_android_snapshot_carries_its_experience_weight_into_the_merge() {
     // The blend weights each device by its idf document count; if the counter had stayed at the
     // top level it would read as 0 and the phone's learned vectors would count for nothing.
-    let snapshot: FlowNeuroBrainSnapshot = serde_json::from_str(&android_brain_record()).unwrap();
-    let merged = merge_flow_neuro(&[snapshot]);
+    let snapshot: AelloNeuroBrainSnapshot = serde_json::from_str(&android_brain_record()).unwrap();
+    let merged = merge_aello_neuro(&[snapshot]);
 
     let device = &merged.device_vectors[ANDROID_DEVICE];
     assert_eq!(device.weight, 42);
@@ -249,9 +249,9 @@ fn an_android_snapshot_carries_its_experience_weight_into_the_merge() {
 #[test]
 fn the_canonical_grouped_envelope_still_round_trips_byte_for_byte() {
     // Desktop→desktop sync and the persisted merged-brain blob both depend on this.
-    let snapshot: FlowNeuroBrainSnapshot = serde_json::from_str(&android_brain_record()).unwrap();
+    let snapshot: AelloNeuroBrainSnapshot = serde_json::from_str(&android_brain_record()).unwrap();
     let canonical = serde_json::to_string(&snapshot).unwrap();
-    let reparsed: FlowNeuroBrainSnapshot = serde_json::from_str(&canonical).unwrap();
+    let reparsed: AelloNeuroBrainSnapshot = serde_json::from_str(&canonical).unwrap();
 
     assert_eq!(snapshot, reparsed);
     assert_eq!(canonical, serde_json::to_string(&reparsed).unwrap());

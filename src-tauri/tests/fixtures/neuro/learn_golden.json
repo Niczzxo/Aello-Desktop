@@ -1,5 +1,5 @@
 {
-    "about": "Inputs and outputs of NeuroVectorMath and the rejection memory, written by NeuroLearnGoldenTest. Flow Desktop mirrors this file.",
+    "about": "Inputs and outputs of NeuroVectorMath and the rejection memory, written by NeuroLearnGoldenTest. Aello Desktop mirrors this file.",
     "constants": {
         "decayReferenceRate": 0.15,
         "recentShare": 0.25,

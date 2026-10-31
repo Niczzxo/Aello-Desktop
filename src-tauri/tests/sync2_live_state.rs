@@ -3,8 +3,8 @@
 
 mod sync2_common;
 
-use flow_desktop_lib::sync2::live_state::{accept_live_seq, consents, next_live_seq, set_consent};
-use flow_desktop_lib::sync2::state::forget_group;
+use aello_desktop_lib::sync2::live_state::{accept_live_seq, consents, next_live_seq, set_consent};
+use aello_desktop_lib::sync2::state::forget_group;
 use sync2_common::{device_pool, group};
 
 #[tokio::test]

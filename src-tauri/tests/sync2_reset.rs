@@ -3,13 +3,13 @@
 
 mod sync2_common;
 
-use flow_desktop_lib::sync::canonical::Collection;
-use flow_desktop_lib::sync::export::export_collections;
-use flow_desktop_lib::sync::local_edits;
-use flow_desktop_lib::sync2::actions::{depart, reset_local_data};
-use flow_desktop_lib::sync2::engine::{EngineError, Session};
-use flow_desktop_lib::sync2::roster::Op;
-use flow_desktop_lib::sync2::state::load_group;
+use aello_desktop_lib::sync::canonical::Collection;
+use aello_desktop_lib::sync::export::export_collections;
+use aello_desktop_lib::sync::local_edits;
+use aello_desktop_lib::sync2::actions::{depart, reset_local_data};
+use aello_desktop_lib::sync2::engine::{EngineError, Session};
+use aello_desktop_lib::sync2::roster::Op;
+use aello_desktop_lib::sync2::state::load_group;
 use sync2_common::{device_pool, group};
 
 #[tokio::test]

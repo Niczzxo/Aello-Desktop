@@ -1,4 +1,4 @@
-//!CRDT primitive-law tests for Flow Local Sync.
+//!CRDT primitive-law tests for Aello Local Sync.
 //!
 //! These assert the laws that guarantee conflict-free convergence — commutativity, associativity
 //! (covered structurally by the per-device representations), and **idempotency** — for the merge
@@ -9,8 +9,8 @@
 
 use std::str::FromStr;
 
-use flow_desktop_lib::sync::canonical::{Collection, GCounter, Hlc, Lww, OrSet};
-use flow_desktop_lib::sync::frames::{FrameType, SelectionFrame};
+use aello_desktop_lib::sync::canonical::{Collection, GCounter, Hlc, Lww, OrSet};
+use aello_desktop_lib::sync::frames::{FrameType, SelectionFrame};
 
 #[test]
 fn hlc_roundtrips_through_string() {
@@ -137,7 +137,7 @@ fn frame_type_byte_values_are_stable() {
 #[test]
 fn collection_serializes_snake_case() {
     let s = SelectionFrame {
-        send: vec![Collection::WatchHistory, Collection::FlowNeuroBrain],
+        send: vec![Collection::WatchHistory, Collection::AelloNeuroBrain],
         accept: vec![Collection::Likes],
     };
     let v = serde_json::to_value(&s).unwrap();

@@ -1,7 +1,7 @@
 //! Upgrade and downgrade check on a real database from a build without profiles. It needs a copy
 //! of one, so it is ignored by default:
 //!
-//!   FLOW_UPGRADE_DB=/path/to/copy/flow-desktop.sqlite \
+//!   AELLO_UPGRADE_DB=/path/to/copy/aello-desktop.sqlite \
 //!     cargo test --test profile_upgrade -- --ignored --nocapture
 //!
 //! The copy is moved into a temporary app data folder and never written back.
@@ -9,7 +9,7 @@
 use std::collections::BTreeMap;
 use std::path::Path;
 
-use flow_desktop_lib::profiles::{ActiveProfile, load_for_process, open_database};
+use aello_desktop_lib::profiles::{ActiveProfile, load_for_process, open_database};
 
 async fn snapshot(path: &Path) -> (BTreeMap<String, i64>, Vec<i64>) {
     let pool = sqlx::SqlitePool::connect(&format!("sqlite://{}", path.display()))
@@ -41,12 +41,12 @@ async fn snapshot(path: &Path) -> (BTreeMap<String, i64>, Vec<i64>) {
 }
 
 #[tokio::test]
-#[ignore = "needs FLOW_UPGRADE_DB, a copy of a real database"]
+#[ignore = "needs AELLO_UPGRADE_DB, a copy of a real database"]
 async fn a_database_from_before_profiles_opens_as_default_and_stays_readable_by_older_builds() {
-    let source = std::env::var("FLOW_UPGRADE_DB").expect("set FLOW_UPGRADE_DB");
+    let source = std::env::var("AELLO_UPGRADE_DB").expect("set AELLO_UPGRADE_DB");
     let dir = std::env::temp_dir().join(format!("flow-upgrade-{}", uuid::Uuid::new_v4()));
     std::fs::create_dir_all(&dir).unwrap();
-    let db = dir.join("flow-desktop.sqlite");
+    let db = dir.join("aello-desktop.sqlite");
     std::fs::copy(&source, &db).unwrap();
     let (before_rows, before_versions) = snapshot(&db).await;
 
@@ -86,7 +86,7 @@ async fn a_database_from_before_profiles_opens_as_default_and_stays_readable_by_
     };
     let study_pool = open_database(&dir, &study).await.unwrap();
     study_pool.close().await;
-    let (study_rows, _) = snapshot(&dir.join("profiles/study/flow-desktop.sqlite")).await;
+    let (study_rows, _) = snapshot(&dir.join("profiles/study/aello-desktop.sqlite")).await;
     assert_eq!(study_rows.get("watch_history"), Some(&0));
     assert_eq!(
         snapshot(&db).await.1,

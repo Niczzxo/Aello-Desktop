@@ -1,9 +1,9 @@
-//! Key spec 2 stage 8 against Flow for Android: every row of `fixtures/neuro/stem_golden.tsv`
+//! Key spec 2 stage 8 against Aello for Android: every row of `fixtures/neuro/stem_golden.tsv`
 //! (byte-identical to Android's) and ports of `NeuroStemmerTest`.
 
-use flow_desktop_lib::flow_neuro::keyspec::tables::tables;
-use flow_desktop_lib::flow_neuro::keyspec::text::{fold, words};
-use flow_desktop_lib::flow_neuro::keyspec::{KeySpec, normalize_lemma, stemmer};
+use aello_desktop_lib::aello_neuro::keyspec::tables::tables;
+use aello_desktop_lib::aello_neuro::keyspec::text::{fold, words};
+use aello_desktop_lib::aello_neuro::keyspec::{KeySpec, normalize_lemma, stemmer};
 
 const STEM_GOLDEN: &str = include_str!("fixtures/neuro/stem_golden.tsv");
 const LANGUAGE_TITLES: &str = include_str!("fixtures/neuro/language_titles.tsv");

@@ -3,10 +3,10 @@
 
 mod sync2_common;
 
-use flow_desktop_lib::sync2::engine::{EngineError, Session};
-use flow_desktop_lib::sync2::linking::DeviceMeta;
-use flow_desktop_lib::sync2::membership::{remove_device, rename_device};
-use flow_desktop_lib::sync2::names::device_names;
+use aello_desktop_lib::sync2::engine::{EngineError, Session};
+use aello_desktop_lib::sync2::linking::DeviceMeta;
+use aello_desktop_lib::sync2::membership::{remove_device, rename_device};
+use aello_desktop_lib::sync2::names::device_names;
 use sync2_common::{device_pool, group, head};
 
 fn meta(name: &str) -> DeviceMeta {

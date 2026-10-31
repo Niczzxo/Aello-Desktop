@@ -6,11 +6,11 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 
 use base64::Engine;
 use base64::engine::general_purpose::URL_SAFE_NO_PAD;
-use flow_desktop_lib::sync2::curve::verify;
-use flow_desktop_lib::sync2::kdf::tag;
-use flow_desktop_lib::sync2::keys::{MemberSecrets, member_secrets};
-use flow_desktop_lib::sync2::server::{ServerStore, StoreError};
-use flow_desktop_lib::sync2::store::Store;
+use aello_desktop_lib::sync2::curve::verify;
+use aello_desktop_lib::sync2::kdf::tag;
+use aello_desktop_lib::sync2::keys::{MemberSecrets, member_secrets};
+use aello_desktop_lib::sync2::server::{ServerStore, StoreError};
+use aello_desktop_lib::sync2::store::Store;
 use serde_json::{Value, json};
 use wiremock::matchers::{body_json, header, method, path};
 use wiremock::{Mock, MockServer, Request, Respond, ResponseTemplate};
@@ -197,7 +197,7 @@ async fn a_lost_append_reports_the_current_head() {
         .unwrap();
     assert_eq!(
         outcome,
-        flow_desktop_lib::sync2::server::Appended::Conflict {
+        aello_desktop_lib::sync2::server::Appended::Conflict {
             head: "newer".to_owned()
         }
     );
@@ -227,8 +227,8 @@ async fn claiming_a_server_that_has_a_group_says_so() {
 
 #[tokio::test]
 async fn a_join_request_waits_for_a_member_s_code() {
-    use flow_desktop_lib::sync2::codes::{Code, StoreLocation, new_offer};
-    use flow_desktop_lib::sync2::join_requests::wait_for_code;
+    use aello_desktop_lib::sync2::codes::{Code, StoreLocation, new_offer};
+    use aello_desktop_lib::sync2::join_requests::wait_for_code;
     use wiremock::matchers::path_regex;
 
     let (server, _) = server(INSTANCE).await;
@@ -279,8 +279,8 @@ async fn a_join_request_waits_for_a_member_s_code() {
 
 #[tokio::test]
 async fn a_declined_join_request_stops_waiting() {
-    use flow_desktop_lib::sync2::engine::EngineError;
-    use flow_desktop_lib::sync2::join_requests::wait_for_code;
+    use aello_desktop_lib::sync2::engine::EngineError;
+    use aello_desktop_lib::sync2::join_requests::wait_for_code;
     use wiremock::matchers::path_regex;
 
     let (server, _) = server(INSTANCE).await;
@@ -364,7 +364,7 @@ async fn the_server_says_when_it_last_heard_from_each_device() {
 
 #[tokio::test]
 async fn a_server_reset_to_empty_says_the_group_is_gone() {
-    use flow_desktop_lib::sync2::engine::EngineError;
+    use aello_desktop_lib::sync2::engine::EngineError;
 
     let server = MockServer::start().await;
     Mock::given(method("POST"))

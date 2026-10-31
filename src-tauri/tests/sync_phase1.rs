@@ -1,14 +1,14 @@
-//! isolation tests for Flow Local Sync: device identity / HLC, payload crypto, and the
+//! isolation tests for Aello Local Sync: device identity / HLC, payload crypto, and the
 //! QR handshake. These run in an integration test (the crate links Tauri's cdylib; in-crate unit
 //! tests can't launch on Windows — see the note in `src/sync/canonical.rs`).
 
-use flow_desktop_lib::sync::canonical::{Hlc, short_device_id};
-use flow_desktop_lib::sync::crypto::{
+use aello_desktop_lib::sync::canonical::{Hlc, short_device_id};
+use aello_desktop_lib::sync::crypto::{
     CryptoError, Role, SessionCipher, compute_sas, generate_master_secret, generate_session_id,
 };
-use flow_desktop_lib::sync::frames::FrameType;
-use flow_desktop_lib::sync::identity::{default_device_name, new_device_id};
-use flow_desktop_lib::sync::qr::{QrError, QrPayload};
+use aello_desktop_lib::sync::frames::FrameType;
+use aello_desktop_lib::sync::identity::{default_device_name, new_device_id};
+use aello_desktop_lib::sync::qr::{QrError, QrPayload};
 
 // --------------------------------------------------------------------------------------------
 // Identity & HLC
@@ -17,7 +17,7 @@ use flow_desktop_lib::sync::qr::{QrError, QrPayload};
 #[test]
 fn device_ids_are_unique_and_name_is_friendly() {
     assert_ne!(new_device_id(), new_device_id());
-    assert!(default_device_name().starts_with("Flow Desktop ("));
+    assert!(default_device_name().starts_with("Aello Desktop ("));
 }
 
 #[test]
@@ -170,7 +170,7 @@ fn qr_payload_json_roundtrips() {
         &master,
         "192.168.1.42",
         49210,
-        "Flow Desktop (Windows)",
+        "Aello Desktop (Windows)",
         1_781_512_700,
     );
     let parsed = QrPayload::from_json(&qr.to_json()).unwrap();
@@ -189,7 +189,7 @@ fn scanning_the_qr_reconstructs_keys_and_sas() {
         &master,
         "10.0.0.5",
         5050,
-        "Flow Desktop (Linux)",
+        "Aello Desktop (Linux)",
         9_999_999_999,
     )
     .to_json();

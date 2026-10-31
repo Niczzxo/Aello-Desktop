@@ -4,12 +4,12 @@
 use serde_json::json;
 use sqlx::SqlitePool;
 
-use flow_desktop_lib::profiles::{ActiveProfile, open_database};
-use flow_desktop_lib::sync::apply::apply_payload;
-use flow_desktop_lib::sync::canonical::Collection;
-use flow_desktop_lib::sync::clock;
-use flow_desktop_lib::sync::local_edits;
-use flow_desktop_lib::sync::protocol::StagedCollection;
+use aello_desktop_lib::profiles::{ActiveProfile, open_database};
+use aello_desktop_lib::sync::apply::apply_payload;
+use aello_desktop_lib::sync::canonical::Collection;
+use aello_desktop_lib::sync::clock;
+use aello_desktop_lib::sync::local_edits;
+use aello_desktop_lib::sync::protocol::StagedCollection;
 
 const DAY_MS: u64 = 24 * 60 * 60 * 1000;
 

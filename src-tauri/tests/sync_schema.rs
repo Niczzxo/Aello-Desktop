@@ -1,4 +1,4 @@
-//! schema-lock test for Flow Local Sync.
+//! schema-lock test for Aello Local Sync.
 //!
 //! Each golden fixture under `tests/fixtures/sync/` is deserialized into the canonical typed
 //! model and re-serialized; we assert the serialization is **stable** (round-trip deterministic)
@@ -13,12 +13,12 @@ use std::path::PathBuf;
 use serde::Serialize;
 use serde::de::DeserializeOwned;
 
-use flow_desktop_lib::sync::canonical::{
-    FlowNeuroBrainSnapshot, Like, LikeKind, LikeState, MusicBrainSnapshot, Playlist,
+use aello_desktop_lib::sync::canonical::{
+    AelloNeuroBrainSnapshot, Like, LikeKind, LikeState, MusicBrainSnapshot, Playlist,
     PlaylistOrigin, SettingEntry, SubscribedChannel, SubscriptionGroup, WatchHistoryRecord,
     to_canonical_json,
 };
-use flow_desktop_lib::sync::frames::CapabilitiesFrame;
+use aello_desktop_lib::sync::frames::CapabilitiesFrame;
 
 fn fixture_path(name: &str) -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR"))
@@ -97,7 +97,7 @@ fn settings_fixture_locks() {
 
 #[test]
 fn flow_neuro_brain_fixture_locks() {
-    let brain: FlowNeuroBrainSnapshot = load_stable("flow_neuro_brain.json");
+    let brain: AelloNeuroBrainSnapshot = load_stable("flow_neuro_brain.json");
     assert_eq!(brain.schema, 14);
     assert_eq!(brain.device_id, "device-aaa");
     // G-Counter total comes from summing per-device sub-counts

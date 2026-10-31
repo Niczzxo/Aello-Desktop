@@ -55,7 +55,7 @@ import Diagnostics from "./pages/Diagnostics";
 import { Watch } from "./pages/Watch";
 import { ShortsFeed } from "./components/shorts/ShortsFeed";
 import Onboarding from "./pages/Onboarding";
-import FlowNeuroPersona from "./pages/FlowNeuroPersona";
+import AelloNeuroPersona from "./pages/AelloNeuroPersona";
 import { LayoutGroup } from "framer-motion";
 import { ToastHost } from "./components/layout/ToastHost";
 import { GlobalMusicAudio } from "./components/music/GlobalMusicAudio";
@@ -69,7 +69,7 @@ import { PipWindowController } from "./components/pip/PipWindowController";
 import { AddToAlbumModal } from "./components/music/AddToAlbumModal";
 import { AddTracksToAlbumModal } from "./components/music/AddTracksToAlbumModal";
 import { AddToPlaylistModal } from "./components/playlist/AddToPlaylistModal";
-import { DeepFlowController } from "./components/deep-flow/DeepFlowController";
+import { DeepAelloController } from "./components/deep-aello/DeepAelloController";
 import { DeepLinkController } from "./components/handoff/DeepLinkController";
 import { DiscordPresenceController } from "./components/discord/DiscordPresenceController";
 import { MusicTrayController } from "./components/tray/MusicTrayController";
@@ -207,7 +207,7 @@ function App() {
             <Home onPlay={handlePlayVideo} onAddToQueue={handleAddToQueue} />
           } />
           <Route path="feed" element={
-            <FlowNeuroPersona />
+            <AelloNeuroPersona />
           } />
           <Route path="music" element={
             <MusicHome />
@@ -314,7 +314,7 @@ function App() {
             <ConsentDialog />
             <MusicOverlay />
           </LayoutGroup>
-          <DeepFlowController />
+          <DeepAelloController />
           <DeepLinkController />
           <MusicTrayController />
           <ScrobbleController />

@@ -7,8 +7,8 @@
 
 use std::path::PathBuf;
 
-use flow_desktop_lib::sync::canonical::to_canonical_json;
-use flow_desktop_lib::sync::crypto::{
+use aello_desktop_lib::sync::canonical::to_canonical_json;
+use aello_desktop_lib::sync::crypto::{
     MasterSecret, SessionId, compute_sas, derive_key_material_hex, open_with_key, seal_with_nonce,
 };
 use serde_json::Value;

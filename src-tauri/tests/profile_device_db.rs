@@ -1,8 +1,8 @@
 //! A non-Default profile opens its own database, and reads the rows every profile shares from
 //! Default's. Runs in its own test binary because the device pool is process-wide.
 
-use flow_desktop_lib::profiles::{ActiveProfile, open_database};
-use flow_desktop_lib::sync::ledger::get_or_create_device_id;
+use aello_desktop_lib::profiles::{ActiveProfile, open_database};
+use aello_desktop_lib::sync::ledger::get_or_create_device_id;
 
 async fn identity_rows(path: &std::path::Path) -> i64 {
     let pool = sqlx::SqlitePool::connect(&format!("sqlite://{}", path.display()))
@@ -31,10 +31,10 @@ async fn another_profile_shares_defaults_device_rows() {
     assert_eq!(get_or_create_device_id(&pool).await.unwrap(), id);
     pool.close().await;
 
-    let study_file = dir.join("profiles/study/flow-desktop.sqlite");
+    let study_file = dir.join("profiles/study/aello-desktop.sqlite");
     assert!(study_file.exists(), "the profile has its own database");
     assert_eq!(
-        identity_rows(&dir.join("flow-desktop.sqlite")).await,
+        identity_rows(&dir.join("aello-desktop.sqlite")).await,
         1,
         "device id lives in Default's file"
     );

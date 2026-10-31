@@ -7,25 +7,25 @@
 
 use std::path::PathBuf;
 
-use flow_desktop_lib::api::innertube::extractors::channel::{
+use aello_desktop_lib::api::innertube::extractors::channel::{
     SHORTS_TAB_PARAMS, VIDEOS_TAB_PARAMS, parse_about, parse_header, parse_tab,
 };
-use flow_desktop_lib::api::innertube::extractors::comments::parse_comments_json;
-use flow_desktop_lib::api::innertube::extractors::explore::{
+use aello_desktop_lib::api::innertube::extractors::comments::parse_comments_json;
+use aello_desktop_lib::api::innertube::extractors::explore::{
     parse_explore_grid, parse_explore_page,
 };
-use flow_desktop_lib::api::innertube::extractors::search::parse_innertube_search;
-use flow_desktop_lib::api::innertube::extractors::watch_next;
-use flow_desktop_lib::api::innertube::json::age::relative_age;
-use flow_desktop_lib::api::innertube::json::continuation::{
+use aello_desktop_lib::api::innertube::extractors::search::parse_innertube_search;
+use aello_desktop_lib::api::innertube::extractors::watch_next;
+use aello_desktop_lib::api::innertube::json::age::relative_age;
+use aello_desktop_lib::api::innertube::json::continuation::{
     continuation_item_lists, continuation_token,
 };
-use flow_desktop_lib::api::innertube::music::artist::parse_artist_page;
-use flow_desktop_lib::api::innertube::music::parse::items::parse_responsive_list_item;
-use flow_desktop_lib::api::innertube::music::search::parse_summary;
-use flow_desktop_lib::api::innertube::renderers::lockup::lockup_item;
-use flow_desktop_lib::models::channel::{ChannelItem, PostAttachment};
-use flow_desktop_lib::models::music::{ArtistSectionKind, YTItem};
+use aello_desktop_lib::api::innertube::music::artist::parse_artist_page;
+use aello_desktop_lib::api::innertube::music::parse::items::parse_responsive_list_item;
+use aello_desktop_lib::api::innertube::music::search::parse_summary;
+use aello_desktop_lib::api::innertube::renderers::lockup::lockup_item;
+use aello_desktop_lib::models::channel::{ChannelItem, PostAttachment};
+use aello_desktop_lib::models::music::{ArtistSectionKind, YTItem};
 use serde_json::Value;
 
 fn fixture(name: &str) -> Option<Value> {

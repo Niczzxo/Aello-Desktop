@@ -3,9 +3,9 @@
 
 mod sync2_common;
 
-use flow_desktop_lib::sync2::engine::Session;
-use flow_desktop_lib::sync2::membership::remove_device;
-use flow_desktop_lib::sync2::paths::log_path;
+use aello_desktop_lib::sync2::engine::Session;
+use aello_desktop_lib::sync2::membership::remove_device;
+use aello_desktop_lib::sync2::paths::log_path;
 use sqlx::SqlitePool;
 use sync2_common::{MemoryStore, device_pool, exported, group};
 

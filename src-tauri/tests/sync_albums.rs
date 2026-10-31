@@ -5,11 +5,11 @@
 use sqlx::SqlitePool;
 use sqlx::sqlite::SqlitePoolOptions;
 
-use flow_desktop_lib::sync::apply::apply_payload;
-use flow_desktop_lib::sync::canonical::Collection;
-use flow_desktop_lib::sync::codec::sha256_hex;
-use flow_desktop_lib::sync::export::export_collections;
-use flow_desktop_lib::sync::protocol::{OutgoingCollection, StagedCollection};
+use aello_desktop_lib::sync::apply::apply_payload;
+use aello_desktop_lib::sync::canonical::Collection;
+use aello_desktop_lib::sync::codec::sha256_hex;
+use aello_desktop_lib::sync::export::export_collections;
+use aello_desktop_lib::sync::protocol::{OutgoingCollection, StagedCollection};
 
 const OUR: &str = "dlocal";
 const PEER: &str = "dpeer";
@@ -145,8 +145,8 @@ async fn incoming_album_does_not_wipe_an_existing_album_library() {
 
 #[test]
 fn album_track_thumbnail_falls_back_to_item_when_raw_song_has_none() {
-    use flow_desktop_lib::sync::canonical::{Hlc, Playlist, PlaylistItem, PlaylistOrigin};
-    use flow_desktop_lib::sync::mapping::albums_to_blob;
+    use aello_desktop_lib::sync::canonical::{Hlc, Playlist, PlaylistItem, PlaylistOrigin};
+    use aello_desktop_lib::sync::mapping::albums_to_blob;
 
     let hlc = Hlc::new(1000, 0, "dev");
     let item = PlaylistItem {

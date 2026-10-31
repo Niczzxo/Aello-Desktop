@@ -2,12 +2,12 @@
 //! header `ver(1) ∥ frame_type(1) ∥ seq(8 BE)` so the Android-interop bug (a missing `ver` byte,
 //! which shifted every following byte and made the peer's AEAD-open fail) can never come back.
 
-use flow_desktop_lib::sync::PROTOCOL_VERSION;
-use flow_desktop_lib::sync::codec::{HEADER_LEN, decode_message, encode_message};
-use flow_desktop_lib::sync::crypto::{
+use aello_desktop_lib::sync::PROTOCOL_VERSION;
+use aello_desktop_lib::sync::codec::{HEADER_LEN, decode_message, encode_message};
+use aello_desktop_lib::sync::crypto::{
     Role, SessionCipher, generate_master_secret, generate_session_id,
 };
-use flow_desktop_lib::sync::frames::FrameType;
+use aello_desktop_lib::sync::frames::FrameType;
 
 fn host_client() -> (SessionCipher, SessionCipher) {
     let master = generate_master_secret();

@@ -7,18 +7,18 @@ mod common;
 use std::collections::BTreeMap;
 
 use common::bind_loopback;
-use flow_desktop_lib::sync::canonical::Collection::{self, Likes, WatchHistory};
-use flow_desktop_lib::sync::crypto::{
+use aello_desktop_lib::sync::canonical::Collection::{self, Likes, WatchHistory};
+use aello_desktop_lib::sync::crypto::{
     Role, SessionCipher, generate_master_secret, generate_session_id,
 };
-use flow_desktop_lib::sync::frames::{
+use aello_desktop_lib::sync::frames::{
     ApplyResultEntry, ApplyResultFrame, CapabilitiesFrame, Capability, HelloFrame, Platform,
 };
-use flow_desktop_lib::sync::protocol::{
+use aello_desktop_lib::sync::protocol::{
     ApplyOutput, ClientOutcome, HostOutcome, OutgoingCollection, StagedCollection,
     run_client_sender, run_host_receiver, run_receiver, run_sender,
 };
-use flow_desktop_lib::sync::transport;
+use aello_desktop_lib::sync::transport;
 
 fn hello(id: &str, name: &str) -> HelloFrame {
     HelloFrame {
@@ -87,7 +87,7 @@ async fn one_way_transfer_succeeds_for_all_selected_collections() {
         run_sender(
             ch,
             cipher,
-            hello("host-1", "Flow Desktop (Windows)"),
+            hello("host-1", "Aello Desktop (Windows)"),
             caps(&[(WatchHistory, true, true), (Likes, true, true)]),
             vec![oc(WatchHistory, WH_NDJSON), oc(Likes, LIKES_NDJSON)],
             vec![WatchHistory, Likes],
@@ -176,7 +176,7 @@ async fn sender_streams_collections_in_sorted_key_order() {
         run_sender(
             ch,
             cipher,
-            hello("host-1", "Flow Desktop"),
+            hello("host-1", "Aello Desktop"),
             caps(&[(WatchHistory, true, true), (Likes, true, true)]),
             vec![oc(WatchHistory, WH_NDJSON), oc(Likes, LIKES_NDJSON)],
             vec![WatchHistory, Likes], // unsorted on purpose
@@ -310,7 +310,7 @@ async fn host_receives_while_client_sends() {
         run_host_receiver(
             ch,
             cipher,
-            hello("host-1", "Flow Desktop"),
+            hello("host-1", "Aello Desktop"),
             caps(&[(WatchHistory, true, true), (Likes, true, true)]),
             false,
             |peer, manifest| async move {

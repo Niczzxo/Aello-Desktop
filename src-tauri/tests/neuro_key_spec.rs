@@ -1,11 +1,11 @@
-//! Key spec 3 against Flow for Android: its golden cases (`fixtures/neuro/key_spec_golden.json`,
+//! Key spec 3 against Aello for Android: its golden cases (`fixtures/neuro/key_spec_golden.json`,
 //! byte-identical to Android's) and ports of `NeuroKeySpecTest`, `BrainKeyRekeyTest`'s key
 //! function and `NeuroPhraseLearningTest`'s phrase test.
 
 use std::collections::HashMap;
 
-use flow_desktop_lib::flow_neuro::keyspec::phrases::{IdfSnapshot, is_phrase};
-use flow_desktop_lib::flow_neuro::keyspec::{KeySpec, VERSION};
+use aello_desktop_lib::aello_neuro::keyspec::phrases::{IdfSnapshot, is_phrase};
+use aello_desktop_lib::aello_neuro::keyspec::{KeySpec, VERSION};
 use serde_json::Value;
 
 const GOLDEN: &str = include_str!("fixtures/neuro/key_spec_golden.json");
@@ -212,7 +212,7 @@ fn unspaced_scripts_split_into_dictionary_words() {
 // Android NeuroHanRunsTest.
 #[test]
 fn traditional_characters_read_as_simplified_ones() {
-    use flow_desktop_lib::flow_neuro::keyspec::text::fold;
+    use aello_desktop_lib::aello_neuro::keyspec::text::fold;
     assert_eq!(fold("機器學習"), "机器学习");
     let spec = KeySpec::default();
     assert_eq!(
@@ -223,14 +223,14 @@ fn traditional_characters_read_as_simplified_ones() {
 
 #[test]
 fn text_with_kana_is_japanese_and_its_kanji_stay() {
-    use flow_desktop_lib::flow_neuro::keyspec::text::fold;
+    use aello_desktop_lib::aello_neuro::keyspec::text::fold;
     assert_eq!(fold("宮崎駿 ジブリ"), "宮崎駿 ジブリ");
     assert_eq!(fold("宮崎駿"), "宫崎骏");
 }
 
 #[test]
 fn the_fold_table_maps_one_character_to_one_that_maps_no_further() {
-    use flow_desktop_lib::flow_neuro::keyspec::text::fold;
+    use aello_desktop_lib::aello_neuro::keyspec::text::fold;
     let table = include_str!("../resources/neuro/fold/hant-hans.txt");
     let lines: Vec<&str> = table
         .lines()
@@ -275,7 +275,7 @@ fn single_han_characters_merge_into_one_candidate() {
 
 #[test]
 fn japanese_and_earlier_specs_merge_nothing() {
-    use flow_desktop_lib::flow_neuro::keyspec::tables::run_breaks;
+    use aello_desktop_lib::aello_neuro::keyspec::tables::run_breaks;
     let spec = KeySpec::default();
     assert!(spec.chunk("大谷翔平 ホームラン 50号").merged.is_empty());
     assert!(run_breaks("ja").is_none());

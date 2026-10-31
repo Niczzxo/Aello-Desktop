@@ -1,7 +1,7 @@
 //! Only the Default profile syncs (FLOW-SYNC/1 carries no profile): the manager itself refuses
 //! to start a session anywhere else, before any socket or database work.
 
-use flow_desktop_lib::sync::session::{SyncManager, SyncProfile};
+use aello_desktop_lib::sync::session::{SyncManager, SyncProfile};
 
 fn manager(syncs_here: bool) -> SyncManager {
     SyncManager::new(SyncProfile {
@@ -17,7 +17,7 @@ async fn another_profile_refuses_to_start_a_session() {
     assert_eq!(error.kind(), "syncNotDefaultProfile");
     assert_eq!(error.wire_code(), None, "no peer is involved yet");
     assert!(
-        matches!(error, flow_desktop_lib::sync::error::SyncError::NotDefaultProfile(name) if name == "Home")
+        matches!(error, aello_desktop_lib::sync::error::SyncError::NotDefaultProfile(name) if name == "Home")
     );
     assert_eq!(manager.status().await.phase, "idle");
     assert!(!manager.syncs_here());

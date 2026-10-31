@@ -4,15 +4,15 @@ mod sync2_common;
 
 use std::collections::BTreeMap;
 
-use flow_desktop_lib::sync::canonical::Collection;
-use flow_desktop_lib::sync2::batches::{IncomingBatch, apply_batches, parse_batch};
-use flow_desktop_lib::sync2::blob::open_blob;
-use flow_desktop_lib::sync2::engine::{Session, now_ms};
-use flow_desktop_lib::sync2::envelope::{ObjectType, open_object, parse_object};
-use flow_desktop_lib::sync2::epoch::purpose_key;
-use flow_desktop_lib::sync2::paths::{blob_path, log_path};
-use flow_desktop_lib::sync2::payload::decode_payload;
-use flow_desktop_lib::sync2::snapshot::{Manifest, note_merged, snapshot_due, snapshot_soon};
+use aello_desktop_lib::sync::canonical::Collection;
+use aello_desktop_lib::sync2::batches::{IncomingBatch, apply_batches, parse_batch};
+use aello_desktop_lib::sync2::blob::open_blob;
+use aello_desktop_lib::sync2::engine::{Session, now_ms};
+use aello_desktop_lib::sync2::envelope::{ObjectType, open_object, parse_object};
+use aello_desktop_lib::sync2::epoch::purpose_key;
+use aello_desktop_lib::sync2::paths::{blob_path, log_path};
+use aello_desktop_lib::sync2::payload::decode_payload;
+use aello_desktop_lib::sync2::snapshot::{Manifest, note_merged, snapshot_due, snapshot_soon};
 use sqlx::SqlitePool;
 use sync2_common::{Group, LINK, device_pool, exported, group};
 

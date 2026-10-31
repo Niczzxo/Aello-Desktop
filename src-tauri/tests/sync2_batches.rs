@@ -1,9 +1,9 @@
 //! FLOW-SYNC/2 change batches: only changed records go out, the ledger moves only after an
 //! upload, and batches from another device apply through the FLOW-SYNC/1 merges.
 
-use flow_desktop_lib::sync::canonical::Collection;
-use flow_desktop_lib::sync::export::export_collections;
-use flow_desktop_lib::sync2::batches::{
+use aello_desktop_lib::sync::canonical::Collection;
+use aello_desktop_lib::sync::export::export_collections;
+use aello_desktop_lib::sync2::batches::{
     Outgoing, apply_batches, mark_sent, outgoing_batches, parse_batch,
 };
 use sqlx::SqlitePool;

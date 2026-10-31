@@ -8,12 +8,12 @@
 use rand::rngs::StdRng;
 use rand::{RngExt, SeedableRng};
 
-use flow_desktop_lib::sync::canonical::{
-    AffinityWire, FlowNeuroBrainSnapshot, GCounter, GroupMember, Hlc, Like, LikeKind, LikeState,
+use aello_desktop_lib::sync::canonical::{
+    AffinityWire, AelloNeuroBrainSnapshot, GCounter, GroupMember, Hlc, Like, LikeKind, LikeState,
     Lww, MusicBrainSnapshot, Playlist, PlaylistItem, PlaylistOrigin, SettingEntry,
     SubscribedChannel, SubscriptionGroup, WatchHistoryRecord,
 };
-use flow_desktop_lib::sync::merge;
+use aello_desktop_lib::sync::merge;
 
 /// Assert commutativity, associativity, and idempotency for a Vec-returning merge.
 fn assert_laws<T, F>(sets: &[Vec<T>], merge_fn: F)
@@ -250,8 +250,8 @@ fn subscribed_channels_merge_obeys_crdt_laws() {
 // Brains: order-independence + idempotency of the folded merge, and deterministic effective state.
 // --------------------------------------------------------------------------------------------
 
-fn fnb(device: &str, seed: u64) -> FlowNeuroBrainSnapshot {
-    let mut s = FlowNeuroBrainSnapshot {
+fn fnb(device: &str, seed: u64) -> AelloNeuroBrainSnapshot {
+    let mut s = AelloNeuroBrainSnapshot {
         schema: 14,
         device_id: device.to_string(),
         hlc: Hlc::new(seed * 100, 0, device),
@@ -288,15 +288,15 @@ fn flow_neuro_brain_merge_is_order_independent_and_idempotent() {
     let s1 = fnb("d2", 2);
     let s2 = fnb("d1", 3); // a second, newer snapshot from d1
 
-    let a = merge::merge_flow_neuro(&[s0.clone(), s1.clone(), s2.clone()]);
-    let b = merge::merge_flow_neuro(&[s2.clone(), s1.clone(), s0.clone()]);
-    let c = merge::merge_flow_neuro(&[s1.clone(), s0.clone(), s2.clone()]);
+    let a = merge::merge_aello_neuro(&[s0.clone(), s1.clone(), s2.clone()]);
+    let b = merge::merge_aello_neuro(&[s2.clone(), s1.clone(), s0.clone()]);
+    let c = merge::merge_aello_neuro(&[s1.clone(), s0.clone(), s2.clone()]);
     assert_eq!(a, b, "fold order must not matter");
     assert_eq!(a, c, "fold order must not matter");
 
     // Re-feeding snapshots already merged changes nothing (idempotent).
     let dup =
-        merge::merge_flow_neuro(&[s0.clone(), s1.clone(), s2.clone(), s0.clone(), s1.clone()]);
+        merge::merge_aello_neuro(&[s0.clone(), s1.clone(), s2.clone(), s0.clone(), s1.clone()]);
     assert_eq!(a, dup, "duplicate snapshots are no-ops");
 
     // The newer d1 snapshot (s2) wins the per-device vector slot; counters sum across devices.

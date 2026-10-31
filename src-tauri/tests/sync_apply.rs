@@ -5,15 +5,15 @@
 use sqlx::SqlitePool;
 use sqlx::sqlite::SqlitePoolOptions;
 
-use flow_desktop_lib::flow_neuro::keyspec::KeySpec;
-use flow_desktop_lib::sync::apply::apply_payload;
-use flow_desktop_lib::sync::canonical::{
-    Collection, FlowNeuroBrainSnapshot, GCounter, Hlc, Like, LikeKind, LikeState,
+use aello_desktop_lib::aello_neuro::keyspec::KeySpec;
+use aello_desktop_lib::sync::apply::apply_payload;
+use aello_desktop_lib::sync::canonical::{
+    Collection, AelloNeuroBrainSnapshot, GCounter, Hlc, Like, LikeKind, LikeState,
     MusicBrainSnapshot, Playlist, PlaylistItem, PlaylistOrigin, SettingEntry, SubscribedChannel,
     SubscriptionGroup, WatchHistoryRecord,
 };
-use flow_desktop_lib::sync::mapping;
-use flow_desktop_lib::sync::protocol::StagedCollection;
+use aello_desktop_lib::sync::mapping;
+use aello_desktop_lib::sync::protocol::StagedCollection;
 
 const OUR: &str = "dlocal";
 const PEER: &str = "dpeer";
@@ -521,7 +521,7 @@ async fn apply_flow_neuro_brain_merges_into_effective_userbrain() {
     )
     .await;
 
-    let mut snap = FlowNeuroBrainSnapshot {
+    let mut snap = AelloNeuroBrainSnapshot {
         schema: 14,
         device_id: PEER.to_string(),
         hlc: Hlc::new(1000, 0, PEER),
@@ -537,7 +537,7 @@ async fn apply_flow_neuro_brain_merges_into_effective_userbrain() {
         .insert("coding".to_string(), 0.5);
 
     let payload = StagedCollection {
-        collection: Collection::FlowNeuroBrain,
+        collection: Collection::AelloNeuroBrain,
         ndjson: ndjson_of(&[snap]),
         record_count: 1,
         hash: "fn-1".to_string(),
@@ -605,7 +605,7 @@ async fn apply_music_brain_merges_into_effective() {
 
 #[tokio::test]
 async fn an_android_shaped_brain_record_applies_instead_of_rolling_back_everything() {
-    // Regression for issue #46. Flow for Android sends the brain with its counters, sets, LWW-maps
+    // Regression for issue #46. Aello for Android sends the brain with its counters, sets, LWW-maps
     // and flags at the top level and its G-Counters wrapped in `perDevice`. The strict decoder
     // failed with `invalid type: map, expected u64`, and because apply is one transaction that
     // rollback took *every* collection with it — the phone reported success while the desktop
@@ -632,7 +632,7 @@ async fn an_android_shaped_brain_record_applies_instead_of_rolling_back_everythi
     );
 
     let payload = StagedCollection {
-        collection: Collection::FlowNeuroBrain,
+        collection: Collection::AelloNeuroBrain,
         ndjson: android_record.replace(['\n', ' '], "").into_bytes(),
         record_count: 1,
         hash: "android-brain-1".to_string(),
@@ -851,7 +851,7 @@ async fn history_goes_out_with_a_thumbnail_that_never_reads_as_a_change() {
     let pool = memory_pool().await;
     seed(&pool).await;
     let out =
-        flow_desktop_lib::sync::export::export_collections(&pool, OUR, &[Collection::WatchHistory])
+        aello_desktop_lib::sync::export::export_collections(&pool, OUR, &[Collection::WatchHistory])
             .await
             .unwrap();
     let sent: Vec<WatchHistoryRecord> = String::from_utf8(out[0].ndjson.clone())

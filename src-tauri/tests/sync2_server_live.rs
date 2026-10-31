@@ -7,20 +7,20 @@ use std::collections::BTreeMap;
 
 use base64::Engine;
 use base64::engine::general_purpose::URL_SAFE_NO_PAD;
-use flow_desktop_lib::sync2::entries::{Draft, build_entry, epoch_draft, member_subject};
-use flow_desktop_lib::sync2::envelope::{
+use aello_desktop_lib::sync2::entries::{Draft, build_entry, epoch_draft, member_subject};
+use aello_desktop_lib::sync2::envelope::{
     Header, ObjectType, ZERO_HASH, open_object, parse_object, seal_object, verify_object,
 };
-use flow_desktop_lib::sync2::epoch::{Purpose, check_epoch_key, purpose_key};
-use flow_desktop_lib::sync2::keys::member_secrets;
-use flow_desktop_lib::sync2::paths::log_path;
-use flow_desktop_lib::sync2::payload::{decode_payload, encode_payload};
-use flow_desktop_lib::sync2::recovery::recovery_keys;
-use flow_desktop_lib::sync2::roster::{Op, Role, apply_entry};
-use flow_desktop_lib::sync2::sealed::random_bytes;
-use flow_desktop_lib::sync2::server::ServerStore;
-use flow_desktop_lib::sync2::store::Store;
-use flow_desktop_lib::sync2::wrap::{unwrap_epoch_key, wrap_epoch_key};
+use aello_desktop_lib::sync2::epoch::{Purpose, check_epoch_key, purpose_key};
+use aello_desktop_lib::sync2::keys::member_secrets;
+use aello_desktop_lib::sync2::paths::log_path;
+use aello_desktop_lib::sync2::payload::{decode_payload, encode_payload};
+use aello_desktop_lib::sync2::recovery::recovery_keys;
+use aello_desktop_lib::sync2::roster::{Op, Role, apply_entry};
+use aello_desktop_lib::sync2::sealed::random_bytes;
+use aello_desktop_lib::sync2::server::ServerStore;
+use aello_desktop_lib::sync2::store::Store;
+use aello_desktop_lib::sync2::wrap::{unwrap_epoch_key, wrap_epoch_key};
 
 #[tokio::test]
 #[ignore = "needs a running flow-sync server"]
@@ -112,11 +112,11 @@ async fn desktop_talks_to_a_real_server() {
 #[tokio::test]
 #[ignore = "needs a fresh flow-sync server"]
 async fn a_group_is_created_paired_with_and_restored_through_the_server() {
-    use flow_desktop_lib::sync2::codes::{StoreLocation, new_offer, read_code};
-    use flow_desktop_lib::sync2::engine::Session;
-    use flow_desktop_lib::sync2::linking::{DeviceMeta, WelcomeStore, add_device, join};
-    use flow_desktop_lib::sync2::setup::{create_group, restore_group};
-    use flow_desktop_lib::sync2::state::load_group;
+    use aello_desktop_lib::sync2::codes::{StoreLocation, new_offer, read_code};
+    use aello_desktop_lib::sync2::engine::Session;
+    use aello_desktop_lib::sync2::linking::{DeviceMeta, WelcomeStore, add_device, join};
+    use aello_desktop_lib::sync2::setup::{create_group, restore_group};
+    use aello_desktop_lib::sync2::state::load_group;
     use sqlx::sqlite::SqlitePoolOptions;
 
     let url = std::env::var("FLOW_SYNC_TEST_URL").expect("FLOW_SYNC_TEST_URL");

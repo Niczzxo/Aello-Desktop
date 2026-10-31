@@ -1,14 +1,14 @@
-//! Title language detection against Flow for Android: every row of
+//! Title language detection against Aello for Android: every row of
 //! `fixtures/neuro/language_detected.tsv` (byte-identical to Android's) and ports of
 //! `NeuroLanguagesTest`.
 
 use std::collections::HashMap;
 
-use flow_desktop_lib::flow_neuro::keyspec::KeySpec;
-use flow_desktop_lib::flow_neuro::keyspec::languages::{
+use aello_desktop_lib::aello_neuro::keyspec::KeySpec;
+use aello_desktop_lib::aello_neuro::keyspec::languages::{
     PROFILE_WINDOW, detect_text, normalize, vote,
 };
-use flow_desktop_lib::flow_neuro::keyspec::tables::{raw_stop_list, tables};
+use aello_desktop_lib::aello_neuro::keyspec::tables::{raw_stop_list, tables};
 
 const DETECTED: &str = include_str!("fixtures/neuro/language_detected.tsv");
 const TITLES: &str = include_str!("fixtures/neuro/language_titles.tsv");

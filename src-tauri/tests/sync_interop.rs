@@ -1,5 +1,5 @@
 //! Cross-implementation protocol tests: the desktop drivers against a scripted peer that follows
-//! Flow for Android's frame order (`SyncProtocol.kt`) rather than the desktop's own. The other
+//! Aello for Android's frame order (`SyncProtocol.kt`) rather than the desktop's own. The other
 //! protocol suites pair the desktop with itself, which is how the SELECTION deadlock, the chunk
 //! misrouting and the unknown-collection failure all shipped unnoticed.
 
@@ -12,21 +12,21 @@ use tokio::net::TcpListener;
 use tokio_tungstenite::tungstenite::Message;
 use tokio_tungstenite::{WebSocketStream, accept_async, connect_async};
 
-use flow_desktop_lib::sync::canonical::Collection::{self, Likes, WatchHistory};
-use flow_desktop_lib::sync::codec::{decode_message, encode_chunk, encode_message, sha256_hex};
-use flow_desktop_lib::sync::crypto::{
+use aello_desktop_lib::sync::canonical::Collection::{self, Likes, WatchHistory};
+use aello_desktop_lib::sync::codec::{decode_message, encode_chunk, encode_message, sha256_hex};
+use aello_desktop_lib::sync::crypto::{
     Role, SessionCipher, generate_master_secret, generate_session_id,
 };
-use flow_desktop_lib::sync::error::SyncError;
-use flow_desktop_lib::sync::frames::{
+use aello_desktop_lib::sync::error::SyncError;
+use aello_desktop_lib::sync::frames::{
     ApplyResultEntry, ApplyResultFrame, CapabilitiesFrame, Capability, ChunkHeader, FrameType,
     HelloFrame, Platform,
 };
-use flow_desktop_lib::sync::protocol::{
+use aello_desktop_lib::sync::protocol::{
     ApplyOutput, ClientOutcome, HostOutcome, OutgoingCollection, StagedCollection, run_receiver,
     run_sender,
 };
-use flow_desktop_lib::sync::transport;
+use aello_desktop_lib::sync::transport;
 
 const WH_NDJSON: &str = "{\"videoId\":\"a\"}\n{\"videoId\":\"b\"}";
 const LIKES_NDJSON: &str = "{\"id\":\"a\",\"state\":\"liked\"}";

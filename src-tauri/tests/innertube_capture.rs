@@ -7,9 +7,9 @@
 
 use std::path::PathBuf;
 
-use flow_desktop_lib::api::innertube::InnertubeClient;
-use flow_desktop_lib::api::innertube::core::{clients, locale};
-use flow_desktop_lib::api::innertube::json::continuation::{
+use aello_desktop_lib::api::innertube::InnertubeClient;
+use aello_desktop_lib::api::innertube::core::{clients, locale};
+use aello_desktop_lib::api::innertube::json::continuation::{
     continuation_item_lists, last_continuation_token,
 };
 use serde_json::{Value, json};
@@ -49,11 +49,11 @@ const PODCAST: &str = "PLYWnygDGxPqWiCM5_kihM28jfWiQTNYDa";
 
 /// A YouTube Music request as the web client sends it, signed out.
 async fn music_post(endpoint: &str, mut body: Value) -> Value {
-    let hl = flow_desktop_lib::api::innertube::core::locale::content_language();
+    let hl = aello_desktop_lib::api::innertube::core::locale::content_language();
     body["context"] = json!({ "client": {
         "clientName": "WEB_REMIX", "clientVersion": "1.20260708.01.00", "hl": hl, "gl": "US"
     } });
-    flow_desktop_lib::api::http::shared_client()
+    aello_desktop_lib::api::http::shared_client()
         .post(format!(
             "https://music.youtube.com/youtubei/v1/{endpoint}?prettyPrint=false"
         ))
@@ -156,7 +156,7 @@ async fn capture_innertube_fixtures() {
         .await
         .expect("next");
     let next = save("next_related", next);
-    let token = flow_desktop_lib::api::innertube::extractors::watch_next::related_page(&next)
+    let token = aello_desktop_lib::api::innertube::extractors::watch_next::related_page(&next)
         .continuation
         .expect("related page 2 token");
     let mut page2 = json!({ "continuation": token });
@@ -217,7 +217,7 @@ async fn capture_innertube_fixtures() {
         save(name, page);
     }
 
-    let rss = flow_desktop_lib::api::http::shared_client()
+    let rss = aello_desktop_lib::api::http::shared_client()
         .get(format!(
             "https://www.youtube.com/feeds/videos.xml?channel_id={LTT}"
         ))
@@ -256,7 +256,7 @@ async fn capture_innertube_fixtures() {
         .expect("channel landing");
     let landing = save("channel_home", landing);
     let details =
-        flow_desktop_lib::api::innertube::extractors::channel::parse_header(&landing, LTT);
+        aello_desktop_lib::api::innertube::extractors::channel::parse_header(&landing, LTT);
     for tab in &details.tabs {
         let Some(params) = &tab.params else { continue };
         if !["videos", "shorts", "live", "playlists", "posts"].contains(&tab.kind.as_str()) {
@@ -271,7 +271,7 @@ async fn capture_innertube_fixtures() {
         if tab.kind != "videos" {
             continue;
         }
-        let tab = flow_desktop_lib::api::innertube::extractors::channel::parse_tab(&page, LTT);
+        let tab = aello_desktop_lib::api::innertube::extractors::channel::parse_tab(&page, LTT);
         let popular = tab
             .filters
             .iter()

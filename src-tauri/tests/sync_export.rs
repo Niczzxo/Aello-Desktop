@@ -6,15 +6,15 @@
 use sqlx::SqlitePool;
 use sqlx::sqlite::SqlitePoolOptions;
 
-use flow_desktop_lib::sync::apply::apply_payload;
-use flow_desktop_lib::sync::brainmap;
-use flow_desktop_lib::sync::canonical::{
-    BrainVectors, ContentVectorWire, FlowNeuroBrainSnapshot, GCounter, Hlc, MusicBrainSnapshot,
+use aello_desktop_lib::sync::apply::apply_payload;
+use aello_desktop_lib::sync::brainmap;
+use aello_desktop_lib::sync::canonical::{
+    BrainVectors, ContentVectorWire, AelloNeuroBrainSnapshot, GCounter, Hlc, MusicBrainSnapshot,
 };
-use flow_desktop_lib::sync::codec::sha256_hex;
-use flow_desktop_lib::sync::export::export_collections;
-use flow_desktop_lib::sync::merge::{merge_flow_neuro, merge_music};
-use flow_desktop_lib::sync::protocol::{OutgoingCollection, StagedCollection};
+use aello_desktop_lib::sync::codec::sha256_hex;
+use aello_desktop_lib::sync::export::export_collections;
+use aello_desktop_lib::sync::merge::{merge_aello_neuro, merge_music};
+use aello_desktop_lib::sync::protocol::{OutgoingCollection, StagedCollection};
 
 async fn memory_pool() -> SqlitePool {
     let pool = SqlitePoolOptions::new()
@@ -79,7 +79,7 @@ async fn insert_watch(pool: &SqlitePool, id: &str, watched: i64, total: i64) {
 
 #[tokio::test]
 async fn export_then_apply_round_trips_watch_likes_playlists_settings() {
-    use flow_desktop_lib::sync::canonical::Collection::*;
+    use aello_desktop_lib::sync::canonical::Collection::*;
 
     let a = memory_pool().await;
     insert_watch(&a, "v1", 100, 200).await;
@@ -150,10 +150,10 @@ fn flow_snapshot(
     docs: u64,
     topic: &str,
     weight_topic: f64,
-) -> FlowNeuroBrainSnapshot {
+) -> AelloNeuroBrainSnapshot {
     let mut global = ContentVectorWire::default();
     global.topics.insert(topic.to_string(), weight_topic);
-    FlowNeuroBrainSnapshot {
+    AelloNeuroBrainSnapshot {
         schema: 1,
         device_id: device.to_string(),
         hlc: Hlc::new(docs, 0, device),
@@ -161,7 +161,7 @@ fn flow_snapshot(
             global_vector: global,
             ..BrainVectors::default()
         },
-        counters: flow_desktop_lib::sync::canonical::BrainCounters {
+        counters: aello_desktop_lib::sync::canonical::BrainCounters {
             idf_total_documents: GCounter::single(device, docs),
             ..Default::default()
         },
@@ -170,9 +170,9 @@ fn flow_snapshot(
 }
 
 #[test]
-fn flow_neuro_decompose_then_remerge_reconstructs_merged_state() {
+fn aello_neuro_decompose_then_remerge_reconstructs_merged_state() {
     // Two devices' contributions merged.
-    let merged = merge_flow_neuro(&[
+    let merged = merge_aello_neuro(&[
         flow_snapshot("dA", 100, "rust", 1.0),
         flow_snapshot("dB", 300, "cooking", 1.0),
     ]);
@@ -180,7 +180,7 @@ fn flow_neuro_decompose_then_remerge_reconstructs_merged_state() {
     // Decompose back into snapshots and re-merge them.
     let snaps = brainmap::merged_flow_to_snapshots(&merged);
     assert_eq!(snaps.len(), 2, "one snapshot per contributing device");
-    let remerged = merge_flow_neuro(&snaps);
+    let remerged = merge_aello_neuro(&snaps);
 
     // Counter totals survive (no double-count) and both devices' vectors are preserved.
     assert_eq!(remerged.counters.idf_total_documents.total(), 400);
@@ -192,7 +192,7 @@ fn flow_neuro_decompose_then_remerge_reconstructs_merged_state() {
     );
 
     // Re-merging the snapshots again is idempotent.
-    let again = merge_flow_neuro(&[snaps.clone(), snaps].concat());
+    let again = merge_aello_neuro(&[snaps.clone(), snaps].concat());
     assert_eq!(again.counters.idf_total_documents.total(), 400);
 }
 

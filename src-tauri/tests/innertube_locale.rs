@@ -5,14 +5,14 @@
 
 use std::path::PathBuf;
 
-use flow_desktop_lib::api::innertube::core::locale;
-use flow_desktop_lib::api::innertube::extractors::channel::parse_header;
-use flow_desktop_lib::api::innertube::extractors::search::parse_innertube_search;
-use flow_desktop_lib::api::innertube::extractors::watch_next;
-use flow_desktop_lib::api::innertube::json::age::relative_age;
-use flow_desktop_lib::api::innertube::music::search::parse_summary;
-use flow_desktop_lib::api::innertube::renderers::lockup::related_to_video;
-use flow_desktop_lib::models::music::YTItem;
+use aello_desktop_lib::api::innertube::core::locale;
+use aello_desktop_lib::api::innertube::extractors::channel::parse_header;
+use aello_desktop_lib::api::innertube::extractors::search::parse_innertube_search;
+use aello_desktop_lib::api::innertube::extractors::watch_next;
+use aello_desktop_lib::api::innertube::json::age::relative_age;
+use aello_desktop_lib::api::innertube::music::search::parse_summary;
+use aello_desktop_lib::api::innertube::renderers::lockup::related_to_video;
+use aello_desktop_lib::models::music::YTItem;
 use serde_json::Value;
 
 const LANGUAGES: [&str; 6] = ["de", "fr", "ja", "es", "ru", "pt-BR"];

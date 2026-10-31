@@ -6,12 +6,12 @@
 //! client's identity disagreeing with itself between the request and the media
 //! fetch that follows it.
 
-use flow_desktop_lib::api::innertube::core::clients::{
+use aello_desktop_lib::api::innertube::core::clients::{
     self, ANDROID, ANDROID_CREATOR, ANDROID_VR, ANDROID_VR_1_43_32, ANDROID_VR_NO_AUTH,
     AttestationPlatform, IOS, IPADOS, MWEB, TVHTML5_SIMPLY_EMBEDDED_PLAYER, VISIONOS, WEB,
     WEB_REMIX,
 };
-use flow_desktop_lib::api::innertube::music::clients::DIRECT_AUDIO_CLIENTS;
+use aello_desktop_lib::api::innertube::music::clients::DIRECT_AUDIO_CLIENTS;
 
 #[test]
 fn non_web_clients_never_carry_a_botguard_token() {
@@ -33,7 +33,7 @@ fn web_family_does_carry_a_botguard_token() {
     let body = WEB.player_body("vid", Some("visitor"), Some("a-botguard-token"));
     assert_eq!(
         body["serviceIntegrityDimensions"]["poToken"], "a-botguard-token",
-        "WEB is the one family Flow can attest, so it must send the token"
+        "WEB is the one family Aello can attest, so it must send the token"
     );
     assert!(
         body["context"].get("serviceIntegrityDimensions").is_none(),
@@ -146,7 +146,7 @@ fn signature_timestamp_is_sent_only_where_the_client_asks_for_it() {
     assert!(ANDROID_VR.signature_timestamp().is_none());
     assert!(
         IOS.signature_timestamp().is_none(),
-        "Flow for Android's IOS sends none either"
+        "Aello for Android's IOS sends none either"
     );
     assert_eq!(
         WEB.signature_timestamp(),
