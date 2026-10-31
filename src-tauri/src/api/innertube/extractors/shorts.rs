@@ -23,7 +23,7 @@ const OVERLAY_BUDGET: std::time::Duration = std::time::Duration::from_secs(5);
 const HOME_SEQUENCE_PARAMS: &str = "CA8=";
 
 /// The `sequenceParams` token that seeds a reel sequence from a video: protobuf `{1: videoId}`,
-/// base64url without padding. As Flow for Android found (#931), this is the only accepted seed;
+/// base64url without padding. As Aello for Android found (#931), this is the only accepted seed;
 /// the same token in `params` is rejected with HTTP 400. The response never contains the seed.
 #[must_use]
 pub fn encode_reel_seed_params(video_id: &str) -> String {
@@ -39,7 +39,7 @@ impl InnertubeClient {
     /// `sequence_params = Some(encode_reel_seed_params(id))`. Next page: the page's token.
     /// IOS is asked first: its page is a few kilobytes per reel, where ANDROID's
     /// carries a prefetch of every reel's player response and runs to megabytes
-    /// for the same reels (Flow for Android measured the same). Neither names a
+    /// for the same reels (Aello for Android measured the same). Neither names a
     /// reel's title or channel: see [`Self::fill_reel_overlays`].
     pub async fn get_shorts_sequence(
         &self,

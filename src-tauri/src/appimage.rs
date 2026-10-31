@@ -13,7 +13,7 @@
 //!
 //! Host programs: the bundle's launcher and hooks point `PATH`,
 //! `LD_LIBRARY_PATH` and the media and toolkit variables into the bundle, and
-//! every program Flow starts inherits them. A host program then loads bundled
+//! every program Aello starts inherits them. A host program then loads bundled
 //! libraries built for another distro (issue #74: the host `/bin/sh` picked up
 //! the bundled readline and failed with `undefined symbol`). [`host_command`]
 //! and [`host_tokio_command`] start a program with those entries removed.
@@ -148,7 +148,7 @@ fn bundle_env_changes() -> Vec<EnvChange> {
         .unwrap_or_default()
 }
 
-/// Whether Flow runs from an `AppImage`, whose environment points into the bundle.
+/// Whether Aello runs from an `AppImage`, whose environment points into the bundle.
 #[cfg(target_os = "linux")]
 pub fn in_appimage() -> bool {
     std::env::var_os("APPDIR").is_some_and(|appdir| !appdir.is_empty())
@@ -187,7 +187,7 @@ mod tests {
     use std::ffi::OsString;
     use std::path::Path;
 
-    const APPDIR: &str = "/tmp/.mount_Flow_abc123";
+    const APPDIR: &str = "/tmp/.mount_Aello_abc123";
 
     fn fallback() -> String {
         format!("{APPDIR}/{LIBVA_FALLBACK_DIR}")

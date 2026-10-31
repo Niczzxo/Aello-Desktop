@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 'use strict';
 
-// Flow Desktop — headless YouTube BotGuard / WAA poToken minter.
+// Aello Desktop — headless YouTube BotGuard / WAA poToken minter.
 //
 // Self-contained port of the verified reverse-engineered flow (see
 // notes/reverse/{youtube_integrity_spec.md,vm_runner.cjs,extractor.py}). It runs
@@ -13,7 +13,7 @@
 // stdout: exactly one JSON object (the only thing written to stdout):
 //   { "success": true,  "poToken": "...", "integrityToken": "...", "ttl": 43200, "visitorData": "..." }
 //   { "success": false, "error": "<message>" }
-// Diagnostics (when FLOW_INTEGRITY_DEBUG is set) go to stderr only, so stdout
+// Diagnostics (when AELLO_INTEGRITY_DEBUG is set) go to stderr only, so stdout
 // stays cleanly parseable by the Rust caller. Exit code 0 on success, 1 on error.
 
 const vm = require('vm');
@@ -27,7 +27,7 @@ const GENERATE_IT_URL =
 const SNAPSHOT_TIMEOUT_MS = 10000;
 
 function diag(...args) {
-  if (process.env.FLOW_INTEGRITY_DEBUG) console.error('[integrity]', ...args);
+  if (process.env.AELLO_INTEGRITY_DEBUG) console.error('[integrity]', ...args);
 }
 function emit(obj) {
   process.stdout.write(JSON.stringify(obj));

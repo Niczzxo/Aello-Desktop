@@ -1,6 +1,6 @@
 //! Multi-client audio stream resolver for YouTube Music.
 //!
-//! This is the desktop counterpart of `FlowApp_mobile`'s
+//! This is the desktop counterpart of `AelloApp_mobile`'s
 //! `MusicPlayerUtils.fetchPlaybackData`: it walks an ordered list of InnerTube
 //! clients ([`clients::DIRECT_AUDIO_CLIENTS`]) until one returns a directly
 //! playable audio stream. Unlike mobile, the desktop has no JS cipher/n-sig
@@ -139,7 +139,7 @@ impl InnertubeClient {
         prefer_aac: bool,
         visitor: Option<&str>,
     ) -> ClientAnswer {
-        // Only a client Flow can attest gets a token, and it is bound to the same
+        // Only a client Aello can attest gets a token, and it is bound to the same
         // visitor data the request carries.
         let po_token = if client.use_web_po_tokens {
             generate_po_token(visitor.unwrap_or(video_id)).await

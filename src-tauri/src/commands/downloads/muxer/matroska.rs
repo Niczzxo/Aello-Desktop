@@ -331,8 +331,8 @@ fn info_element(duration_ms: i64, title: Option<String>) -> MatroskaSpec {
     if let Some(title) = title.filter(|title| !title.is_empty()) {
         children.push(MatroskaSpec::Title(title));
     }
-    children.push(MatroskaSpec::MuxingApp("Flow".to_string()));
-    children.push(MatroskaSpec::WritingApp("Flow".to_string()));
+    children.push(MatroskaSpec::MuxingApp("Aello".to_string()));
+    children.push(MatroskaSpec::WritingApp("Aello".to_string()));
     MatroskaSpec::Info(Master::Full(children))
 }
 
@@ -401,7 +401,7 @@ fn chapters_element(metadata: &EmbeddedMetadata, duration_ms: i64) -> MatroskaSp
 }
 
 /// The same fields as the MP4 `ilst`, with the names ffmpeg, VLC and mpv read, plus
-/// the Flow IDs as `FLOW_*` tags.
+/// the Aello IDs as `FLOW_*` tags.
 fn tags_element(metadata: &EmbeddedMetadata) -> MatroskaSpec {
     let tags = &metadata.tags;
     let mut pairs: Vec<(String, String)> = Vec::new();
@@ -422,7 +422,7 @@ fn tags_element(metadata: &EmbeddedMetadata) -> MatroskaSpec {
     push("COMMENT", tags.source_url());
     push("URL", tags.source_url());
     push("LYRICS", tags.lyrics.clone());
-    push("ENCODER", Some("Flow".to_string()));
+    push("ENCODER", Some("Aello".to_string()));
     for (name, value) in tags.flow_fields() {
         push(&format!("FLOW_{}", name.to_ascii_uppercase()), Some(value));
     }

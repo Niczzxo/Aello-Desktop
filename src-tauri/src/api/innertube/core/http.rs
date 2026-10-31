@@ -92,7 +92,7 @@ impl InnertubeClient {
     /// A body without a context gets this client's, carrying the visitor
     /// identity; a body with one is sent as the caller built it. When the server
     /// answers 400 to an identity added here, the request is repeated once
-    /// without it and that identity is dropped, as Flow for Android does.
+    /// without it and that identity is dropped, as Aello for Android does.
     #[allow(clippy::too_many_arguments)]
     pub(crate) async fn post_via(
         &self,

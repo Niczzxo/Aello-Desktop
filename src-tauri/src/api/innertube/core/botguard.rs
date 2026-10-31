@@ -52,9 +52,9 @@ fn token_cache() -> &'static Mutex<HashMap<String, MintedToken>> {
     CACHE.get_or_init(|| Mutex::new(HashMap::new()))
 }
 
-/// Resolve the Node executable. Honors `FLOW_NODE`, else relies on PATH.
+/// Resolve the Node executable. Honors `AELLO_NODE`, else relies on PATH.
 pub(crate) fn node_command() -> String {
-    std::env::var("FLOW_NODE").unwrap_or_else(|_| "node".to_string())
+    std::env::var("AELLO_NODE").unwrap_or_else(|_| "node".to_string())
 }
 
 static RESOURCE_DIR: OnceLock<PathBuf> = OnceLock::new();
@@ -122,7 +122,7 @@ fn sidecar_candidates(
 }
 
 async fn run_sidecar(content_binding: &str) -> Option<MintedToken> {
-    let Some(script) = sidecar_script_path("integrity.cjs", "FLOW_INTEGRITY_SCRIPT") else {
+    let Some(script) = sidecar_script_path("integrity.cjs", "AELLO_INTEGRITY_SCRIPT") else {
         warn!("integrity.cjs sidecar not found; cannot mint PO token");
         return None;
     };
@@ -244,13 +244,13 @@ mod tests {
     fn resource_dir_is_tried_first() {
         let candidates = sidecar_candidates(
             "nsig.cjs",
-            Some(Path::new("/usr/lib/Flow Beta")),
+            Some(Path::new("/usr/lib/Aello Beta")),
             None,
-            Some(Path::new("/usr/bin/flow")),
+            Some(Path::new("/usr/bin/aello")),
         );
         assert_eq!(
             candidates.first(),
-            Some(&PathBuf::from("/usr/lib/Flow Beta/sidecar/nsig.cjs"))
+            Some(&PathBuf::from("/usr/lib/Aello Beta/sidecar/nsig.cjs"))
         );
     }
 
@@ -258,11 +258,11 @@ mod tests {
     fn flatpak_resource_dir_is_a_candidate() {
         let candidates = sidecar_candidates(
             "integrity.cjs",
-            Some(Path::new("/app/lib/Flow")),
+            Some(Path::new("/app/lib/Aello")),
             None,
-            Some(Path::new("/app/bin/flow")),
+            Some(Path::new("/app/bin/aello")),
         );
-        assert!(candidates.contains(&PathBuf::from("/app/lib/Flow/sidecar/integrity.cjs")));
+        assert!(candidates.contains(&PathBuf::from("/app/lib/Aello/sidecar/integrity.cjs")));
     }
 
     #[test]
@@ -271,11 +271,11 @@ mod tests {
             "nsig.cjs",
             None,
             None,
-            Some(Path::new("C:/Program Files/Flow/flow.exe")),
+            Some(Path::new("C:/Program Files/Aello/aello.exe")),
         );
         assert!(
             candidates.contains(
-                &Path::new("C:/Program Files/Flow")
+                &Path::new("C:/Program Files/Aello")
                     .join("sidecar")
                     .join("nsig.cjs")
             )

@@ -1,5 +1,5 @@
 //! The optional remote signature and `n` decoder: the public decoder of the
-//! `PipePipe` app, as Flow for Android uses it.
+//! `PipePipe` app, as Aello for Android uses it.
 //!
 //! A signed stream URL needs the player's signature transform, which current
 //! players inline behind runtime-indexed string arrays, so no local extractor can

@@ -12,14 +12,14 @@ const version = `${baseVersion}${separator}nightly.${runNumber}`;
 
 const nightlyConfig = {
   $schema: "https://schema.tauri.app/config/2",
-  productName: "Flow Nightly",
+  productName: "Aello Nightly",
   version,
-  identifier: "io.github.aedev.flow.desktop.nightly",
+  identifier: "io.github.niczzxo.aello.desktop.nightly",
   bundle: {
     createUpdaterArtifacts: false,
-    shortDescription: "Nightly testing build of Flow Desktop.",
+    shortDescription: "Nightly testing build of Aello Desktop.",
     longDescription:
-      "An automatically generated testing build of Flow Desktop. Nightly builds use isolated application data and may be unstable.",
+      "An automatically generated testing build of Aello Desktop. Nightly builds use isolated application data and may be unstable.",
   },
 };
 
@@ -28,4 +28,4 @@ writeFileSync(
   `${JSON.stringify(nightlyConfig, null, 2)}\n`,
 );
 
-console.log(`Generated Flow Nightly configuration for version ${version}`);
+console.log(`Generated Aello Nightly configuration for version ${version}`);

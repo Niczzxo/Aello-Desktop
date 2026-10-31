@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 "use strict";
 
-// Flow Desktop — YouTube `n` throttling-parameter solver.
+// Aello Desktop — YouTube `n` throttling-parameter solver.
 //
 // Web-family stream URLs (MWEB/WEB, including their SABR endpoint) carry an
 // obfuscated `n` that googlevideo refuses until it is rewritten by the player's
-// own JavaScript. Like Flow for Android, this runs the real player script rather
+// own JavaScript. Like Aello for Android, this runs the real player script rather
 // than re-implementing its transform: the player's URL class, constructed with
 // its "deobfuscate" flag, returns the solved `n` from `.get("n")`.
 //

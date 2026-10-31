@@ -10,8 +10,8 @@ use crate::errors::{AppError, ErrorResponse};
 use crate::security::validation::validate_app_route;
 
 /// Every extra app window's label starts with this; `capabilities/default.json`
-/// grants them the main window's permissions through the matching `flow-*` glob.
-pub const APP_WINDOW_PREFIX: &str = "flow-";
+/// grants them the main window's permissions through the matching `aello-*` glob.
+pub const APP_WINDOW_PREFIX: &str = "aello-";
 
 /// How far a new window sits from the one that opened it, so both stay visible.
 const CASCADE_OFFSET: f64 = 32.0;
@@ -87,7 +87,7 @@ fn placement<R: Runtime>(opener: &WebviewWindow<R>) -> Option<(f64, f64, f64, f6
     Some((x, y, width, height))
 }
 
-/// Opens another full Flow window. Built from the main window's own config, so
+/// Opens another full Aello window. Built from the main window's own config, so
 /// it gets the same decorations, size limits and webview arguments on every
 /// platform (`WebView2` refuses a second environment with different arguments).
 /// Must not run on the main thread; see `open_app_window`.
@@ -195,7 +195,7 @@ pub fn hide_main_instead_of_closing<R: Runtime>(main: &WebviewWindow<R>) -> bool
     true
 }
 
-/// Flow quits when its last visible window closes, even while the main window
+/// Aello quits when its last visible window closes, even while the main window
 /// is hidden behind it. macOS keeps running in the Dock, as it already does.
 fn quit_if_only_hidden_main_remains<R: Runtime>(app: &AppHandle<R>, closed: &str) {
     if cfg!(target_os = "macos") || other_visible_app_window(app, closed) {

@@ -1,6 +1,6 @@
-# Contributing to Flow Desktop
+# Contributing to Aello Desktop
 
-Thanks for your interest in improving Flow Desktop — a privacy-respecting YouTube and YouTube Music client with a native, fully local recommendation engine, built with Rust, Tauri, React, and TypeScript.
+Thanks for your interest in improving Aello Desktop — a privacy-respecting YouTube and YouTube Music client with a native, fully local recommendation engine, built with Rust, Tauri, React, and TypeScript.
 
 This guide explains how to set up the project, the standards we hold code to, and how to get your changes merged. Contributions of every size are welcome, from typo fixes to new subsystems.
 
@@ -19,7 +19,7 @@ This project is governed by our [Code of Conduct](CODE_OF_CONDUCT.md). By partic
 
 ## Before you start
 
-- Search [existing issues](https://github.com/Flow-Tube/Flow-Desktop/issues) and pull requests first to avoid duplicates.
+- Search [existing issues](https://github.com/Niczzxo/Aello-Desktop/issues) and pull requests first to avoid duplicates.
 - For anything beyond a small fix, open an issue (or comment on an existing one) to discuss the approach **before** writing code. This avoids wasted effort on changes that may not be a good fit.
 - Keep pull requests focused. One logical change per PR is far easier to review and merge than a large, mixed one.
 
@@ -66,7 +66,7 @@ src/                  React + TypeScript frontend
 src-tauri/            Rust backend (Tauri 2)
   src/commands/       Tauri command handlers exposed to the frontend
   src/db/             SQLite access and migrations
-  src/flow_neuro/     Local video recommendation engine
+  src/aello_neuro/     Local video recommendation engine
   src/music_brain/    Local music recommendation engine
   src/streaming/      Media extraction and the loopback media proxy
   src/security/       Validation and integrity (BotGuard/PO-token) handling
@@ -98,7 +98,7 @@ The UI follows a strict design system. **Read [Design.md](Design.md) before writ
 ### General
 
 - Match the style, naming, and comment density of the surrounding code.
-- Keep privacy and security front of mind — Flow contains no advertising or analytics SDK, requires no account, and stores user data locally. Contributions must preserve these guarantees.
+- Keep privacy and security front of mind — Aello contains no advertising or analytics SDK, requires no account, and stores user data locally. Contributions must preserve these guarantees.
 
 ## Commit messages
 
@@ -140,8 +140,8 @@ Please confirm that your PR introduces no new secrets, private data, telemetry, 
 
 ## Supporting the project
 
-Flow is free and open-source software maintained by an independent developer. If you would like to support development financially, you can do so through [Patreon](https://patreon.com/A_EDev) or via cryptocurrency — see the **Support & donations** section of the [README](README.md#support--donations), or the in-app **Support Flow** page. Always verify any crypto address and network before sending.
+Aello is free and open-source software maintained by an independent developer. If you would like to support development financially, you can do so through [Patreon](https://patreon.com/A_EDev) or via cryptocurrency — see the **Support & donations** section of the [README](README.md#support--donations), or the in-app **Support Aello** page. Always verify any crypto address and network before sending.
 
 ## License
 
-Flow Desktop is licensed under the [GNU General Public License v3.0](LICENSE). By contributing, you agree that your contributions will be licensed under the same terms.
+Aello Desktop is licensed under the [GNU General Public License v3.0](LICENSE). By contributing, you agree that your contributions will be licensed under the same terms.

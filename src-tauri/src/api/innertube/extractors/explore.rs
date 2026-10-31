@@ -1,4 +1,4 @@
-//! Explore, rebuilt on the destinations that still answer anonymously (Flow for
+//! Explore, rebuilt on the destinations that still answer anonymously (Aello for
 //! Android's `ExploreDestination`). `FEtrending` and `FEexplore` answer 400 on
 //! every client since 2026-09-18, and charts.youtube.com 429 since 2026-10-08,
 //! so there is no anonymous "Trending" or "Movies" left. Only the browse ids live

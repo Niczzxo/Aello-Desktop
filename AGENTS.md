@@ -1,6 +1,6 @@
-# Working with Flow Desktop as an AI agent
+# Working with Aello Desktop as an AI agent
 
-Flow Desktop (`io.github.aedev.flow.desktop`) is a privacy-first YouTube and YouTube Music client built with **Tauri 2 (Rust backend) + React 19/TypeScript (frontend)**. It is the desktop companion to [Flow for Android](FlowApp_mobile/AGENTS.md). It plays YouTube content via a native, hand-rolled Innertube client (SABR/DASH/HLS, no `protoc`), supports downloads with a native muxer, SponsorBlock/DeArrow/Return YouTube Dislike integrations, P2P sync with the Android app, and two on-device recommendation engines: **FlowNeuro** (video) and **MusicBrain** (music). No account, no analytics SDK, no telemetry.
+Aello Desktop (`io.github.niczzxo.aello.desktop`) is a privacy-first YouTube and YouTube Music client built with **Tauri 2 (Rust backend) + React 19/TypeScript (frontend)**. It is the desktop companion to [Aello for Android](AelloApp_mobile/AGENTS.md). It plays YouTube content via a native, hand-rolled Innertube client (SABR/DASH/HLS, no `protoc`), supports downloads with a native muxer, SponsorBlock/DeArrow/Return YouTube Dislike integrations, P2P sync with the Android app, and two on-device recommendation engines: **AelloNeuro** (video) and **MusicBrain** (music). No account, no analytics SDK, no telemetry.
 
 Frontend lives at `src/`, backend at `src-tauri/src/`. Run all `cargo` commands from inside `src-tauri/` — it needs `.cargo/config.toml`'s `reqwest_unstable` rustflag. Use `pnpm` (not `npm` or `yarn`) for JS.
 
@@ -34,8 +34,8 @@ Rules:
 
 - `api/innertube/` — native Innertube client (no `protoc`), plus `dearrow.rs`, `extractor.rs`, `http.rs` (shared `reqwest` client — never build a new client per request).
 - `streaming/sabr/` — hand-rolled SABR/DASH stack; `streaming/proxy.rs` for range-request proxying.
-- `flow_neuro/` — video recommendation engine (ranker, scoring, signals, tokenizer, resident brain store).
-- `music_brain/` — entity-based music recommendation engine (ACT-R heavy rotation, separate from FlowNeuro). Video and music recommendation state must never leak into each other — `watch_history` is shared between both surfaces (`is_music` flag), so any video-feed recall/seed path must filter out music rows.
+- `aello_neuro/` — video recommendation engine (ranker, scoring, signals, tokenizer, resident brain store).
+- `music_brain/` — entity-based music recommendation engine (ACT-R heavy rotation, separate from AelloNeuro). Video and music recommendation state must never leak into each other — `watch_history` is shared between both surfaces (`is_music` flag), so any video-feed recall/seed path must filter out music rows.
 - `sync/` — CRDT-based P2P LAN sync with the Android app (codec, merge, ledger, transport, QR pairing). This is the most fragile subsystem — see `src-tauri/tests/sync_*.rs` (golden, fuzz, scale tests) before changing anything here.
 - `security/` — input validation (`validation.rs`).
 - `commands/` — Tauri `#[tauri::command]` handlers, one file per domain (downloads, music, sync, notifications, recommendation, shorts, youtube).
@@ -57,14 +57,14 @@ Rules:
 - **Content restrictions are first-class, not exceptions.** YouTube extraction can fail in many distinct, expected ways (age-restricted, private, paid/Premium, geo-blocked, bot-check/BotGuard challenge, account terminated, content removed). These are modeled as `AppError` variants (`src-tauri/src/errors/mod.rs`), each with its own `kind` string. The frontend must render a specific, actionable state for each `kind` — never collapse them into one generic "Something went wrong" toast.
 - **Graceful degradation for FOSS APIs.** SponsorBlock, DeArrow, and Return YouTube Dislike are optional, third-party, and can fail or rate-limit independently of core playback. If one fails, fall back to default metadata/behavior silently — never block or break page layout waiting on them (Design.md §8).
 - **BotGuard/poToken failures.** The native poToken minter (`sidecar/integrity.cjs`, `webview_pot`) can fail to mint, or googlevideo can reject a token. Treat this as a retryable extraction failure, not a crash — surface the `botCheckRequired` error kind.
-- **Optimistic local UI, real backend confirmation.** Local-only actions (SponsorBlock toggle, like, FlowNeuro/MusicBrain feedback) update Zustand state instantly, then reconcile with the SQLite write. If the backend write fails, roll the optimistic update back rather than leaving UI and DB out of sync.
+- **Optimistic local UI, real backend confirmation.** Local-only actions (SponsorBlock toggle, like, AelloNeuro/MusicBrain feedback) update Zustand state instantly, then reconcile with the SQLite write. If the backend write fails, roll the optimistic update back rather than leaving UI and DB out of sync.
 - **Sync conflicts are expected, not exceptional.** The CRDT merge in `sync/merge.rs` must handle concurrent edits from desktop and Android deterministically — when in doubt, check `sync_golden.rs`/`sync_fuzz.rs` for the expected resolution before assuming a merge result is a bug.
-- **Empty and first-run states.** Empty search results, empty library/downloads/history, and first-run onboarding (no watch history yet, FlowNeuro/MusicBrain cold-start) all need explicit empty-state UI, not a blank pane.
+- **Empty and first-run states.** Empty search results, empty library/downloads/history, and first-run onboarding (no watch history yet, AelloNeuro/MusicBrain cold-start) all need explicit empty-state UI, not a blank pane.
 - **IPC/network latency is not optional to handle.** Every `invoke()` can fail (backend panic, IO error, extraction error) or hang (network) — hooks in `src/lib/` must model loading/error/empty states, not just the happy path.
 
 ## Logging
 
-- Backend logging uses `tracing` + `tracing-subscriber`, initialized in `src-tauri/src/lib.rs::run()` with an `EnvFilter` (default level `info`). Override verbosity for a debug session with `RUST_LOG=debug` (or a per-module filter, e.g. `RUST_LOG=flow_desktop::sync=trace`) before launching `pnpm tauri dev`.
+- Backend logging uses `tracing` + `tracing-subscriber`, initialized in `src-tauri/src/lib.rs::run()` with an `EnvFilter` (default level `info`). Override verbosity for a debug session with `RUST_LOG=debug` (or a per-module filter, e.g. `RUST_LOG=aello_desktop::sync=trace`) before launching `pnpm tauri dev`.
 - Logs go to stdout of the process running the app (the terminal running `pnpm tauri dev`, or the packaged app's console if attached). There is no persisted log file today — don't assume one exists.
 - **Never log secrets.** poTokens, BotGuard integrity tokens, sync pairing/encryption keys, and any auth material must never be logged, even at `debug`/`trace`. Log video/channel IDs and error kinds freely — they're not sensitive.
 - On the frontend, prefer surfacing errors through the existing `ErrorResponse.kind` handling over ad hoc `console.error` — but `console.error` for genuine unexpected exceptions during development is fine; just don't leave verbose `console.log` debugging statements in committed code.

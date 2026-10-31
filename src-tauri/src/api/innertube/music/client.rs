@@ -106,7 +106,7 @@ impl InnertubeClient {
         visitor_data: Option<&str>,
     ) -> AppResult<Value> {
         // `player_body` drops the token unless this client's attestation platform
-        // is the one Flow can actually mint for.
+        // is the one Aello can actually mint for.
         let mut payload = client.player_body(video_id, visitor_data, po_token);
         if let Some(ts) = signature_timestamp {
             payload["playbackContext"] = json!({

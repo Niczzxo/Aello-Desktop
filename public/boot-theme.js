@@ -3,7 +3,7 @@
 // (src/lib/useTheme.ts) writes the snapshot; the key follows src/lib/storage/profileStorage.ts.
 (function () {
   try {
-    var profile = window.__FLOW_PROFILE__;
+    var profile = window.__AELLO_PROFILE__;
     var prefix = profile && profile.id && !profile.isDefault ? "p:" + profile.id + ":" : "";
     var raw = window.localStorage.getItem(prefix + "flow_boot_theme");
     if (!raw) return;

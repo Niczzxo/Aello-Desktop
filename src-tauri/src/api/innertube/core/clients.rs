@@ -1,4 +1,4 @@
-//! Single source of truth for every InnerTube client identity Flow presents.
+//! Single source of truth for every InnerTube client identity Aello presents.
 //!
 //! Before this module the same client was declared in five places (the video
 //! context builders, the `post_innertube` User-Agent table, the music profiles,
@@ -27,7 +27,7 @@ pub const DEFAULT_SIGNATURE_TIMESTAMP: i64 = 20745;
 /// accepted with.
 ///
 /// A PO token comes from BotGuard (web), DroidGuard (Android) or iOSGuard (iOS),
-/// and one platform's token is never valid on another's. Flow can only run
+/// and one platform's token is never valid on another's. Aello can only run
 /// BotGuard (`sidecar/integrity.cjs` and the hidden-WebView minter), so [`Web`] is
 /// the only family it can attest for. Encoding it here is what stops a BotGuard
 /// token being injected into an `IOS`/`ANDROID_VR` player request — a claim
@@ -37,7 +37,7 @@ pub const DEFAULT_SIGNATURE_TIMESTAMP: i64 = 20745;
 /// [`Web`]: AttestationPlatform::Web
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum AttestationPlatform {
-    /// BotGuard. The only runtime Flow owns.
+    /// BotGuard. The only runtime Aello owns.
     Web,
     /// DroidGuard, inside Google Play Services. Not reachable from a desktop app.
     DroidGuard,
@@ -131,7 +131,7 @@ impl YouTubeClient {
 
     /// The body of a `player` request: context, video id, content-check flags,
     /// the embed URL for embedded clients, and the PO token only when this client
-    /// can actually be attested by the runtime Flow owns.
+    /// can actually be attested by the runtime Aello owns.
     ///
     /// The token goes in a top-level `serviceIntegrityDimensions`, next to
     /// `context`. The server silently ignores it inside `context`, which left every
@@ -412,7 +412,7 @@ pub const TVHTML5_SIMPLY_EMBEDDED_PLAYER: YouTubeClient = YouTubeClient {
     ..WEB
 };
 
-/// The Samsung Tizen TV app, asked anonymously. Flow for Android measured it
+/// The Samsung Tizen TV app, asked anonymously. Aello for Android measured it
 /// serving visitors the app clients had walled (#921). Its formats are all
 /// signed, so it needs the remote decoder, and the Tizen device fields: without
 /// them `player` answers "The page needs to be reloaded".

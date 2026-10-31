@@ -9,7 +9,7 @@ pub const CONTENT_LANGUAGE_SETTING: &str = "content_language";
 
 static CONTENT_LANGUAGE: RwLock<String> = RwLock::new(String::new());
 
-/// The host language the site accepts for a language tag, as Flow for Android
+/// The host language the site accepts for a language tag, as Aello for Android
 /// normalises it: the bare language, Brazilian and European Portuguese and the
 /// three Chinese variants told apart, and English for anything unusable.
 #[must_use]
@@ -70,7 +70,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn host_languages_follow_flow_for_android() {
+    fn host_languages_follow_aello_for_android() {
         assert_eq!(normalize_host_language("system"), "en");
         assert_eq!(
             normalize_host_language("en-DE-u-fw-mon-ms-metric-mu-celsius"),

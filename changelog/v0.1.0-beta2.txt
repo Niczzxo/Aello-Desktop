@@ -1,16 +1,16 @@
-FLOW DESKTOP CHANGE LOG
+AELLO DESKTOP CHANGE LOG
 VERSION: 0.1.0-beta2
 DATE: 2026-08-26
 STATUS: RELEASE
 
 ABOUT
-Flow Desktop is a privacy-first YouTube and YouTube Music client - no account, no ads, no analytics, no telemetry. It is the desktop companion to Flow for Android.
+Aello Desktop is a privacy-first YouTube and YouTube Music client - no account, no ads, no analytics, no telemetry. It is the desktop companion to Aello for Android.
 
 A bug-fix release built on beta-tester feedback: Linux startup and packaging, livestreams, the Home feed, the player, subscriptions, search, backups, and downloads - plus a rework of how quickly videos, Shorts and music start playing.
 
 LINUX
 - Fixed the AppImage failing to start with a blank screen and "EGL_BAD_PARAMETER" on Arch, CachyOS, Manjaro and Fedora (#40). It shipped its own copies of the Wayland libraries, which conflicted with newer system graphics drivers.
-- Fixed Flow refusing to launch on Wayland unless GDK_BACKEND=x11 and WEBKIT_DISABLE_DMABUF_RENDERER=1 were set by hand (#31). Flow now applies what it needs itself, and only falls back further (software compositing, then X11) if a launch actually fails - so working systems keep full GPU rendering. Your own environment variables still win.
+- Fixed Aello refusing to launch on Wayland unless GDK_BACKEND=x11 and WEBKIT_DISABLE_DMABUF_RENDERER=1 were set by hand (#31). Aello now applies what it needs itself, and only falls back further (software compositing, then X11) if a launch actually fails - so working systems keep full GPU rendering. Your own environment variables still win.
 - Fixed video staying frozen on the spinner while audio played (#29). The .deb and .rpm now pull in the required decoders, the AppImage carries them, and if one is genuinely missing the player says what to install instead of spinning forever.
 - Fixed stuttering audio and the long delay opening Subscriptions.
 
@@ -30,10 +30,10 @@ SUBSCRIPTIONS
 - A channel that fails to load now shows a "Channel unavailable" page with Retry instead of a blank screen.
 
 PLAYBACK SPEED
-- Videos start much sooner. Flow used to load the title, channel, suggested videos, comments and dislike counts alongside the stream itself, all fighting over the same connection; the stream is now resolved first and everything else fills in once the video is actually playing.
+- Videos start much sooner. Aello used to load the title, channel, suggested videos, comments and dislike counts alongside the stream itself, all fighting over the same connection; the stream is now resolved first and everything else fills in once the video is actually playing.
 - Opening a video from a link, a notification or a page reload no longer waits for its details before the player appears - playback starts from the link alone and the title fills in a moment later.
 - Clicking a video starts resolving it straight away, while the page is still opening, instead of afterwards.
-- Flow no longer looks the same video up twice on every open, and a video you just left plays immediately when you come back to it.
+- Aello no longer looks the same video up twice on every open, and a video you just left plays immediately when you come back to it.
 - Swiping through Shorts is faster: the next Shorts are resolved ahead of the swipe instead of queueing one behind another.
 - The next song is prepared while the current one plays, so tracks change without the pause in between. The same now applies to the next video when autoplay is on.
 - Removed two YouTube Music lookups that ran every time you opened any video and were never shown anywhere.
@@ -67,7 +67,7 @@ SEARCH
 MUSIC
 - The mini-player timeline thickens under the cursor and shows a position dot, making it comfortable to scrub.
 - Shuffle and repeat now clearly show when they are on. The button fills with a colour drawn from the current artwork instead of only recolouring the icon, which was easy to miss - and on some tracks invisible against the background.
-- New Music Player Background setting with four styles - Blur + Gradient, Blurred Artwork, Palette Gradient and Default Surface - matching Flow for Android.
+- New Music Player Background setting with four styles - Blur + Gradient, Blurred Artwork, Palette Gradient and Default Surface - matching Aello for Android.
 
 INTERFACE
 - Hovering a card now grows its artwork colour outward from the centre rather than simply switching it on, with a softer, springier transition.
@@ -79,8 +79,8 @@ INTERFACE
 - Volume, the equaliser and the music player's seek bar use a new slider design with a thicker track and a slim handle. If you prefer the old one, turn off Settings > Appearance > Expressive sliders. The video, Shorts and mini-player seek bars are unchanged.
 
 BACKUPS AND DATA
-- Backups now actually contain your data. Previously a Flow backup file held only settings - watch history, subscriptions, playlists, likes, and the recommendation brains were silently left out, which is why restores came back crippled. The App data / Brain / Everything choice now does exactly what it says, and restoring shows a summary of what came back.
-- Fixed restoring a backup being able to leave Deep Flow silently stuck on forever, which stopped watch-history recording and FlowNeuro learning without any visible sign.
+- Backups now actually contain your data. Previously a Aello backup file held only settings - watch history, subscriptions, playlists, likes, and the recommendation brains were silently left out, which is why restores came back crippled. The App data / Brain / Everything choice now does exactly what it says, and restoring shows a summary of what came back.
+- Fixed restoring a backup being able to leave Deep Aello silently stuck on forever, which stopped watch-history recording and AelloNeuro learning without any visible sign.
 - The Reset Brain confirmation now appears centred on screen instead of buried in the middle of the page.
 - The Import data page was rebuilt to match the rest of Settings, and its in-page back button removed now that the top bar handles going back.
 
@@ -89,7 +89,7 @@ DOWNLOADS
 
 DIAGNOSTICS AND PRIVACY
 - Fixed log export from Settings. Diagnostics now offers "Save logs" and "Open logs folder" and shows where the logs live, so they can always be attached to a bug report.
-- Flow no longer writes your learned topic profile or recommendation queries into the logs by default. These get pasted into public bug reports, and they described your viewing interests.
+- Aello no longer writes your learned topic profile or recommendation queries into the logs by default. These get pasted into public bug reports, and they described your viewing interests.
 
 OTHER
 - Updated third-party dependencies.

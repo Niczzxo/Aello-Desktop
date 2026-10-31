@@ -6,9 +6,9 @@ import { join } from "node:path";
 import { pathToFileURL } from "node:url";
 
 export const SUPPORT_MESSAGE =
-  "Enjoying Flow? Consider supporting its development on [Open Collective](https://opencollective.com/flow-tube) or [Patreon](https://patreon.com/A_EDev) to help keep the app free, open source, ad-free, and improving!";
+  "Enjoying Aello? Consider supporting its development on [Open Collective](https://opencollective.com/flow-tube) or [Patreon](https://patreon.com/A_EDev) to help keep the app free, open source, ad-free, and improving!";
 
-const TITLE_LINES = new Set(["FLOW DESKTOP CHANGE LOG", "FLOW CHANGE LOG"]);
+const TITLE_LINES = new Set(["AELLO DESKTOP CHANGE LOG", "AELLO CHANGE LOG"]);
 const META_LINE = /^(VERSION|DATE|STATUS):(.*)$/i;
 const HEADING_LINE = /^[A-Z][A-Z &/,:-]+:?$/;
 // Sentence-casing a heading would otherwise print "Macos" or "Youtube".
@@ -53,7 +53,7 @@ function sentenceCase(heading) {
 }
 
 export function renderGithubNotes({ meta, blocks }, tag) {
-  const out = [`# Flow ${tag}`];
+  const out = [`# Aello ${tag}`];
   const details = [];
   if (meta.DATE) details.push(`**Release date:** ${meta.DATE}`);
   if (meta.STATUS) details.push(`**Status:** ${sentenceCase(meta.STATUS)}`);

@@ -1,5 +1,5 @@
 -- What a download was tagged with, so the library can show it and retag it offline.
--- `cover_path` is Flow's private copy of the cover (in app data), not a file beside the media.
+-- `cover_path` is Aello's private copy of the cover (in app data), not a file beside the media.
 ALTER TABLE downloads ADD COLUMN cover_path TEXT;
 ALTER TABLE downloads ADD COLUMN artists_json TEXT;
 ALTER TABLE downloads ADD COLUMN album TEXT;

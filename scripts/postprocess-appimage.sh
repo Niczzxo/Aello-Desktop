@@ -13,7 +13,7 @@
 #   decoding never works. The bundled FFmpeg still links it, so it moves to
 #   usr/lib/libva-fallback, which the app puts on the loader path only on hosts
 #   without a libva of their own (src-tauri/src/appimage.rs).
-# - GDK_BACKEND: older linuxdeploy GTK hooks forced X11 for every user; Flow
+# - GDK_BACKEND: older linuxdeploy GTK hooks forced X11 for every user; Aello
 #   picks its own backend (src-tauri/src/linux_startup.rs), so a hook that
 #   forces one again fails the build.
 # Usage: postprocess-appimage.sh <path-to.AppImage> <x86_64|aarch64>
@@ -48,7 +48,7 @@ cat "$root"/*.desktop
 echo "::endgroup::"
 
 if grep -En '^[[:space:]]*export[[:space:]]+GDK_BACKEND=' "$root"/apprun-hooks/*.sh 2>/dev/null; then
-  echo "an AppRun hook forces GDK_BACKEND; Flow must choose its own backend" >&2
+  echo "an AppRun hook forces GDK_BACKEND; Aello must choose its own backend" >&2
   exit 1
 fi
 

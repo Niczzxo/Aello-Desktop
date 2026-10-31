@@ -1,4 +1,4 @@
--- Listens and loves waiting to reach Last.fm, Libre.fm or ListenBrainz (Flow for Android's
+-- Listens and loves waiting to reach Last.fm, Libre.fm or ListenBrainz (Aello for Android's
 -- ScrobbleStore queues). A listen is queued the moment it counts and leaves once the service
 -- accepts it, so quitting or going offline loses nothing. Device-local, never synced or backed up.
 -- service: LASTFM, LIBREFM or LISTENBRAINZ. Each service keeps at most 2,000 rows of each kind.

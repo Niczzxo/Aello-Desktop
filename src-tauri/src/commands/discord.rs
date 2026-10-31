@@ -5,7 +5,7 @@ use tauri::{Runtime, State, WebviewWindow};
 use crate::errors::ErrorResponse;
 use crate::services::discord_presence::{DiscordPresence, PresencePayload};
 
-/// The window whose playback Discord shows. With several Flow windows, a pause
+/// The window whose playback Discord shows. With several Aello windows, a pause
 /// in one must not wipe what another is playing.
 #[derive(Default)]
 pub struct DiscordPresenceOwner(Mutex<Option<String>>);

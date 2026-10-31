@@ -1,26 +1,26 @@
 # Flatpak
 
-`io.github.flow_tube.Flow-Desktop.yml` builds Flow from source on the GNOME 51
+`io.github.niczzxo.Aello-Desktop.yml` builds Aello from source on the GNOME 51
 runtime. The same manifest is used for the nightly CI bundle and, later, for
 Flathub. Everything is built offline from pre-generated sources, as Flathub
 requires.
 
 ## What is different in the Flatpak
 
-- **App ID.** The Flatpak uses `io.github.flow_tube.Flow-Desktop` instead of
-  `io.github.aedev.flow.desktop`. Only the Flatpak build changes it, through
+- **App ID.** The Flatpak uses `io.github.niczzxo.Aello-Desktop` instead of
+  `io.github.niczzxo.aello.desktop`. Only the Flatpak build changes it, through
   `src-tauri/tauri.flatpak.conf.json`, because Flatpak only lets an app own
   D-Bus names under its own ID and the single-instance name is
   `<identifier>.SingleInstance`.
 - **Own data folder.** The library, settings, logs and startup state live in
-  `~/.var/app/io.github.flow_tube.Flow-Desktop/data/io.github.flow_tube.Flow-Desktop/`.
+  `~/.var/app/io.github.niczzxo.Aello-Desktop/data/io.github.niczzxo.Aello-Desktop/`.
   A Flatpak install does not see the data of a `.deb`, `.rpm` or AppImage
   install, and the other way around.
 - **Bundled Node.** The poToken and n-signature helpers need Node, which the
   sandbox does not have. The `node` module copies Node 24 from the SDK
-  extension into `/app/node`, and `FLOW_NODE`, `FLOW_INTEGRITY_SCRIPT` and
-  `FLOW_NSIG_SCRIPT` point the app at it and at the helper scripts in
-  `/app/lib/Flow/sidecar/`.
+  extension into `/app/node`, and `AELLO_NODE`, `AELLO_INTEGRITY_SCRIPT` and
+  `AELLO_NSIG_SCRIPT` point the app at it and at the helper scripts in
+  `/app/lib/Aello/sidecar/`.
 - **No Tauri CLI.** `tauri build` rejects underscores in identifiers, so the
   manifest runs `cargo build` with the `tauri/custom-protocol` feature and the
   Flatpak config passed through `TAURI_CONFIG`, which is what the CLI does.
@@ -52,20 +52,20 @@ Run it again after any change to `Cargo.lock`, `pnpm-lock.yaml` or
 flatpak remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
 scripts/flatpak-sources.sh
 flatpak-builder --user --install --install-deps-from=flathub --force-clean \
-  flatpak_app packaging/flatpak/io.github.flow_tube.Flow-Desktop.yml
-flatpak run io.github.flow_tube.Flow-Desktop
+  flatpak_app packaging/flatpak/io.github.niczzxo.Aello-Desktop.yml
+flatpak run io.github.niczzxo.Aello-Desktop
 ```
 
 Run these from the repository root. To make a single-file bundle instead:
 
 ```sh
 flatpak-builder --user --repo=repo --install-deps-from=flathub --force-clean \
-  flatpak_app packaging/flatpak/io.github.flow_tube.Flow-Desktop.yml
-flatpak build-bundle repo Flow-Desktop.flatpak io.github.flow_tube.Flow-Desktop
+  flatpak_app packaging/flatpak/io.github.niczzxo.Aello-Desktop.yml
+flatpak build-bundle repo Aello-Desktop.flatpak io.github.niczzxo.Aello-Desktop
 ```
 
 Startup logging can be raised with
-`flatpak run --env=RUST_LOG=debug io.github.flow_tube.Flow-Desktop`.
+`flatpak run --env=RUST_LOG=debug io.github.niczzxo.Aello-Desktop`.
 
 ## Permissions
 
@@ -76,10 +76,10 @@ Startup logging can be raised with
 | `--socket=pulseaudio` | Audio |
 | `--device=dri` | GPU rendering and video decoding |
 | `--talk-name=org.freedesktop.Notifications` | New-upload notifications |
-| `--filesystem=xdg-videos/Flow:create`, `--filesystem=xdg-music/Flow:create` | Default download folders |
+| `--filesystem=xdg-videos/Aello:create`, `--filesystem=xdg-music/Aello:create` | Default download folders |
 | `--filesystem=xdg-download` | Fallback download folder when Videos or Music is not set |
 
-There is no tray permission, because Flow does not use a tray icon.
+There is no tray permission, because Aello does not use a tray icon.
 
 ## Check in the bundle
 
@@ -88,8 +88,8 @@ These only show up in a real install:
 - Picking a custom download folder (the dialog goes through the file chooser
   portal) and downloading into it.
 - Playback, including H.264, and the poToken and n-signature log lines.
-- `flow://` links from the browser extension opening the app.
-- Sync pairing with Flow for Android, and notifications.
+- `aello://` links from the browser extension opening the app.
+- Sync pairing with Aello for Android, and notifications.
 
 ## Runtime support
 
@@ -100,5 +100,5 @@ way `com.pot_app.pot` does on Flathub.
 
 ## Flathub
 
-`io.github.flow_tube.Flow-Desktop.metainfo.xml` is the AppStream listing the
+`io.github.niczzxo.Aello-Desktop.metainfo.xml` is the AppStream listing the
 Flatpak installs.

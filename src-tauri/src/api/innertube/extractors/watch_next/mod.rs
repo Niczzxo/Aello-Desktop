@@ -1,6 +1,6 @@
 //! The watch page's `/next` answer, fetched once per video and shared by
 //! everything read from it: the details, the related lane, the first comments
-//! page and the live chat seed. Flow for Android keeps the same small cache
+//! page and the live chat seed. Aello for Android keeps the same small cache
 //! (`YouTubeRepository.watchNextJson`); fetching it per consumer cost three to
 //! four half-megabyte requests per watch.
 

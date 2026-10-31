@@ -1,15 +1,15 @@
 {
-  "name": "Flow",
+  "name": "Aello",
   "private": true,
   "version": "0.1.0-beta3",
-  "description": "Privacy-first YouTube and YouTube Music desktop companion to Flow for Android, powered by the native local FlowNeuro recommendation engine.",
+  "description": "Privacy-first YouTube and YouTube Music desktop companion to Aello for Android, powered by the native local AelloNeuro recommendation engine.",
   "author": "A-EDev",
   "license": "GPL-3.0-only",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Flow-Tube/Flow-Desktop.git"
+    "url": "https://github.com/Niczzxo/Aello-Desktop.git"
   },
-  "homepage": "https://github.com/Flow-Tube/Flow-Desktop",
+  "homepage": "https://github.com/Niczzxo/Aello-Desktop",
   "type": "module",
   "packageManager": "pnpm@11.9.0",
   "engines": {

@@ -470,7 +470,7 @@ fn is_transient_file_lock(error: &std::io::Error) -> bool {
     matches!(error.raw_os_error(), Some(5 | 32))
 }
 
-/// Everything after the file has its final name: Flow's cover copy, companion files
+/// Everything after the file has its final name: Aello's cover copy, companion files
 /// and the library row.
 async fn finish(
     app: &AppHandle,

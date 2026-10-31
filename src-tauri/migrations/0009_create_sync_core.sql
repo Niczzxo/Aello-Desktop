@@ -1,4 +1,4 @@
--- Flow Local Sync core tables.
+-- Aello Local Sync core tables.
 
 -- This device's stable identity (single row). Carried in the FLOW-SYNC handshake / HLC stamps.
 CREATE TABLE IF NOT EXISTS sync_identity (

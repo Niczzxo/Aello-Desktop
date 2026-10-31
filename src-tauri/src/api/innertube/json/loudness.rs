@@ -22,7 +22,7 @@ pub fn loudness_db(audio_config: &Value, format: &Value) -> Option<f64> {
 /// The target the site measures perceptual loudness against when the answer leaves it out.
 const DEFAULT_TARGET_LKFS: f64 = -14.0;
 
-/// Music's loudness in Flow for Android's order (`LoudnessGain`): the perceptual loudness
+/// Music's loudness in Aello for Android's order (`LoudnessGain`): the perceptual loudness
 /// against its target first, then the answer's `loudnessDb`, then the format's own. The
 /// perceptual value is measured the way a listener hears the song, so it is preferred.
 #[must_use]

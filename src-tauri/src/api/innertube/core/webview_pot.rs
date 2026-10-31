@@ -29,7 +29,7 @@ pub struct PotResult {
 /// times out — the caller then falls back to the headless sidecar.
 pub async fn mint(content_binding: &str) -> Option<PotResult> {
     let result = super::hidden_webview::run(
-        "flow-pot-minter",
+        "aello-pot-minter",
         "/potmint",
         &[("binding", content_binding)],
         MINT_TIMEOUT,

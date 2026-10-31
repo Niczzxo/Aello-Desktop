@@ -5,13 +5,13 @@ import { describe, expect, it } from "vitest";
 import { SUPPORT_MESSAGE, releaseNotes } from "./release-notes.mjs";
 
 const CHANGELOG = [
-  "﻿FLOW DESKTOP CHANGE LOG",
+  "﻿AELLO DESKTOP CHANGE LOG",
   "VERSION: 0.2.0",
   "DATE: 2026-11-01",
   "STATUS: PRE-RELEASE",
   "",
   "ABOUT",
-  "Flow Desktop is a privacy-first client.",
+  "Aello Desktop is a privacy-first client.",
   "",
   "",
   "MACOS",
@@ -24,7 +24,7 @@ const CHANGELOG = [
 ].join("\r\n");
 
 function changelogDir(files) {
-  const dir = mkdtempSync(join(tmpdir(), "flow-changelog-"));
+  const dir = mkdtempSync(join(tmpdir(), "aello-changelog-"));
   for (const [name, text] of Object.entries(files)) writeFileSync(join(dir, name), text);
   return dir;
 }
@@ -34,7 +34,7 @@ describe("releaseNotes", () => {
     const dir = changelogDir({ "v0.2.0.txt": CHANGELOG });
     expect(releaseNotes("v0.2.0", { changelogDir: dir })).toBe(
       [
-        "# Flow v0.2.0",
+        "# Aello v0.2.0",
         "",
         "**Release date:** 2026-11-01",
         "**Status:** Pre-release",
@@ -43,7 +43,7 @@ describe("releaseNotes", () => {
         "",
         "## About",
         "",
-        "Flow Desktop is a privacy-first client.",
+        "Aello Desktop is a privacy-first client.",
         "",
         "## macOS",
         "",
@@ -61,7 +61,7 @@ describe("releaseNotes", () => {
     expect(releaseNotes("v0.2.0", { app: true, changelogDir: dir })).toBe(
       [
         "ABOUT",
-        "Flow Desktop is a privacy-first client.",
+        "Aello Desktop is a privacy-first client.",
         "",
         "MACOS",
         "- Fixed the dock icon.",

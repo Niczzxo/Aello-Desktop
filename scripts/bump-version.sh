@@ -47,7 +47,7 @@ write_version() {
     PATTERN="$2" VERSION="$3" perl -0pi -e 's/$ENV{PATTERN}/$1$ENV{VERSION}$3/m' "$repo_root/$1"
 }
 
-echo "Flow Desktop - version bump"
+echo "Aello Desktop - version bump"
 echo
 
 current_version=""

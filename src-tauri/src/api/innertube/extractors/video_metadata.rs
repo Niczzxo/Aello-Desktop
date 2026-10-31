@@ -1,7 +1,7 @@
 //! What a listed video is: its length, views, upload date and category. The
 //! clients that serve streams return no microformat, so this costs one small
 //! `MWEB` player request, asked without a signature timestamp: the answer is
-//! unplayable and carries no streams, 5 to 10 KB (Flow for Android's
+//! unplayable and carries no streams, 5 to 10 KB (Aello for Android's
 //! `videoCategory`). It stays out of the playback caches, so filling in a list
 //! never pushes out what is playing.
 

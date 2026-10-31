@@ -1,5 +1,5 @@
 //! Attributed text (`content` plus `commandRuns` and `attachmentRuns`), as
-//! descriptions and comments carry it, read into [`RichText`]. Ported from Flow
+//! descriptions and comments carry it, read into [`RichText`]. Ported from Aello
 //! for Android's `toRichText`.
 
 use serde_json::Value;

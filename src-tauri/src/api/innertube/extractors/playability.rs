@@ -2,7 +2,7 @@
 //! and whether any other client could do better.
 //!
 //! Extraction runs in English, so the reasons are matched as English text, the
-//! same patterns Flow for Android's `PlayabilityVerdict` uses.
+//! same patterns Aello for Android's `PlayabilityVerdict` uses.
 
 use serde_json::Value;
 

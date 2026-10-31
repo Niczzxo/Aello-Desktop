@@ -1,7 +1,7 @@
 //! Clients googlevideo has started refusing for this viewer.
 //!
 //! A refused media URL says which client minted it in its `c=` parameter. When
-//! the URL was fresh and had not expired, the refusal is about that client: Flow
+//! the URL was fresh and had not expired, the refusal is about that client: Aello
 //! for Android measured these walls lasting for a while per visitor, so the
 //! client is tried last for 30 minutes instead of first. Both the video and the
 //! music ladders read this.

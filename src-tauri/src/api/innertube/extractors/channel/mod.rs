@@ -1,5 +1,5 @@
 //! A channel: its header, tabs, each tab's items and filters, and its About
-//! panel. Ported from Flow for Android's channel parsers, read structurally so
+//! panel. Ported from Aello for Android's channel parsers, read structurally so
 //! no tab, shelf or filter depends on its English title.
 
 mod about;

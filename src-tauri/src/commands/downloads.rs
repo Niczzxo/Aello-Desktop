@@ -107,7 +107,7 @@ pub async fn reveal_download(
         .map_err(ErrorResponse::from)
 }
 
-/// A system notification for a download that ended while Flow was in the
+/// A system notification for a download that ended while Aello was in the
 /// background. The window decides when, and sends the text in the user's language.
 #[tauri::command]
 #[allow(clippy::needless_pass_by_value)] // Tauri commands deserialize owned arguments.
@@ -808,7 +808,7 @@ pub struct OfflineStreamInfo {
     pub captions: Vec<CaptionTrack>,
 }
 
-/// Downloads saved before Flow kept its own cover copy have their poster next to
+/// Downloads saved before Aello kept its own cover copy have their poster next to
 /// the media file instead; this finds it by name.
 async fn find_artwork_sidecar(media_path: &str) -> Option<(String, String)> {
     for (extension, content_type) in [
@@ -1135,7 +1135,7 @@ pub async fn delete_download_collections(
 }
 
 /// Puts lyrics that arrived after a download finished into the file's `©lyr` tag.
-/// Only MP4/M4A files Flow wrote progressively can be retagged.
+/// Only MP4/M4A files Aello wrote progressively can be retagged.
 pub async fn embed_download_lyrics(media_path: &Path, lyrics: String) -> Result<bool, String> {
     let is_mp4 = media_path
         .extension()
@@ -1151,7 +1151,7 @@ pub async fn embed_download_lyrics(media_path: &Path, lyrics: String) -> Result<
     Ok(true)
 }
 
-/// Removes a downloaded media file, its companion files and Flow's cover copy.
+/// Removes a downloaded media file, its companion files and Aello's cover copy.
 async fn remove_download_files(record: &DownloadRecord) {
     let media_path = Path::new(&record.file_path);
     let _ = tokio::fs::remove_file(media_path).await;

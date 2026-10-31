@@ -3,7 +3,7 @@
 //! parameter. Web-family clients (`MWEB`/`WEB`) need both, and googlevideo refuses
 //! their SABR endpoint outright while `n` is unsolved.
 //!
-//! Mirrors Flow for Android's `PlayerJsFetcher` + `CipherDeobfuscator`: the
+//! Mirrors Aello for Android's `PlayerJsFetcher` + `CipherDeobfuscator`: the
 //! script is cached on disk per player version and run as is rather than
 //! re-implementing its transform, in a hidden web view ([`super::webview_nsig`])
 //! or, without a GUI, by `sidecar/nsig.cjs` under Node.
@@ -169,7 +169,7 @@ async fn fetch_player_script() -> Option<PlayerScript> {
 
 fn player_path(id: &str) -> PathBuf {
     std::env::temp_dir()
-        .join("flow-desktop-player")
+        .join("aello-desktop-player")
         .join(format!("{id}.js"))
 }
 
@@ -206,7 +206,7 @@ async fn run_solver(player: &PlayerScript, n: &str) -> Option<String> {
 }
 
 async fn run_node_solver(player: &PlayerScript, n: &str) -> Option<String> {
-    let Some(solver) = sidecar_script_path("nsig.cjs", "FLOW_NSIG_SCRIPT") else {
+    let Some(solver) = sidecar_script_path("nsig.cjs", "AELLO_NSIG_SCRIPT") else {
         warn!("nsig.cjs sidecar not found; cannot solve n");
         return None;
     };

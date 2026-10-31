@@ -1,6 +1,6 @@
 //! The visitor identity every request carries.
 //!
-//! One identity is minted, kept on disk and reused for a week, as Flow for
+//! One identity is minted, kept on disk and reused for a week, as Aello for
 //! Android does. A new identity per launch, or a new one on every bot wall, is
 //! the pattern that gets a visitor flagged. Re-rolls after a wall are capped at
 //! two in six hours; past that a wall is the network's, not the identity's.

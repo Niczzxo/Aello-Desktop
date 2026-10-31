@@ -1,4 +1,4 @@
-//! Backup/restore commands: full-fidelity export/import that reuses the Flow Local Sync
+//! Backup/restore commands: full-fidelity export/import that reuses the Aello Local Sync
 //! collection serialization ([`crate::sync::export`]) and the atomic CRDT apply pipeline
 //! ([`crate::sync::apply`]). A backup file therefore round-trips through the exact wire
 //! representation the sync test suite already covers, instead of a second ad hoc format.
@@ -19,7 +19,7 @@ use crate::services::profile_service::{MasterManifest, ProfileService, RestoreTa
 use crate::services::recommendation_service::RecommendationService;
 use crate::sync::apply;
 use crate::sync::canonical::{
-    Collection, FlowNeuroBrainSnapshot, Like, MusicBrainSnapshot, Playlist, SettingEntry,
+    Collection, AelloNeuroBrainSnapshot, Like, MusicBrainSnapshot, Playlist, SettingEntry,
     SubscribedChannel, SubscriptionGroup, WatchHistoryRecord,
 };
 use crate::sync::codec;
@@ -69,7 +69,7 @@ fn sync_err(e: SyncError) -> ErrorResponse {
 /// Map a backup scope to the sync collections it covers. `None` for an unknown scope.
 fn scope_collections(scope: &str) -> Option<Vec<Collection>> {
     match scope {
-        "BRAIN" => Some(vec![Collection::FlowNeuroBrain, Collection::MusicBrain]),
+        "BRAIN" => Some(vec![Collection::AelloNeuroBrain, Collection::MusicBrain]),
         "APP_DATA" => Some(vec![
             Collection::Playlists,
             Collection::Likes,
@@ -117,7 +117,7 @@ fn filter_parseable(collection: Collection, values: &[Value]) -> (Vec<Value>, u6
         Collection::Likes => ok::<Like>(v, |l| !l.id.is_empty()),
         Collection::Playlists => ok::<Playlist>(v, |p| !p.sync_id.is_empty()),
         Collection::Settings => ok::<SettingEntry>(v, |s| !s.key.is_empty()),
-        Collection::FlowNeuroBrain => ok::<FlowNeuroBrainSnapshot>(v, |s| !s.device_id.is_empty()),
+        Collection::AelloNeuroBrain => ok::<AelloNeuroBrainSnapshot>(v, |s| !s.device_id.is_empty()),
         Collection::MusicBrain => ok::<MusicBrainSnapshot>(v, |s| !s.device_id.is_empty()),
         Collection::Subscriptions => ok::<SubscriptionGroup>(v, |g| !g.name.is_empty()),
         Collection::SubscribedChannels => ok::<SubscribedChannel>(v, |c| !c.channel_id.is_empty()),
@@ -312,7 +312,7 @@ async fn flush_brains(app: &AppHandle, hold: bool) {
             svc.flush_brain().await
         };
         if let Err(e) = flushed {
-            tracing::warn!(%e, "[backup] flush flow_neuro brain failed");
+            tracing::warn!(%e, "[backup] flush aello_neuro brain failed");
         }
     }
     if let Some(store) = app.try_state::<std::sync::Arc<MusicBrainStore>>() {
@@ -325,7 +325,7 @@ async fn flush_brains(app: &AppHandle, hold: bool) {
 async fn reload_brains(app: &AppHandle) {
     if let Some(svc) = app.try_state::<RecommendationService>() {
         if let Err(e) = svc.reload_brain().await {
-            tracing::warn!(%e, "[backup] reload flow_neuro brain failed");
+            tracing::warn!(%e, "[backup] reload aello_neuro brain failed");
         }
     }
     if let Some(store) = app.try_state::<std::sync::Arc<MusicBrainStore>>() {
@@ -486,7 +486,7 @@ mod tests {
     fn scope_mapping_matches_the_selector() {
         assert_eq!(
             scope_collections("BRAIN").unwrap(),
-            vec![Collection::FlowNeuroBrain, Collection::MusicBrain]
+            vec![Collection::AelloNeuroBrain, Collection::MusicBrain]
         );
         let app_data = scope_collections("APP_DATA").unwrap();
         assert!(app_data.contains(&Collection::Settings));

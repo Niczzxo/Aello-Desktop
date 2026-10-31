@@ -27,7 +27,7 @@ fn logs_dir(app: &tauri::AppHandle) -> Result<std::path::PathBuf, ErrorResponse>
 fn is_log_file(path: &std::path::Path) -> bool {
     path.file_name()
         .and_then(|name| name.to_str())
-        .is_some_and(|name| name.starts_with("flow") && name.contains("log"))
+        .is_some_and(|name| name.starts_with("aello") && name.contains("log"))
 }
 
 /// Records a frontend diagnostic event in the backend log under the
@@ -127,7 +127,7 @@ pub async fn reveal_logs_folder(app: tauri::AppHandle) -> Result<(), ErrorRespon
     Ok(())
 }
 
-/// Forgets the anonymous visitor identity Flow sends with every request, so the next
+/// Forgets the anonymous visitor identity Aello sends with every request, so the next
 /// request starts under a new one.
 #[tauri::command]
 pub fn reset_visitor_identity(

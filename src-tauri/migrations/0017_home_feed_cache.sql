@@ -1,4 +1,4 @@
--- Home feed state the backend keeps between loads (Flow for Android's HomeFeedCacheRepository and
+-- Home feed state the backend keeps between loads (Aello for Android's HomeFeedCacheRepository and
 -- channel memory / neighbour stores). Device-local, never synced.
 --
 -- home_feed_cache buckets:
@@ -46,7 +46,7 @@ CREATE TABLE IF NOT EXISTS home_neighbour_channels (
 );
 
 -- The latest uploads of followed channels, from their RSS feeds and Videos tabs, with real publish
--- times (Flow for Android's subscription feed store). Home reads it for its subscription lanes
+-- times (Aello for Android's subscription feed store). Home reads it for its subscription lanes
 -- without a network call. card: the upload as JSON; RSS rows have no length until a Videos tab
 -- or the player fills one in.
 CREATE TABLE IF NOT EXISTS subscription_uploads (

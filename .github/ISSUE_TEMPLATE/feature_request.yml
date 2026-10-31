@@ -1,5 +1,5 @@
 name: Feature request
-description: Propose a focused improvement to Flow Desktop.
+description: Propose a focused improvement to Aello Desktop.
 title: "[Feature]: "
 labels:
   - enhancement
@@ -12,7 +12,7 @@ body:
       options:
         - label: I searched existing issues and discussions for this request.
           required: true
-        - label: This request is specifically relevant to Flow Desktop.
+        - label: This request is specifically relevant to Aello Desktop.
           required: true
 
   - type: textarea

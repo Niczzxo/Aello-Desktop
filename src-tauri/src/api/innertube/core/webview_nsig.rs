@@ -13,7 +13,7 @@ const SOLVE_TIMEOUT: Duration = Duration::from_secs(8);
 /// `n` solved by player `player_id`, or None without a GUI or a result in time.
 pub async fn solve(player_id: &str, n: &str) -> Option<String> {
     let result = super::hidden_webview::run(
-        "flow-n-solver",
+        "aello-n-solver",
         "/nsolve",
         &[("player", player_id), ("n", n)],
         SOLVE_TIMEOUT,
@@ -67,12 +67,12 @@ pub const SOLVE_PAGE_HTML: &str = r#"<!doctype html>
     var name = urlClass(source);
     if (!name) { fail('n-solving URL class not found'); return; }
     try {
-      (0, eval)(source + '\n;window.__flowPlayer = _yt_player;');
+      (0, eval)(source + '\n;window.__aelloPlayer = _yt_player;');
     } catch (e) {
       // A late initializer can throw after every class is defined; only a
       // missing class below is fatal.
     }
-    var UrlClass = window.__flowPlayer && window.__flowPlayer[name];
+    var UrlClass = window.__aelloPlayer && window.__aelloPlayer[name];
     if (typeof UrlClass !== 'function') { fail('player class unavailable'); return; }
     var results = {};
     try {

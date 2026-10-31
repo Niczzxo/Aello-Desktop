@@ -1,5 +1,5 @@
 //! Best-effort extras of a finished download: the poster image beside it when asked
-//! for, Flow's own cover copy, and `SponsorBlock` segments for the library. Lyrics
+//! for, Aello's own cover copy, and `SponsorBlock` segments for the library. Lyrics
 //! are saved by `save_download_lyrics` once the provider chain has them.
 
 use std::path::{Path, PathBuf};
@@ -17,7 +17,7 @@ const SPONSORBLOCK_ENABLED_KEY: &str = "sponsorblock_enabled";
 const SPONSORBLOCK_SERVER_KEY: &str = "sponsorblock_server";
 const COVER_STORE_DIR: &str = "download_covers";
 
-/// Keeps Flow's own copy of the cover in app data, for the library and offline UI.
+/// Keeps Aello's own copy of the cover in app data, for the library and offline UI.
 pub async fn store_cover(app: &AppHandle, id: &str, jpeg: &[u8]) -> Option<String> {
     let dir = app.path().app_data_dir().ok()?.join(COVER_STORE_DIR);
     tokio::fs::create_dir_all(&dir).await.ok()?;

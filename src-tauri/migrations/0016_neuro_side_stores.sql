@@ -1,5 +1,5 @@
 -- Which YouTube categories each channel posts in, learned from every watched video that carries
--- one (Flow for Android's NeuroCategoryStore). Search, related and feed results carry no category,
+-- one (Aello for Android's NeuroCategoryStore). Search, related and feed results carry no category,
 -- so this is how a candidate gets one without another request. Device-local, never synced.
 CREATE TABLE IF NOT EXISTS neuro_channel_categories (
     channel_id TEXT    NOT NULL,
@@ -13,7 +13,7 @@ CREATE INDEX IF NOT EXISTS idx_neuro_channel_categories_seen
     ON neuro_channel_categories (channel_id, seen_at);
 
 -- Related lists YouTube showed beside videos the viewer really watched or liked: which channels
--- sit next to the viewer's own (Flow for Android's NeuroCoWatchStore). Device-local, never synced.
+-- sit next to the viewer's own (Aello for Android's NeuroCoWatchStore). Device-local, never synced.
 -- related / names: JSON array of channel ids, JSON object of channel id to name.
 CREATE TABLE IF NOT EXISTS neuro_cowatch_sources (
     video_id   TEXT    PRIMARY KEY,

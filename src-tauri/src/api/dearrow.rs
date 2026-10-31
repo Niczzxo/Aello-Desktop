@@ -59,7 +59,7 @@ pub async fn fetch_dearrow_override_api(video_id: &str) -> AppResult<Option<DeAr
     let url = format!("https://sponsor.ajay.app/api/branding?videoID={}", video_id);
     let res = client
         .get(&url)
-        .header(reqwest::header::USER_AGENT, "FlowYouTube/1.0")
+        .header(reqwest::header::USER_AGENT, "AelloYouTube/1.0")
         .send()
         .await;
 

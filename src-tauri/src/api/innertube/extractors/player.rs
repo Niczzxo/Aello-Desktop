@@ -53,10 +53,10 @@ const PLAYER_RESPONSE_CACHE_CAPACITY: usize = 12;
 /// date) before returning without them.
 
 /// Web clients mint a PO token and solve `n` before their SABR session can
-/// start, so they get the longer budget Flow for Android gives them.
+/// start, so they get the longer budget Aello for Android gives them.
 const WEB_PLAYER_TIMEOUT: Duration = Duration::from_secs(10);
 
-/// Client ladder for playback, in Flow for Android's order.
+/// Client ladder for playback, in Aello for Android's order.
 ///
 /// 1. `VISIONOS`: direct URLs with neither a PO token nor an `n` parameter, so it
 ///    reaches first frame fastest. It needs `visitorData` on the request; without
@@ -73,7 +73,7 @@ const PLAYER_CLIENT_LADDER: &[&clients::YouTubeClient] = &[
     &clients::MWEB,
     &clients::WEB,
     // Past the walls the gated clients below stop at a minute, and the source
-    // for label and kids videos the app clients refuse (Flow for Android #921, #1292).
+    // for label and kids videos the app clients refuse (Aello for Android #921, #1292).
     &clients::TV_TIZEN,
     &clients::ANDROID_VR_1_65_10,
     &clients::ANDROID_VR,
@@ -83,7 +83,7 @@ const PLAYER_CLIENT_LADDER: &[&clients::YouTubeClient] = &[
 ];
 
 /// A direct ladder that tops out below this height likely has its higher rungs
-/// served only over SABR, so the web clients are asked too (Flow for Android's
+/// served only over SABR, so the web clients are asked too (Aello for Android's
 /// `SabrRoutingPolicy`).
 const SABR_UPGRADE_FLOOR: u64 = 720;
 /// The longest a portrait or square upload runs and is still made a Short.
@@ -1124,7 +1124,7 @@ fn build_sabr_metadata(
 
 /// What one client's `player` request came back with.
 enum ClientOutcome {
-    /// Playable, with streams Flow can actually fetch.
+    /// Playable, with streams Aello can actually fetch.
     Won(PlayerAttempt),
     /// A non-OK playability status, kept so the most specific restriction can be
     /// reported once the ladder is exhausted.
@@ -1146,7 +1146,7 @@ fn has_playable_direct_streams(streaming_data: &Value, video_id: &str) -> bool {
 
 /// How long googlevideo holds a response's streams behind its pre-roll: an
 /// answer with a start ad is refused on every byte until about 0.8 of the ad's
-/// skip offset has passed, at most 8 seconds (measured by Flow for Android on
+/// skip offset has passed, at most 8 seconds (measured by Aello for Android on
 /// `TV_TIZEN`).
 fn preroll_wait(ad_placements: &Value) -> Duration {
     const MAX_MS: u64 = 8_000;
@@ -1423,7 +1423,7 @@ impl InnertubeClient {
     }
 
     /// Walk `ladder` in order, returning the first client that answers with
-    /// streams Flow can fetch.
+    /// streams Aello can fetch.
     ///
     /// The first bot wall gets one retry of that client under a freshly issued
     /// visitor identity, which every later client then inherits: a stale or
@@ -1497,7 +1497,7 @@ impl InnertubeClient {
     }
 
     /// One client's turn on the ladder: request, then judge the answer by what
-    /// Flow can actually play rather than by its status alone.
+    /// Aello can actually play rather than by its status alone.
     async fn attempt_client(
         &self,
         video_id: &str,
@@ -1506,8 +1506,8 @@ impl InnertubeClient {
     ) -> ClientOutcome {
         let web_client = client.is_web_sabr();
         // Web clients are only served with a BotGuard token on the request, bound
-        // to the video id as Flow for Android binds it. Every other family is
-        // attested by a runtime Flow cannot run, and a BotGuard token on those is
+        // to the video id as Aello for Android binds it. Every other family is
+        // attested by a runtime Aello cannot run, and a BotGuard token on those is
         // a claim googlevideo validates and refuses.
         let po_token = if web_client {
             let Some(token) = generate_po_token(video_id).await else {
@@ -1602,7 +1602,7 @@ impl InnertubeClient {
             has_playable_direct_streams(&response["streamingData"], video_id)
         };
         if !playable {
-            warn!(video_id = %video_id, client = client.name, "Player client answered OK with nothing Flow can fetch");
+            warn!(video_id = %video_id, client = client.name, "Player client answered OK with nothing Aello can fetch");
             return ClientOutcome::Unusable;
         }
         let preroll = preroll_wait(&response["adPlacements"]);
@@ -2097,7 +2097,7 @@ impl InnertubeClient {
 }
 
 // Live network smoke test for the SABR stack. Ignored by default; run with:
-//   FLOW_SABR_VIDEO=3RmOvxilbPM cargo test -p flow sabr_live_smoke -- --ignored --nocapture
+//   FLOW_SABR_VIDEO=3RmOvxilbPM cargo test -p aello sabr_live_smoke -- --ignored --nocapture
 #[cfg(test)]
 mod sabr_live_smoke {
     use super::*;
@@ -2284,7 +2284,7 @@ mod sabr_live_smoke {
 // This probe streams the WHOLE audio track under each candidate client and reports
 // which ones sustain vs. escalate to ATTESTATION_REQUIRED, so we can pick a
 // client whose attestation our (web BotGuard) PO token actually satisfies.
-//   cargo test -p flow sabr_client_probe -- --ignored --nocapture
+//   cargo test -p aello sabr_client_probe -- --ignored --nocapture
 #[cfg(test)]
 mod sabr_client_probe {
     use super::*;

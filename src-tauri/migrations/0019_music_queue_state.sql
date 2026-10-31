@@ -1,4 +1,4 @@
--- The music queue as the player last left it, so a restart reopens on the same song (Flow for
+-- The music queue as the player last left it, so a restart reopens on the same song (Aello for
 -- Android's QueuePersistence). One row. state: JSON written and read by the player (queue, index,
 -- position, source, shuffle order, radio tracks). Device-local, never synced.
 CREATE TABLE IF NOT EXISTS music_queue_state (

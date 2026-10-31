@@ -28,7 +28,7 @@ src-tauri/tauri.nightly.generated.json
 *.sln
 *.sw?
 
-FlowApp_mobile/
+AelloApp_mobile/
 notes/
 NewPipeExtractor-dev/
 InnertubeAPI/

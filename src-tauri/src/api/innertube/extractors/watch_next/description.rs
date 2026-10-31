@@ -1,6 +1,6 @@
 //! The description as the watch page shows it: the text with its links, and
 //! the structured panel under it (headline numbers, credited songs, the
-//! creator's links). Ported from Flow for Android's `VideoDescriptionPage`.
+//! creator's links). Ported from Aello for Android's `VideoDescriptionPage`.
 
 use serde_json::Value;
 
