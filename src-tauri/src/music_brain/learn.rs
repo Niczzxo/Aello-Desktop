@@ -6,7 +6,7 @@
 //! milestones — and crucially, relistening is a POSITIVE signal here, not a
 //! suppression event.
 
-use crate::flow_neuro::scoring::TimeBucket;
+use crate::aello_neuro::scoring::TimeBucket;
 
 use super::model::*;
 

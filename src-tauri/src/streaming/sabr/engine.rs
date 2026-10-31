@@ -698,7 +698,7 @@ impl SabrEngine {
     }
 
     // Mint a new PO token, bound to the video id like the one the session opened
-    // with (Flow for Android's binding), and install it for subsequent requests.
+    // with (Aello for Android's binding), and install it for subsequent requests.
     // Returns whether a token was obtained.
     async fn refresh_po_token(&self) -> bool {
         match crate::api::innertube::core::botguard::remint_po_token(&self.descriptor.video_id)

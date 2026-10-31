@@ -1,4 +1,4 @@
-//! Tauri command surface for Flow Local Sync.
+//! Tauri command surface for Aello Local Sync.
 //!
 //! Thin wrappers over [`crate::sync::session`]: they translate the frontend's requests into
 //! [`SyncManager`] calls and surface [`SyncError`] as the app's standard [`ErrorResponse`]. All

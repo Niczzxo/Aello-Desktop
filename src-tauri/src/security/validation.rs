@@ -110,7 +110,7 @@ pub fn validate_browse_id(id: &str) -> AppResult<()> {
     }
 }
 
-/// Links Flow hands to the system to open: web pages and mail only, never a
+/// Links Aello hands to the system to open: web pages and mail only, never a
 /// file, a script or another app's scheme.
 pub fn validate_external_url(url: &str) -> AppResult<()> {
     let parsed =
@@ -124,7 +124,7 @@ pub fn validate_external_url(url: &str) -> AppResult<()> {
     }
 }
 
-/// A page inside Flow that a new window opens on: an app path such as
+/// A page inside Aello that a new window opens on: an app path such as
 /// `/watch/<id>`, never a URL that could point the window somewhere else.
 pub fn validate_app_route(route: &str) -> AppResult<()> {
     let valid = route.len() <= 2048
@@ -177,7 +177,7 @@ mod tests {
             "file:///etc/passwd",
             "javascript:alert(1)",
             "smb://server/share",
-            "flow://watch?v=x",
+            "aello://watch?v=x",
             "https://",
             "not a url",
             "",

@@ -1,5 +1,5 @@
 //! `profiles_registry.json`: the device-level list of profiles. The JSON shape, field order and
-//! defaults match Flow for Android's `ProfileRegistry.kt`, so both apps read each other's files.
+//! defaults match Aello for Android's `ProfileRegistry.kt`, so both apps read each other's files.
 //! Android treats a `null` or wrong-typed field as a corrupt file, so nothing here is ever
 //! written as `null`.
 

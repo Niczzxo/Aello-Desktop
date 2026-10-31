@@ -15,15 +15,15 @@ use std::collections::{BTreeMap, BTreeSet, HashSet};
 
 use serde::{Deserialize, Serialize};
 
-use crate::flow_neuro::scoring::UserBrain;
+use crate::aello_neuro::scoring::UserBrain;
 use crate::music_brain::model::MusicBrain;
 use crate::sync::brainmap;
 use crate::sync::canonical::{
-    FlowNeuroBrainSnapshot, GCounter, Hlc, Lww, MusicBrainSnapshot, OrSet,
+    AelloNeuroBrainSnapshot, GCounter, Hlc, Lww, MusicBrainSnapshot, OrSet,
 };
-use crate::sync::merge::{MergedFlowNeuroBrain, MergedMusicBrain};
+use crate::sync::merge::{MergedAelloNeuroBrain, MergedMusicBrain};
 
-/// Settings key holding the `FlowNeuro` counters as they stood right after the last merge.
+/// Settings key holding the `AelloNeuro` counters as they stood right after the last merge.
 pub const NEURO_BASELINE_KEY: &str = "sync_neuro_baseline";
 /// Settings key holding the music counters as they stood right after the last merge.
 pub const MUSIC_BASELINE_KEY: &str = "sync_music_baseline";
@@ -122,12 +122,12 @@ fn own_count(
 }
 
 // ===========================================================================================
-// FlowNeuro
+// AelloNeuro
 // ===========================================================================================
 
 /// Fold this device's current brain into `merged`, crediting only local growth to its counters.
 pub fn fold_local_flow(
-    merged: &mut MergedFlowNeuroBrain,
+    merged: &mut MergedAelloNeuroBrain,
     ub: &UserBrain,
     device_id: &str,
     hlc: &Hlc,
@@ -195,8 +195,8 @@ pub fn fold_local_flow(
 
 /// Merge peer snapshots, keeping this device's own counter entries as they are.
 pub fn merge_incoming_flow(
-    merged: &mut MergedFlowNeuroBrain,
-    incoming: &[FlowNeuroBrainSnapshot],
+    merged: &mut MergedAelloNeuroBrain,
+    incoming: &[AelloNeuroBrainSnapshot],
     device_id: &str,
 ) {
     let docs = merged.counters.idf_total_documents.get(device_id);

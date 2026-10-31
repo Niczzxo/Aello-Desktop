@@ -1,4 +1,4 @@
-//! Home's SQLite caches, from Flow for Android's `HomeFeedCacheRepository`: the feed as last shown
+//! Home's SQLite caches, from Aello for Android's `HomeFeedCacheRepository`: the feed as last shown
 //! with each card's origin, a reserve of ranked candidates load-more serves first, each seed's
 //! related list, and the store of followed channels' uploads.
 

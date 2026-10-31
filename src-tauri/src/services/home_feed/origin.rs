@@ -1,4 +1,4 @@
-//! Why a card is on Home, shown on its "Why you see this" line, from Flow for Android's
+//! Why a card is on Home, shown on its "Why you see this" line, from Aello for Android's
 //! `HomeCardOrigin`.
 
 use std::collections::{HashMap, HashSet};

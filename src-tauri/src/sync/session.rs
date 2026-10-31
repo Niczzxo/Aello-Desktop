@@ -1,4 +1,4 @@
-//! Session orchestration for Flow Local Sync — the bridge between the `FLOW-SYNC/1` protocol
+//! Session orchestration for Aello Local Sync — the bridge between the `FLOW-SYNC/1` protocol
 //! drivers ([`protocol`](crate::sync::protocol)) and the Tauri app (DB, resident brains, UI).
 //!
 //! One [`SyncManager`] is held in Tauri state. It runs **one session at a time**: either *hosting*
@@ -8,7 +8,7 @@
 //! gate that the frontend answers with [`resolve_consent`](SyncManager::resolve_consent).
 //!
 //! Receive-side coordination: before applying we
-//! **flush** the resident FlowNeuro/Music brains to the DB so the merge folds in the freshest
+//! **flush** the resident AelloNeuro/Music brains to the DB so the merge folds in the freshest
 //! learning; after applying we **reload** them so the next debounced flush can't clobber the merge;
 //! then we emit `sync://refresh` so the Zustand-cached frontend stores (likes/playlists/settings)
 //! reload.
@@ -52,7 +52,7 @@ use crate::sync::transport;
 /// Per-collection schema version this build advertises in its capabilities.
 const CAP_SCHEMA: i32 = 1;
 /// The key spec the brain's topic keys are written in (Android `NeuroKeySpec.VERSION`).
-const NEURO_KEY_SPEC: i32 = crate::flow_neuro::keyspec::VERSION.cast_signed();
+const NEURO_KEY_SPEC: i32 = crate::aello_neuro::keyspec::VERSION.cast_signed();
 /// How long the QR / host listener stays open waiting for a peer.
 const HOST_TTL: Duration = Duration::from_secs(180);
 /// How long to wait for the TCP/WebSocket connect when joining, across every address in the code.
@@ -345,7 +345,7 @@ fn our_hello(device_id: &str, device_name: &str) -> HelloFrame {
 pub fn desktop_capabilities(key_language: &str) -> CapabilitiesFrame {
     let mut collections = BTreeMap::new();
     for c in Collection::ALL {
-        let keyed = c == Collection::FlowNeuroBrain;
+        let keyed = c == Collection::AelloNeuroBrain;
         collections.insert(
             c.key().to_string(),
             Capability {
@@ -368,7 +368,7 @@ pub fn desktop_capabilities(key_language: &str) -> CapabilitiesFrame {
 async fn our_capabilities(app: &AppHandle) -> CapabilitiesFrame {
     let key_language = match app.try_state::<RecommendationService>() {
         Some(svc) => svc.key_language().await,
-        None => crate::flow_neuro::language::system_language(),
+        None => crate::aello_neuro::language::system_language(),
     };
     desktop_capabilities(&key_language)
 }

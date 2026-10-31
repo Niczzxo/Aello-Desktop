@@ -50,7 +50,7 @@ pub enum AppError {
     #[error("Network error: {0}")]
     Network(String),
 
-    /// The server asked Flow to slow down (HTTP 429).
+    /// The server asked Aello to slow down (HTTP 429).
     #[error("Rate limited: {0}")]
     RateLimited(String),
 

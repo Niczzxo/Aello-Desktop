@@ -1,6 +1,6 @@
-//! Restarts Flow without Tauri's restart, which re-runs the original command line: a link Flow
+//! Restarts Aello without Tauri's restart, which re-runs the original command line: a link Aello
 //! was opened with would be opened again, in whatever profile comes up. Here the new process gets
-//! no arguments and the environment Flow was launched with, before this process changed it.
+//! no arguments and the environment Aello was launched with, before this process changed it.
 
 use std::ffi::OsString;
 use std::sync::OnceLock;
@@ -25,7 +25,7 @@ pub fn on_exit(env: &tauri::Env) {
     if REQUESTED.load(Ordering::SeqCst)
         && let Err(error) = spawn(env)
     {
-        tracing::error!(%error, "could not relaunch Flow");
+        tracing::error!(%error, "could not relaunch Aello");
     }
 }
 
@@ -60,7 +60,7 @@ fn child_env() -> Vec<(OsString, OsString)> {
     crate::appimage::without_bundle(launched)
 }
 
-/// `Flow.app` for a binary at `Flow.app/Contents/MacOS/flow`.
+/// `Aello.app` for a binary at `Aello.app/Contents/MacOS/flow`.
 #[cfg(target_os = "macos")]
 fn macos_bundle(binary: &std::path::Path) -> Option<&std::path::Path> {
     let macos = binary.parent()?;
@@ -77,8 +77,8 @@ mod tests {
     fn finds_the_app_bundle_only_inside_one() {
         use std::path::Path;
         assert_eq!(
-            super::macos_bundle(Path::new("/Applications/Flow.app/Contents/MacOS/flow")),
-            Some(Path::new("/Applications/Flow.app"))
+            super::macos_bundle(Path::new("/Applications/Aello.app/Contents/MacOS/flow")),
+            Some(Path::new("/Applications/Aello.app"))
         );
         assert_eq!(
             super::macos_bundle(Path::new("/tmp/target/debug/flow")),

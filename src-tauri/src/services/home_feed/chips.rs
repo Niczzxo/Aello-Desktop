@@ -1,4 +1,4 @@
-//! Home's chips, from Flow for Android's `HomeChipFeeds`: one per heavy interest, "New to you" and
+//! Home's chips, from Aello for Android's `HomeChipFeeds`: one per heavy interest, "New to you" and
 //! "Recently uploaded". Each is its own ranked list, fetched when the chip is chosen and kept for an
 //! hour or two.
 
@@ -16,7 +16,7 @@ use super::inputs::Inputs;
 use super::lanes;
 use super::load::{inputs_disliked, local_sources};
 use super::{HomeFeedService, now_ms};
-use crate::flow_neuro::interest_chips::{InterestChip, interest_queries};
+use crate::aello_neuro::interest_chips::{InterestChip, interest_queries};
 use crate::models::search::SearchVideosRequest;
 use crate::services::recommendation_service::RecommendationService;
 use crate::services::youtube_service::YoutubeService;

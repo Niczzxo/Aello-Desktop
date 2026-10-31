@@ -1,4 +1,4 @@
-//! From raw fetches to ranked lanes to the first page, from Flow for Android's `HomeFeedAssembly`.
+//! From raw fetches to ranked lanes to the first page, from Aello for Android's `HomeFeedAssembly`.
 
 use std::collections::{HashMap, HashSet};
 
@@ -10,7 +10,7 @@ use super::filters::{
 use super::inputs::Inputs;
 use super::mixer::{Blend, FeedSource, Page, blend, quotas};
 use super::seeds::{GraphCandidate, apply_graph_boost};
-use crate::flow_neuro::gates::LANE_RELEVANCE_FLOOR;
+use crate::aello_neuro::gates::LANE_RELEVANCE_FLOOR;
 use crate::services::recommendation_service::RecommendationService;
 
 pub const HOME_TARGET_SIZE: usize = 40;

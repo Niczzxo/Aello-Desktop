@@ -1,4 +1,4 @@
-//! What Flow writes into a downloaded file. Field names and the `io.github.aedev.flow`
+//! What Aello writes into a downloaded file. Field names and the `io.github.aedev.flow`
 //! freeform keys match the Android app's `DownloadTags` and `FlowTagFields`, so either
 //! app can recognise a file the other saved.
 
@@ -101,7 +101,7 @@ impl DownloadTags {
             .map(|text| truncate_utf16(text, DESCRIPTION_MAX_UTF16))
     }
 
-    /// The flat Flow key/value pairs, in Android's order. Lyrics are left out.
+    /// The flat Aello key/value pairs, in Android's order. Lyrics are left out.
     #[must_use]
     pub fn flow_fields(&self) -> Vec<(&'static str, String)> {
         let mut fields = vec![

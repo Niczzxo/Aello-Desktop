@@ -8,16 +8,16 @@
 
 use std::collections::{BTreeMap, HashMap};
 
-use crate::flow_neuro::key_migration::{link_ends, respelled, to_key_spec_2, to_key_spec_3};
-use crate::flow_neuro::keyspec::{self, KeySpec};
-use crate::flow_neuro::language::system_language;
-use crate::flow_neuro::scoring::UserBrain;
-use crate::flow_neuro::signals::make_affinity_key;
+use crate::aello_neuro::key_migration::{link_ends, respelled, to_key_spec_2, to_key_spec_3};
+use crate::aello_neuro::keyspec::{self, KeySpec};
+use crate::aello_neuro::language::system_language;
+use crate::aello_neuro::scoring::UserBrain;
+use crate::aello_neuro::signals::make_affinity_key;
 use crate::sync::brain_attrib::NeuroBaseline;
 use crate::sync::canonical::{
-    BrainVectors, ContentVectorWire, FlowNeuroBrainSnapshot, GCounter, Lww,
+    BrainVectors, ContentVectorWire, AelloNeuroBrainSnapshot, GCounter, Lww,
 };
-use crate::sync::merge::MergedFlowNeuroBrain;
+use crate::sync::merge::MergedAelloNeuroBrain;
 
 /// Reads the local brain, the merged state and the baseline by one key spec before they meet: the
 /// stored brain converts to the current key spec if no load has converted it yet, and the merged state and
@@ -25,7 +25,7 @@ use crate::sync::merge::MergedFlowNeuroBrain;
 /// reader for the peer's snapshots.
 pub fn align_flow(
     base: Option<&mut UserBrain>,
-    merged: &mut MergedFlowNeuroBrain,
+    merged: &mut MergedAelloNeuroBrain,
     baseline: Option<&mut NeuroBaseline>,
 ) -> KeyReader {
     let spec = if let Some(brain) = base {
@@ -186,7 +186,7 @@ impl KeyReader {
 
     /// A peer's snapshot, its keys read the way this brain reads them.
     #[must_use]
-    pub fn snapshot(&mut self, snap: &FlowNeuroBrainSnapshot) -> FlowNeuroBrainSnapshot {
+    pub fn snapshot(&mut self, snap: &AelloNeuroBrainSnapshot) -> AelloNeuroBrainSnapshot {
         let mut read = snap.clone();
         read.vectors = self.vectors(&snap.vectors);
         read.idf_word_frequency = self.counters(&snap.idf_word_frequency);
@@ -197,7 +197,7 @@ impl KeyReader {
 
     /// The merged state in this brain's key spec and key language, read again only when it was
     /// written in another.
-    pub fn align_merged(&mut self, merged: &mut MergedFlowNeuroBrain) {
+    pub fn align_merged(&mut self, merged: &mut MergedAelloNeuroBrain) {
         if self.is_current(merged.key_spec, &merged.key_language) {
             return;
         }

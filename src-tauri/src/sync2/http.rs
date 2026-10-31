@@ -48,7 +48,7 @@ impl Transport {
         let builder = Client::builder()
             .tls_backend_rustls()
             .redirect(redirect::Policy::none())
-            .user_agent(concat!("FlowDesktop/", env!("CARGO_PKG_VERSION")))
+            .user_agent(concat!("AelloDesktop/", env!("CARGO_PKG_VERSION")))
             .connect_timeout(Duration::from_secs(10));
         match &self.pinned {
             Some((host, address)) => builder.resolve(host, *address),

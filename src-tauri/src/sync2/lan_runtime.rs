@@ -332,7 +332,7 @@ async fn run(app: &AppHandle, daemon: Option<&ServiceDaemon>) -> Result<()> {
         local: &local,
         port,
     };
-    let instance = format!("Flow-{}", hex::encode(random_bytes::<2>()));
+    let instance = format!("Aello-{}", hex::encode(random_bytes::<2>()));
     let mut advertised: Option<(String, String)> = None;
     let browse = || daemon.and_then(|daemon| daemon.browse(SERVICE_TYPE).ok());
     let mut events = browse();

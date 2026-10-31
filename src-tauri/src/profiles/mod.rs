@@ -71,7 +71,7 @@ pub fn webview_plugin<R: tauri::Runtime>(active: &ActiveProfile) -> tauri::plugi
 
 fn webview_script(active: &ActiveProfile) -> String {
     let info = serde_json::json!({ "id": active.id, "isDefault": active.is_default });
-    format!("window.__FLOW_PROFILE__ = Object.freeze({info});")
+    format!("window.__AELLO_PROFILE__ = Object.freeze({info});")
 }
 
 /// Tauri's `app_data_dir()` rule, available before the app is built.
@@ -137,7 +137,7 @@ mod tests {
         };
         assert_eq!(
             webview_script(&study),
-            r#"window.__FLOW_PROFILE__ = Object.freeze({"id":"study","isDefault":false});"#
+            r#"window.__AELLO_PROFILE__ = Object.freeze({"id":"study","isDefault":false});"#
         );
     }
 

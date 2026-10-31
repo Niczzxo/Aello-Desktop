@@ -1,5 +1,5 @@
 //! A group kept in a `WebDAV` folder (spec/store.md): the same objects under the same names as on
-//! a Flow server, each written once. With no server to order appends, concurrent roster entries
+//! a Aello server, each written once. With no server to order appends, concurrent roster entries
 //! both stay and every device picks the same winner (spec/protocol.md, Forks).
 
 mod client;

@@ -1,4 +1,4 @@
-//! Canonical wire model for Flow Local Sync (`FLOW-SYNC/1`).
+//! Canonical wire model for Aello Local Sync (`FLOW-SYNC/1`).
 
 #![allow(
     clippy::must_use_candidate,
@@ -20,7 +20,7 @@ pub enum Collection {
     Playlists,
     Likes,
     Settings,
-    FlowNeuroBrain,
+    AelloNeuroBrain,
     MusicBrain,
     Subscriptions,
     SubscribedChannels,
@@ -33,7 +33,7 @@ impl Collection {
         Collection::Playlists,
         Collection::Likes,
         Collection::Settings,
-        Collection::FlowNeuroBrain,
+        Collection::AelloNeuroBrain,
         Collection::MusicBrain,
         Collection::Subscriptions,
         Collection::SubscribedChannels,
@@ -46,7 +46,7 @@ impl Collection {
             Collection::Playlists => "playlists",
             Collection::Likes => "likes",
             Collection::Settings => "settings",
-            Collection::FlowNeuroBrain => "flow_neuro_brain",
+            Collection::AelloNeuroBrain => "flow_neuro_brain",
             Collection::MusicBrain => "music_brain",
             Collection::Subscriptions => "subscriptions",
             Collection::SubscribedChannels => "subscribed_channels",
@@ -438,7 +438,7 @@ pub struct SettingEntry {
 }
 
 // ===========================================================================================
-// Collection: FlowNeuro brain snapshot
+// Collection: AelloNeuro brain snapshot
 // ===========================================================================================
 
 /// A topic vector plus optional scalar "dimensions" (duration/pacing/complexity/isLive on some
@@ -540,16 +540,16 @@ pub struct BrainFlags {
     pub has_completed_onboarding: bool,
 }
 
-/// One device's FlowNeuro brain contribution. The effective merged brain is derived
+/// One device's AelloNeuro brain contribution. The effective merged brain is derived
 /// deterministically across all known device snapshots.
 /// Device-local/derived fields (`consecutive_skips`, `last_persona`, `persona_stability`,
 /// `recent_query_tokens`) are intentionally **not** part of the wire model.
 ///
 /// `Deserialize` is hand-written in [`crate::sync::compat`]: it accepts this grouped layout and the
-/// flat one Flow for Android sends.
+/// flat one Aello for Android sends.
 #[derive(Debug, Clone, Default, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub struct FlowNeuroBrainSnapshot {
+pub struct AelloNeuroBrainSnapshot {
     pub schema: i32,
     pub device_id: String,
     pub hlc: Hlc,

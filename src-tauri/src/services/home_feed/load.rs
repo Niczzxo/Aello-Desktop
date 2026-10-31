@@ -1,4 +1,4 @@
-//! One Home load, from Flow for Android's `HomeViewModel.loadFlowFeed`: wave 1 (three discovery
+//! One Home load, from Aello for Android's `HomeViewModel.loadAelloFeed`: wave 1 (three discovery
 //! searches and the related lane), the first page from local stores and those, then after paint
 //! the remaining searches, saved-interest related videos, a subscription top-up, channel memory
 //! and neighbour refreshes, each slipped in below what the viewer sees.
@@ -21,7 +21,7 @@ use super::sources::{
     channel_uploads, refresh_subscription_store, rotating_window, subscription_window_size,
 };
 use super::{HomeFeedService, cache, channel_memory, kind_checks, neighbours, now_ms};
-use crate::flow_neuro::scoring::classify_persona;
+use crate::aello_neuro::scoring::classify_persona;
 use crate::services::recommendation_service::{DiscoverySurface, RecommendationService};
 use crate::services::youtube_service::YoutubeService;
 
@@ -958,7 +958,7 @@ pub(super) async fn local_sources(
     rec: &RecommendationService,
     pool: &SqlitePool,
     inputs: &Inputs,
-    brain: &crate::flow_neuro::scoring::UserBrain,
+    brain: &crate::aello_neuro::scoring::UserBrain,
     followed: &HashSet<String>,
     now: u64,
 ) -> Local {

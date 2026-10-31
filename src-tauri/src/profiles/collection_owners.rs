@@ -1,6 +1,6 @@
 //! Downloads are shared by every profile, but a download collection made from a profile's own
 //! playlist belongs to that profile. As on Android (`CollectionOwners.kt`), outside Default such
-//! a collection is stored as `<profileId>:<playlistId>`; Default keeps the bare id. Flow mints
+//! a collection is stored as `<profileId>:<playlistId>`; Default keeps the bare id. Aello mints
 //! its own playlist and album ids as `playlist-<ms>`, `album-<ms>` and `watch-later`; YouTube
 //! ids never look like that, so they stay bare and visible to every profile.
 

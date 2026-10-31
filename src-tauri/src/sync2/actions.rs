@@ -234,7 +234,7 @@ pub async fn devices(app: &AppHandle) -> Result<Vec<LinkedDevice>> {
         .collect())
 }
 
-/// Starts a group on a fresh Flow server, after resetting it when `reset_server` (which deletes the
+/// Starts a group on a fresh Aello server, after resetting it when `reset_server` (which deletes the
 /// group it holds for every device), and returns the recovery words to show once.
 pub async fn create(
     app: &AppHandle,
@@ -322,7 +322,7 @@ pub async fn create_on_lan(app: &AppHandle) -> Result<String> {
     Ok(words)
 }
 
-/// Restores the group from its recovery words, on a Flow server or, with `login`, in a `WebDAV`
+/// Restores the group from its recovery words, on a Aello server or, with `login`, in a `WebDAV`
 /// folder, and returns the new words to show once.
 pub async fn restore(
     app: &AppHandle,

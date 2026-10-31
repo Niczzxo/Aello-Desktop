@@ -43,7 +43,7 @@ pub struct PipSession {
     pub settings: serde_json::Value,
     pub stream: Option<serde_json::Value>,
     pub silent_until_takeover: bool,
-    /// The Flow window the video came from, which gets it back. Set here from
+    /// The Aello window the video came from, which gets it back. Set here from
     /// the calling window, never taken from the frontend.
     #[serde(default)]
     pub source_window: Option<String>,
@@ -146,7 +146,7 @@ pub async fn open_pip_window<R: Runtime>(
 
     let mut builder =
         WebviewWindowBuilder::new(&app, PIP_WINDOW_LABEL, WebviewUrl::App("index.html".into()))
-            .title("Flow - Mini player")
+            .title("Aello - Mini player")
             .inner_size(DEFAULT_WIDTH, DEFAULT_HEIGHT)
             .min_inner_size(MIN_WIDTH, MIN_HEIGHT)
             .resizable(true)
@@ -237,7 +237,7 @@ pub fn set_pip_always_on_top<R: Runtime>(
 }
 
 /// Makes sure the pop-out is on screen once its player has mounted. It
-/// deliberately does not take focus: this also fires when Flow was minimized to
+/// deliberately does not take focus: this also fires when Aello was minimized to
 /// keep watching, and stealing the keyboard from whatever the user switched to
 /// would be worse than not being frontmost. Always-on-top keeps it visible.
 #[tauri::command]

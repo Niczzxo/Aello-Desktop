@@ -1,5 +1,5 @@
 //! Videos that failed to play for a reason that belongs to the video, so feeds stop offering them.
-//! Ported from Flow for Android's `unplayable_video_ids`.
+//! Ported from Aello for Android's `unplayable_video_ids`.
 
 use std::collections::HashSet;
 

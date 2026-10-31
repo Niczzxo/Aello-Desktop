@@ -1,4 +1,4 @@
-//! Channels the viewer keeps watching without subscribing, and their latest uploads, from Flow
+//! Channels the viewer keeps watching without subscribing, and their latest uploads, from Aello
 //! for Android's `ChannelMemory`. Engagement comes from watch history and likes; the uploads and
 //! the viewer's verdicts are kept in `home_channel_memory`.
 

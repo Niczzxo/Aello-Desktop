@@ -671,7 +671,7 @@ mod tests {
     async fn keys_in(dir: &Path) -> Vec<String> {
         let pool = SqlitePool::connect(&format!(
             "sqlite://{}",
-            dir.join("flow-desktop.sqlite").display()
+            dir.join("aello-desktop.sqlite").display()
         ))
         .await
         .unwrap();
@@ -792,13 +792,13 @@ mod tests {
             .create(&pool, request("Study", CopyParts::default()))
             .await
             .unwrap();
-        assert!(!service.hold_link("flow://watch?v=a"));
+        assert!(!service.hold_link("aello://watch?v=a"));
         service.prepare_switch(&study.id, false).unwrap();
-        assert!(service.hold_link("flow://watch?v=a"));
-        assert!(service.hold_link("flow://watch?v=b"));
+        assert!(service.hold_link("aello://watch?v=a"));
+        assert!(service.hold_link("aello://watch?v=b"));
         assert_eq!(
             service.take_held_link().as_deref(),
-            Some("flow://watch?v=b")
+            Some("aello://watch?v=b")
         );
         assert_eq!(service.take_held_link(), None);
         std::fs::remove_dir_all(dir).unwrap();
@@ -875,7 +875,7 @@ mod tests {
     async fn dump(dir: &Path) -> String {
         let pool = SqlitePool::connect(&format!(
             "sqlite://{}",
-            dir.join("flow-desktop.sqlite").display()
+            dir.join("aello-desktop.sqlite").display()
         ))
         .await
         .unwrap();
@@ -1067,10 +1067,10 @@ mod tests {
         assert!(
             dir.join("profiles")
                 .join(&b.id)
-                .join("flow-desktop.sqlite")
+                .join("aello-desktop.sqlite")
                 .exists()
         );
-        assert!(dir.join("flow-desktop.sqlite").exists());
+        assert!(dir.join("aello-desktop.sqlite").exists());
         assert_eq!(service.list().unwrap().profiles.len(), 2);
         std::fs::remove_dir_all(dir).unwrap();
     }

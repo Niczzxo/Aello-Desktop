@@ -3,17 +3,17 @@
 
 use std::collections::{HashMap, HashSet};
 
-use crate::flow_neuro::categories::cluster_category;
-use crate::flow_neuro::clusters::TopicCluster;
-use crate::flow_neuro::clusters::{ClusterInputs, build_clusters};
-use crate::flow_neuro::co_watch::RelatedChannel;
-use crate::flow_neuro::discovery::exploration_queries;
-use crate::flow_neuro::features::pick_keys;
-use crate::flow_neuro::interest_chips::{InterestChip, chips, groups, stable};
-use crate::flow_neuro::rank::{about, clusters_of, share_by_interest};
-use crate::flow_neuro::scoring::CHANNEL_SUPPRESSION_DAYS;
-use crate::flow_neuro::scoring::classify_persona;
-use crate::flow_neuro::specificity::specificity;
+use crate::aello_neuro::categories::cluster_category;
+use crate::aello_neuro::clusters::TopicCluster;
+use crate::aello_neuro::clusters::{ClusterInputs, build_clusters};
+use crate::aello_neuro::co_watch::RelatedChannel;
+use crate::aello_neuro::discovery::exploration_queries;
+use crate::aello_neuro::features::pick_keys;
+use crate::aello_neuro::interest_chips::{InterestChip, chips, groups, stable};
+use crate::aello_neuro::rank::{about, clusters_of, share_by_interest};
+use crate::aello_neuro::scoring::CHANNEL_SUPPRESSION_DAYS;
+use crate::aello_neuro::scoring::classify_persona;
+use crate::aello_neuro::specificity::specificity;
 use crate::models::video::VideoSummary;
 use crate::services::home_feed::card::Card;
 use crate::services::home_feed::neighbours::{Neighbour, neighbours};
@@ -132,7 +132,7 @@ impl RecommendationService {
     }
 
     /// Records `related`, the list beside a video of `channel_id` the viewer watched, liked or
-    /// follows, as a co-watch source. Feed seeds teach nothing; Deep Flow learns nothing.
+    /// follows, as a co-watch source. Feed seeds teach nothing; Deep Aello learns nothing.
     pub async fn note_related_of(&self, video_id: &str, channel_id: &str, related: &[Card]) {
         if channel_id.is_empty() || self.learning_paused().await {
             return;
@@ -193,7 +193,7 @@ impl RecommendationService {
         brain
             .feed_history
             .iter()
-            .filter(|(_, entry)| crate::flow_neuro::gates::is_recently_seen(Some(entry), now_ms))
+            .filter(|(_, entry)| crate::aello_neuro::gates::is_recently_seen(Some(entry), now_ms))
             .map(|(id, _)| id.clone())
             .collect()
     }

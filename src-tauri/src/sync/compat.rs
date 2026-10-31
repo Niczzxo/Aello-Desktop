@@ -2,7 +2,7 @@
 //!
 //! [`crate::sync::canonical`] defines what this build **emits** — the shapes fixed by `FLOW-SYNC/1`
 //! (`notes/sync/sync_wire_format_addendum.md` §6.5). What we **accept** has to be wider, because
-//! Flow for Android through v2.2.0 ships the `FlowNeuro` brain in a flatter envelope and those builds
+//! Aello for Android through v2.2.0 ships the `AelloNeuro` brain in a flatter envelope and those builds
 //! are already on users' phones. Every impl here still accepts the canonical shape unchanged and
 //! additionally understands the Android one. Serialization is untouched, so nothing in this module
 //! can change the bytes we put on the wire or the payload hashes computed over them.
@@ -30,7 +30,7 @@ use serde_json::{Map, Value};
 use crate::sync::brainmap;
 use crate::sync::canonical::{
     BrainCounters, BrainFlags, BrainLwwMaps, BrainPerVideo, BrainSets, BrainVectors,
-    ContentVectorWire, FlowNeuroBrainSnapshot, GCounter, Hlc, Lww, OrSet,
+    ContentVectorWire, AelloNeuroBrainSnapshot, GCounter, Hlc, Lww, OrSet,
 };
 
 // ---- shared helpers ---------------------------------------------------------------------------
@@ -222,17 +222,17 @@ impl<'de> Deserialize<'de> for BrainVectors {
     }
 }
 
-// ---- FlowNeuro brain snapshot -----------------------------------------------------------------
+// ---- AelloNeuro brain snapshot -----------------------------------------------------------------
 
-impl<'de> Deserialize<'de> for FlowNeuroBrainSnapshot {
+impl<'de> Deserialize<'de> for AelloNeuroBrainSnapshot {
     fn deserialize<D: Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
-        const CTX: &str = "flowNeuroBrain";
+        const CTX: &str = "aelloNeuroBrain";
         let value = Value::deserialize(d)?;
         let obj = value
             .as_object()
             .ok_or_else(|| D::Error::custom("flow_neuro_brain record must be a JSON object"))?;
 
-        let mut snapshot = FlowNeuroBrainSnapshot {
+        let mut snapshot = AelloNeuroBrainSnapshot {
             schema: field(obj, CTX, "schema")?,
             device_id: field(obj, CTX, "deviceId")?,
             hlc: field(obj, CTX, "hlc")?,
@@ -281,7 +281,7 @@ impl<'de> Deserialize<'de> for FlowNeuroBrainSnapshot {
 /// A peer that sends bare values leaves them at `Hlc::default()`, the lowest possible stamp — which
 /// would lose to *any* local write during merge and, worse, lose to an old remove tombstone, so a
 /// channel the user just blocked on the phone would silently unblock here.
-fn stamp_missing_hlcs(snapshot: &mut FlowNeuroBrainSnapshot) {
+fn stamp_missing_hlcs(snapshot: &mut AelloNeuroBrainSnapshot) {
     let hlc = snapshot.hlc.clone();
     if hlc == Hlc::default() {
         return;

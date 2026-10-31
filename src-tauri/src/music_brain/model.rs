@@ -1,6 +1,6 @@
 //! The dedicated, entity-based music taste model.
 //!
-//! This is deliberately **separate** from `flow_neuro`'s `UserBrain`. Music is an
+//! This is deliberately **separate** from `aello_neuro`'s `UserBrain`. Music is an
 //! entity-centric, repeat-dominated problem; modelling it as the video engine's
 //! bag-of-title-tokens vector is a category error (see
 //! `notes/music/music_recommendation_analysis.md`). The primitives here are
@@ -10,7 +10,7 @@ use std::collections::{HashMap, HashSet};
 
 use serde::{Deserialize, Serialize};
 
-use crate::flow_neuro::scoring::TimeBucket;
+use crate::aello_neuro::scoring::TimeBucket;
 
 pub const MUSIC_SCHEMA_VERSION: i32 = 1;
 

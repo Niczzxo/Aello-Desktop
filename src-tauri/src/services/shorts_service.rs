@@ -164,7 +164,7 @@ async fn advance(
 /// A reel's like count from its overlay text ("12K", "1,234 likes"): the number and its suffix
 /// only, since a word like "likes" would read as a thousands mark.
 fn like_count_of(text: &str) -> u64 {
-    crate::flow_neuro::rank::view_count_of(text.split_whitespace().next())
+    crate::aello_neuro::rank::view_count_of(text.split_whitespace().next())
 }
 
 /// Builds and serves the personalised Shorts feed. Candidates come from three

@@ -15,7 +15,7 @@ use std::collections::HashMap;
 use chrono::{Datelike, Local, TimeZone, Timelike, Weekday};
 use serde::Serialize;
 
-use crate::flow_neuro::scoring::TimeBucket;
+use crate::aello_neuro::scoring::TimeBucket;
 
 use super::model::MusicBrain;
 use super::rank::heavy_rotation;

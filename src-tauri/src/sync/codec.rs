@@ -1,4 +1,4 @@
-//! Framing, compression, and hashing for Flow Local Sync.
+//! Framing, compression, and hashing for Aello Local Sync.
 //!
 //! On-wire layout of one WebSocket binary message:
 //! ```text
@@ -171,7 +171,7 @@ pub fn encode_chunk(header: &ChunkHeader, ndjson: &[u8]) -> Vec<u8> {
 /// Decode a CHUNK plaintext body into `(header, ndjson_slice)`.
 ///
 /// A frame with **no** newline is read as a header-only chunk (empty body) rather than rejected:
-/// Flow for Android through v2.2.0 builds an empty collection's chunk as `StringBuilder(header)`
+/// Aello for Android through v2.2.0 builds an empty collection's chunk as `StringBuilder(header)`
 /// and only appends `'\n'` *before each record*, so a zero-record collection arrives as bare header
 /// JSON. Rejecting it killed every phone→desktop sync where any selected collection was empty
 /// (issues #30/#49). `encode_chunk` still always writes the separator, so what we emit stays

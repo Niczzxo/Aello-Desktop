@@ -6,11 +6,11 @@
 //! manifest that drops a language or mislabels the original degrades silently:
 //! playback keeps working, just with no way to reach the other languages.
 
-use flow_desktop_lib::api::innertube::extractors::player::{
+use aello_desktop_lib::api::innertube::extractors::player::{
     collect_audio_tracks, select_playable_audio_tracks,
 };
-use flow_desktop_lib::commands::youtube::build_synthetic_dash_manifest;
-use flow_desktop_lib::models::video::{StreamInfo, StreamVariant};
+use aello_desktop_lib::commands::youtube::build_synthetic_dash_manifest;
+use aello_desktop_lib::models::video::{StreamInfo, StreamVariant};
 use serde_json::Value;
 
 fn fixture(name: &str) -> Value {

@@ -3,7 +3,7 @@
 use serde::{Deserialize, Serialize};
 
 use crate::api::innertube::json::age::relative_age_ms;
-use crate::flow_neuro::scoring::is_known_short;
+use crate::aello_neuro::scoring::is_known_short;
 use crate::models::video::VideoSummary;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

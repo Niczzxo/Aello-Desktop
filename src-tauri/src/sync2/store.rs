@@ -1,4 +1,4 @@
-//! What the sync engine needs from a store: the Flow server, what devices hold on the LAN, and a
+//! What the sync engine needs from a store: the Aello server, what devices hold on the LAN, and a
 //! `WebDAV` folder.
 
 use std::collections::BTreeMap;

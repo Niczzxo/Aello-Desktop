@@ -1,4 +1,4 @@
-//! Payload cryptography for Flow Local Sync (`FLOW-SYNC/1`).
+//! Payload cryptography for Aello Local Sync (`FLOW-SYNC/1`).
 //!
 //! Security model: the WebSocket
 //! transport is plaintext; the **payload** is end-to-end encrypted with AES-256-GCM. The master

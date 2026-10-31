@@ -1,6 +1,6 @@
-//! The user's theme file: a `custom.css` in Flow's config folder that desktop
+//! The user's theme file: a `custom.css` in Aello's config folder that desktop
 //! shells and template tools rewrite whenever the system colours change (#81).
-//! Flow only reads it; the frontend turns its `--flow-*` colours into a theme.
+//! Aello only reads it; the frontend turns its `--flow-*` colours into a theme.
 
 use serde::Serialize;
 use std::io::ErrorKind;
@@ -12,15 +12,15 @@ pub const FILE_NAME: &str = "custom.css";
 /// Far more than any palette needs; a larger file is almost surely the wrong file.
 pub const MAX_BYTES: u64 = 256 * 1024;
 
-/// What Flow writes when the user asks for a starting point. It doubles as the
+/// What Aello writes when the user asks for a starting point. It doubles as the
 /// documentation, since the people who want this file are editing it by hand or
 /// turning it into a template.
-pub const STARTER: &str = r"/* Flow theme file. Flow reloads this file whenever it changes.
+pub const STARTER: &str = r"/* Aello theme file. Aello reloads this file whenever it changes.
    Select it in Settings > Appearance > Theme file.
 
    Colours: any CSS colour works (hex, rgb(), hsl(), oklch(), color-mix()).
-   Leave a line out to keep Flow's default for it.
-   --flow-scheme picks light or dark controls; without it Flow decides
+   Leave a line out to keep Aello's default for it.
+   --flow-scheme picks light or dark controls; without it Aello decides
    from how bright --flow-background is.
    Remote url(), @import and @font-face are ignored. */
 :root {
@@ -35,7 +35,7 @@ pub const STARTER: &str = r"/* Flow theme file. Flow reloads this file whenever 
   --flow-outline: #343434;
   --flow-error: #ef5350;
 
-  /* Optional: Flow mixes these from the colours above when they are left out.
+  /* Optional: Aello mixes these from the colours above when they are left out.
   --flow-surface-container-low: #171717;
   --flow-surface-container: #1d1d1d;
   --flow-surface-container-high: #242424;
@@ -43,8 +43,8 @@ pub const STARTER: &str = r"/* Flow theme file. Flow reloads this file whenever 
   */
 }
 
-/* Rules below this line style Flow directly. They can stop matching
-   when Flow's layout changes in an update. */
+/* Rules below this line style Aello directly. They can stop matching
+   when Aello's layout changes in an update. */
 ";
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
@@ -120,7 +120,7 @@ pub fn fingerprint(path: &Path) -> Fingerprint {
 
 /// Decides when a polled file has a new version worth sending: once it has
 /// changed since the last send and held still for one poll, so a tool that is
-/// still writing never hands Flow half a file.
+/// still writing never hands Aello half a file.
 pub struct ChangeGate {
     sent: Fingerprint,
     seen: Fingerprint,

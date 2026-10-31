@@ -1,4 +1,4 @@
-//! What Your taste shows, from Flow for Android's `TasteTopics` and `TasteViewModel`: the viewer's
+//! What Your taste shows, from Aello for Android's `TasteTopics` and `TasteViewModel`: the viewer's
 //! picks with how often they watched each, the interests learned in the groups the engine reads
 //! them in, and the hidden channels by name.
 
@@ -7,11 +7,11 @@ use std::collections::{HashMap, HashSet};
 use serde::Serialize;
 
 use crate::db::watch_history::channel_names;
-use crate::flow_neuro::display_forms::label;
-use crate::flow_neuro::features::pick_keys;
-use crate::flow_neuro::rank::clusters_of;
-use crate::flow_neuro::scoring::{UserBrain, strip_domain_tag};
-use crate::flow_neuro::specificity::specificity;
+use crate::aello_neuro::display_forms::label;
+use crate::aello_neuro::features::pick_keys;
+use crate::aello_neuro::rank::clusters_of;
+use crate::aello_neuro::scoring::{UserBrain, strip_domain_tag};
+use crate::aello_neuro::specificity::specificity;
 use crate::services::blocked_channel_names;
 use crate::services::home_feed::cache;
 use crate::services::home_feed::channel_memory;
@@ -105,13 +105,13 @@ fn picks(brain: &UserBrain) -> Vec<TasteTopic> {
 /// words of one subject: "Pixel · Android · Camera" says more than "Pixel". Picks stay out.
 fn groups(
     brain: &UserBrain,
-    clusters: &[crate::flow_neuro::clusters::TopicCluster],
+    clusters: &[crate::aello_neuro::clusters::TopicCluster],
     specific: &dyn Fn(&str) -> f64,
 ) -> Vec<TasteGroup> {
     let picked = pick_keys(brain);
     let blocked: HashSet<&String> = brain.blocked_topics.iter().collect();
     let weights = &brain.global_vector.topics;
-    let mut kept: Vec<(&crate::flow_neuro::clusters::TopicCluster, Vec<&String>)> = clusters
+    let mut kept: Vec<(&crate::aello_neuro::clusters::TopicCluster, Vec<&String>)> = clusters
         .iter()
         .filter_map(|cluster| {
             let mut members: Vec<&String> = cluster
@@ -259,7 +259,7 @@ impl RecommendationService {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::flow_neuro::clusters::TopicCluster;
+    use crate::aello_neuro::clusters::TopicCluster;
 
     #[test]
     fn a_group_is_named_by_its_three_strongest_specific_words() {

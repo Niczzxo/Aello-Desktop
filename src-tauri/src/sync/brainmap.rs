@@ -1,10 +1,10 @@
 //! Converters between the engine's native brain structs and the canonical sync snapshots.
 //!
-//! FlowNeuro (`flow_neuro::scoring::UserBrain`) and Music (`music_brain::model::MusicBrain`) are
+//! AelloNeuro (`aello_neuro::scoring::UserBrain`) and Music (`music_brain::model::MusicBrain`) are
 //! the engines' in-memory/persisted state. For sync we:
 //!  * project the local brain into a per-device canonical **snapshot** (counters become
 //!    single-device G-Counters, sets become OR-Sets stamped with the given HLC, etc.), and
-//!  * derive an **effective** brain back from the merged CRDT state (`MergedFlowNeuroBrain` /
+//!  * derive an **effective** brain back from the merged CRDT state (`MergedAelloNeuroBrain` /
 //!    `MergedMusicBrain`), preserving the local device's non-synced/derived fields from a `base`.
 //!
 //! Device-local/derived fields that are intentionally NOT synced (and are taken from `base` when
@@ -16,17 +16,17 @@
 
 use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
 
-use crate::flow_neuro::scoring::{
+use crate::aello_neuro::scoring::{
     ChannelStrike, ContentVector, FeedEntry, RejectionSignal, TimeBucket, TopicEvidence, UserBrain,
 };
 use crate::music_brain::model::{Affinity, MusicBrain, TrackMeta};
 use crate::sync::canonical::{
     AffinityWire, BrainCounters, BrainFlags, BrainLwwMaps, BrainPerVideo, BrainSets, BrainVectors,
-    ChannelStrikeWire, ContentVectorWire, FeedEntryWire, FlowNeuroBrainSnapshot, GCounter, Hlc,
+    ChannelStrikeWire, ContentVectorWire, FeedEntryWire, AelloNeuroBrainSnapshot, GCounter, Hlc,
     Lww, MusicBrainSnapshot, OrSet, RejectionSignalWire, TopicEvidenceWire, TrackMetaWire,
 };
 use crate::sync::merge::DeviceVectors;
-use crate::sync::merge::{MergedFlowNeuroBrain, MergedMusicBrain};
+use crate::sync::merge::{MergedAelloNeuroBrain, MergedMusicBrain};
 
 // ---- small generic helpers -------------------------------------------------------------------
 
@@ -106,11 +106,11 @@ fn wire_to_cv(w: &ContentVectorWire, base: &ContentVector) -> ContentVector {
 }
 
 // ===========================================================================================
-// FlowNeuro
+// AelloNeuro
 // ===========================================================================================
 
 /// Project the local `UserBrain` into this device's canonical snapshot, stamped with `hlc`.
-pub fn userbrain_to_snapshot(ub: &UserBrain, device_id: &str, hlc: Hlc) -> FlowNeuroBrainSnapshot {
+pub fn userbrain_to_snapshot(ub: &UserBrain, device_id: &str, hlc: Hlc) -> AelloNeuroBrainSnapshot {
     let or_set = |items: &HashSet<String>| {
         let mut s = OrSet::default();
         for k in items {
@@ -220,7 +220,7 @@ pub fn userbrain_to_snapshot(ub: &UserBrain, device_id: &str, hlc: Hlc) -> FlowN
         })
         .collect();
 
-    FlowNeuroBrainSnapshot {
+    AelloNeuroBrainSnapshot {
         schema: ub.schema_version,
         device_id: device_id.to_string(),
         hlc: hlc.clone(),
@@ -264,7 +264,7 @@ pub fn userbrain_to_snapshot(ub: &UserBrain, device_id: &str, hlc: Hlc) -> FlowN
 
 /// Derive the effective `UserBrain` for the engine from the merged CRDT state, preserving the
 /// local device's non-synced fields from `base`.
-pub fn merged_flow_to_userbrain(m: &MergedFlowNeuroBrain, base: &UserBrain) -> UserBrain {
+pub fn merged_flow_to_userbrain(m: &MergedAelloNeuroBrain, base: &UserBrain) -> UserBrain {
     let ev = m.effective_vectors();
 
     let time_vectors = ev
@@ -407,7 +407,7 @@ pub fn merged_flow_to_userbrain(m: &MergedFlowNeuroBrain, base: &UserBrain) -> U
     }
 }
 
-/// Decompose the merged FlowNeuro CRDT state back into the per-device snapshots that produced it,
+/// Decompose the merged AelloNeuro CRDT state back into the per-device snapshots that produced it,
 /// so a sender can ship the *whole* converged brain (its own contribution **plus** anything it
 /// previously learned from other devices) and a 3rd device converges transitively.
 ///
@@ -416,11 +416,11 @@ pub fn merged_flow_to_userbrain(m: &MergedFlowNeuroBrain, base: &UserBrain) -> U
 /// the **first** snapshot only — folding them once is enough because every merge is idempotent —
 /// while each remaining snapshot carries just that device's learned vectors plus its own
 /// experience weight (so the receiver's effective-vector blend keeps the right per-device weight).
-pub fn merged_flow_to_snapshots(m: &MergedFlowNeuroBrain) -> Vec<FlowNeuroBrainSnapshot> {
+pub fn merged_flow_to_snapshots(m: &MergedAelloNeuroBrain) -> Vec<AelloNeuroBrainSnapshot> {
     let mut out = Vec::with_capacity(m.device_vectors.len());
     for (i, (device_id, dv)) in m.device_vectors.iter().enumerate() {
         let snap = if i == 0 {
-            FlowNeuroBrainSnapshot {
+            AelloNeuroBrainSnapshot {
                 schema: m.schema,
                 device_id: device_id.clone(),
                 hlc: dv.hlc.clone(),
@@ -433,7 +433,7 @@ pub fn merged_flow_to_snapshots(m: &MergedFlowNeuroBrain) -> Vec<FlowNeuroBrainS
                 flags: m.flags.clone(),
             }
         } else {
-            FlowNeuroBrainSnapshot {
+            AelloNeuroBrainSnapshot {
                 schema: m.schema,
                 device_id: device_id.clone(),
                 hlc: dv.hlc.clone(),
@@ -534,7 +534,7 @@ pub fn musicbrain_to_snapshot(mb: &MusicBrain, device_id: &str, hlc: Hlc) -> Mus
     }
 }
 
-/// Project the merged Music CRDT state into a single snapshot for sending. Unlike the FlowNeuro
+/// Project the merged Music CRDT state into a single snapshot for sending. Unlike the AelloNeuro
 /// brain, the music brain keeps no per-device vector blend — every field is already a CRDT
 /// (G-Counters carry per-device sub-counts, scalar maps are max-registers, sets are OR-Sets), so
 /// one snapshot carrying the full merged state converges idempotently on the receiver. `device_id`
@@ -637,7 +637,7 @@ pub fn merged_music_to_musicbrain(m: &MergedMusicBrain, base: &MusicBrain) -> Mu
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::sync::merge::MergedFlowNeuroBrain;
+    use crate::sync::merge::MergedAelloNeuroBrain;
 
     #[test]
     fn the_shorts_taste_travels_through_sync_and_the_recent_taste_stays_home() {
@@ -647,7 +647,7 @@ mod tests {
         let snapshot = userbrain_to_snapshot(&phone, "phone", Hlc::new(1, 0, "phone"));
         assert!(snapshot.vectors.shorts_vector.is_some());
 
-        let mut merged = MergedFlowNeuroBrain::default();
+        let mut merged = MergedAelloNeuroBrain::default();
         merged.merge_snapshot(&snapshot);
         let desktop = merged_flow_to_userbrain(&merged, &UserBrain::default());
         assert!((desktop.shorts_vector.topics["skate"] - 0.4).abs() < 1e-9);

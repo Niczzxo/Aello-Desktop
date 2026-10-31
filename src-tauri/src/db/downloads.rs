@@ -19,7 +19,7 @@ pub struct DownloadRecord {
     pub loudness_db: Option<f64>,
     #[serde(default)]
     pub created_at: String,
-    /// Flow's private copy of the cover, in app data.
+    /// Aello's private copy of the cover, in app data.
     #[serde(default)]
     pub cover_path: Option<String>,
     /// The credited artists as a JSON array of names.

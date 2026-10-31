@@ -8,8 +8,8 @@ use serde::Deserialize;
 use crate::db::library;
 use crate::db::watch_history::get_watch_history;
 use crate::errors::AppResult;
-use crate::flow_neuro::scoring::{CHANNEL_SUPPRESSION_DAYS, is_known_short};
-use crate::flow_neuro::shorts::{
+use crate::aello_neuro::scoring::{CHANNEL_SUPPRESSION_DAYS, is_known_short};
+use crate::aello_neuro::shorts::{
     ShortSeed, ShortSeedSource, classify, classify_abandon, mark_seen, select_seeds,
 };
 use crate::services::recommendation_service::RecommendationService;
@@ -32,7 +32,7 @@ pub struct ShortView {
 }
 
 impl RecommendationService {
-    /// Learns from one viewing of a Short, at the Shorts rate, as Flow for Android classifies it.
+    /// Learns from one viewing of a Short, at the Shorts rate, as Aello for Android classifies it.
     pub async fn report_short_view(&self, view: ShortView) -> AppResult<()> {
         let signal = if view.completed {
             Some(classify(view.duration_ms, view.duration_ms))

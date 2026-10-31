@@ -9,7 +9,7 @@
 
 use std::collections::VecDeque;
 
-use crate::flow_neuro::scoring::TimeBucket;
+use crate::aello_neuro::scoring::TimeBucket;
 
 use super::model::{DEFAULT_DISCOVERY_APPETITE, MusicBrain, pair_key};
 use super::profile::bucket_for;

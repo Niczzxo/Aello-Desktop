@@ -1,4 +1,4 @@
-//! Resident `MusicBrain` store. Mirrors `flow_neuro::brain_store::BrainStore`:
+//! Resident `MusicBrain` store. Mirrors `aello_neuro::brain_store::BrainStore`:
 //! one in-memory brain under an `RwLock`, writes coalesced to disk by a debounced
 //! background flush. Adds ephemeral, non-persisted session state to dedup the
 //! per-second playback firehose into one counted listen per play.

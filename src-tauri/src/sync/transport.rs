@@ -1,4 +1,4 @@
-//! WebSocket transport for Flow Local Sync.
+//! WebSocket transport for Aello Local Sync.
 //!
 //! The transport is **plaintext `ws://`** — confidentiality and integrity come from the AES-GCM
 //! payload encryption (`crypto.rs`), which sidesteps the impossibility of trusted TLS certs for

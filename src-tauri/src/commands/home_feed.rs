@@ -3,7 +3,7 @@
 
 use tauri::{AppHandle, State};
 
-use crate::flow_neuro::interest_chips::InterestChip;
+use crate::aello_neuro::interest_chips::InterestChip;
 use crate::services::home_feed::chips::ChipFeed;
 use crate::services::home_feed::{HomeFeedService, HomeSnapshot};
 

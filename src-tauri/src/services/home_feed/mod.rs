@@ -1,4 +1,4 @@
-//! Home's feed, built in the backend as Flow for Android builds it (`HomeViewModel` and the
+//! Home's feed, built in the backend as Aello for Android builds it (`HomeViewModel` and the
 //! `HomeFeed*` files): a first page mixed from subscriptions, related videos, discovery searches,
 //! channels the viewer keeps watching and neighbour channels; late arrivals slipped in below the
 //! viewport; and load-more pages that end, retry or report failure. The page renders snapshots:
@@ -114,7 +114,7 @@ struct Inner {
     /// Followed channels asked for a missing length lately: channel id to when.
     priority_asked: Mutex<HashMap<String, u64>>,
     /// The interest chips last shown, so a chip's key finds its topics.
-    chips: Mutex<Vec<crate::flow_neuro::interest_chips::InterestChip>>,
+    chips: Mutex<Vec<crate::aello_neuro::interest_chips::InterestChip>>,
     /// Each chip's videos with when they were fetched.
     chip_results: Mutex<HashMap<String, (Vec<Card>, u64)>>,
 }

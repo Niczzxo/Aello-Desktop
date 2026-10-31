@@ -11,7 +11,7 @@ pub mod commands;
 mod config;
 mod db;
 mod errors;
-pub mod flow_neuro;
+pub mod aello_neuro;
 #[cfg(any(target_os = "linux", test))]
 mod linux_startup;
 #[cfg(target_os = "macos")]
@@ -112,7 +112,7 @@ use commands::profiles::{
 use commands::recommendation::{
     add_blocked_topic, add_preferred_topic, block_channel, bootstrap_from_history,
     bootstrap_from_subscriptions, clear_channel_memory, complete_onboarding, end_watch_session,
-    forget_remembered_channel, get_brain_snapshot, get_flow_persona, get_onboarding_status,
+    forget_remembered_channel, get_brain_snapshot, get_aello_persona, get_onboarding_status,
     get_recommendation_events, get_taste_overview, import_brain, learn_from_search,
     log_interaction, mark_not_interested, note_subscription, observe_channel_uploads,
     record_feed_impressions, record_seen_videos, remove_preferred_topic, report_watch_progress,
@@ -173,7 +173,7 @@ fn init_tracing(
         .and_then(|_| {
             tracing_appender::rolling::RollingFileAppender::builder()
                 .rotation(tracing_appender::rolling::Rotation::DAILY)
-                .filename_prefix("flow")
+                .filename_prefix("aello")
                 .filename_suffix("log")
                 .max_log_files(7)
                 .build(&log_dir)
@@ -192,7 +192,7 @@ fn init_tracing(
             (Some(layer), Some(guard))
         }
         Err(error) => {
-            eprintln!("flow: file logging unavailable, using stdout only: {error}");
+            eprintln!("aello: file logging unavailable, using stdout only: {error}");
             (None, None)
         }
     };
@@ -243,13 +243,13 @@ pub fn run() {
 
     let mut builder = tauri::Builder::default();
 
-    // Single-instance MUST be the first plugin. A second `flow://` launch is
+    // Single-instance MUST be the first plugin. A second `aello://` launch is
     // forwarded to this running window (via the "deep-link" feature) instead of
     // spawning a duplicate; we just raise the window here.
     #[cfg(desktop)]
     {
         builder = builder.plugin(tauri_plugin_single_instance::init(|app, argv, _cwd| {
-            // The desktop file's "New window" action launches Flow again with this flag.
+            // The desktop file's "New window" action launches Aello again with this flag.
             if argv.iter().any(|arg| arg == "--new-window") {
                 let handle = app.clone();
                 tauri::async_runtime::spawn(async move {
@@ -375,12 +375,12 @@ pub fn run() {
                 api::innertube::core::botguard::set_resource_dir(dir);
             }
 
-            // Register Flow's AppUserModelID + logo so Windows attributes toasts to
-            // "Flow" instead of the launching shell / PowerShell.
+            // Register Aello's AppUserModelID + logo so Windows attributes toasts to
+            // "Aello" instead of the launching shell / PowerShell.
             #[cfg(windows)]
             services::win_notify::ensure_setup(app.handle());
 
-            // Name Flow's audio in the volume mixer instead of "Microsoft Edge WebView2".
+            // Name Aello's audio in the volume mixer instead of "Microsoft Edge WebView2".
             #[cfg(windows)]
             services::win_mixer::start(app.handle());
 
@@ -449,7 +449,7 @@ pub fn run() {
 
             // Load the single resident recommendation brain (in-memory, debounced writes)
             let brain_store = tauri::async_runtime::block_on(async {
-                flow_neuro::brain_store::BrainStore::load(pool.clone()).await
+                aello_neuro::brain_store::BrainStore::load(pool.clone()).await
             })
             .map_err(|error| {
                 Box::new(std::io::Error::new(
@@ -459,7 +459,7 @@ pub fn run() {
             })?;
 
             let neuro_stores = tauri::async_runtime::block_on(async {
-                flow_neuro::side_stores::SideStores::load(pool.clone()).await
+                aello_neuro::side_stores::SideStores::load(pool.clone()).await
             })
             .map_err(|error| {
                 Box::new(std::io::Error::new(
@@ -531,17 +531,17 @@ pub fn run() {
 
             services::notification_service::spawn_poll_loop(app.handle().clone(), pool.clone());
 
-            // Register the flow:// scheme at runtime. Production installers
+            // Register the aello:// scheme at runtime. Production installers
             // (NSIS/MSI, .desktop) do this, but dev builds and Linux need it.
             #[cfg(any(target_os = "linux", all(debug_assertions, windows)))]
             if !update_support.package_owns_desktop_entry() {
                 use tauri_plugin_deep_link::DeepLinkExt;
                 if let Err(error) = app.deep_link().register_all() {
-                    tracing::warn!("failed to register flow:// scheme: {error}");
+                    tracing::warn!("failed to register aello:// scheme: {error}");
                 }
             }
 
-            // Raise the window when a flow:// URL arrives while running; the
+            // Raise the window when a aello:// URL arrives while running; the
             // frontend's onOpenUrl listener performs the actual routing.
             {
                 use tauri_plugin_deep_link::DeepLinkExt;
@@ -567,7 +567,7 @@ pub fn run() {
             }
 
             // Other platforms quit with the main window, including the pop-out,
-            // unless another Flow window is still open: then it only hides.
+            // unless another Aello window is still open: then it only hides.
             #[cfg(not(target_os = "macos"))]
             if let Some(main_window) = app.get_webview_window("main") {
                 let handle = app.handle().clone();
@@ -689,7 +689,7 @@ pub fn run() {
             commands::home_feed::home_chip_feed,
             complete_onboarding,
             get_onboarding_status,
-            get_flow_persona,
+            get_aello_persona,
             get_brain_snapshot,
             get_taste_overview,
             get_recommendation_events,
@@ -778,7 +778,7 @@ pub fn run() {
             get_music_stream,
             proxy_image_url,
             image_proxy_base,
-            // --- Dedicated music brain (separate from flow_neuro) ---
+            // --- Dedicated music brain (separate from aello_neuro) ---
             record_music_interaction,
             dislike_music_artist,
             block_music_artist,
@@ -798,7 +798,7 @@ pub fn run() {
             clear_music_queue_state,
             save_music_resume_position,
             get_music_resume_position,
-            // --- Flow Local Sync (P2P LAN) ---
+            // --- Aello Local Sync (P2P LAN) ---
             sync_device_info,
             linked_status,
             linked_devices,
@@ -860,7 +860,7 @@ pub fn run() {
             scrobble_retry_keychain
         ])
         .build(context)
-        .expect("error while building Flow Desktop")
+        .expect("error while building Aello Desktop")
         .run(|app_handle, event| {
             #[cfg(target_os = "macos")]
             if let tauri::RunEvent::Reopen { .. } = event {

@@ -33,7 +33,7 @@ pub enum QrError {
     Crypto(#[from] CryptoError),
 }
 
-/// The decoded contents of a Flow Sync QR code. Field names are short to keep the QR dense.
+/// The decoded contents of a Aello Sync QR code. Field names are short to keep the QR dense.
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct QrPayload {
     /// Protocol version.

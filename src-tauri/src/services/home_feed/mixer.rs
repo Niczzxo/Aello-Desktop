@@ -1,4 +1,4 @@
-//! Filling a page from the lanes by quota, from Flow for Android's `HomeFeedMixer`.
+//! Filling a page from the lanes by quota, from Aello for Android's `HomeFeedMixer`.
 
 use std::collections::{HashMap, HashSet, VecDeque};
 

@@ -7,7 +7,7 @@
 use sqlx::SqlitePool;
 use sqlx::sqlite::SqlitePoolOptions;
 
-use flow_desktop_lib::commands::backup::{SUBSCRIPTION_CHANNELS_KEY, export_backup, import_backup};
+use aello_desktop_lib::commands::backup::{SUBSCRIPTION_CHANNELS_KEY, export_backup, import_backup};
 
 async fn memory_pool() -> SqlitePool {
     let pool = SqlitePoolOptions::new()

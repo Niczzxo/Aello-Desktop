@@ -1,4 +1,4 @@
-//! Names for hidden channels, from Flow for Android's `BlockedChannelNames` (#1325): a block saves
+//! Names for hidden channels, from Aello for Android's `BlockedChannelNames` (#1325): a block saves
 //! the name it was made with; older blocks and ones that arrived by sync are named from what the
 //! device already holds, and each channel's RSS feed is asked once a session for the rest.
 

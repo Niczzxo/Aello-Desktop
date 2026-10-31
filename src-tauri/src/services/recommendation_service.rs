@@ -6,28 +6,28 @@ use tracing::info;
 
 use crate::db::recommendations;
 use crate::errors::{AppError, AppResult};
-use crate::flow_neuro::bootstrap::{
+use crate::aello_neuro::bootstrap::{
     ImportedVideo, bootstrap_from_history, bootstrap_from_subscriptions,
 };
-use crate::flow_neuro::brain_store::BrainStore;
-use crate::flow_neuro::categories;
-use crate::flow_neuro::channel_knowledge::{learn_from_uploads, subscription_changed};
-use crate::flow_neuro::co_watch::{RelatedChannel, neighbours};
-use crate::flow_neuro::deep_flow::learning_paused;
-use crate::flow_neuro::discovery::{SurfaceState, next_queries, note_query_novelty, stale_key};
-use crate::flow_neuro::display_forms::with_pick_spellings;
-use crate::flow_neuro::language::system_language;
-use crate::flow_neuro::learning::{Interaction, apply_interaction};
-use crate::flow_neuro::rank::{RankContext, SessionState, rank};
-use crate::flow_neuro::ranker::MomentumEntry;
-use crate::flow_neuro::scoring::{
-    FeedEntry, FlowPersona, IMPRESSION_CACHE_MAX, SESSION_TOPIC_HISTORY_MAX, TimeBucket, UserBrain,
+use crate::aello_neuro::brain_store::BrainStore;
+use crate::aello_neuro::categories;
+use crate::aello_neuro::channel_knowledge::{learn_from_uploads, subscription_changed};
+use crate::aello_neuro::co_watch::{RelatedChannel, neighbours};
+use crate::aello_neuro::deep_aello::learning_paused;
+use crate::aello_neuro::discovery::{SurfaceState, next_queries, note_query_novelty, stale_key};
+use crate::aello_neuro::display_forms::with_pick_spellings;
+use crate::aello_neuro::language::system_language;
+use crate::aello_neuro::learning::{Interaction, apply_interaction};
+use crate::aello_neuro::rank::{RankContext, SessionState, rank};
+use crate::aello_neuro::ranker::MomentumEntry;
+use crate::aello_neuro::scoring::{
+    FeedEntry, AelloPersona, IMPRESSION_CACHE_MAX, SESSION_TOPIC_HISTORY_MAX, TimeBucket, UserBrain,
     classify_persona, is_known_short,
 };
-use crate::flow_neuro::search_learning::learn_search;
-use crate::flow_neuro::side_stores::SideStores;
-use crate::flow_neuro::signals::InteractionType;
-use crate::flow_neuro::watch_session::{WatchReport, WatchSession};
+use crate::aello_neuro::search_learning::learn_search;
+use crate::aello_neuro::side_stores::SideStores;
+use crate::aello_neuro::signals::InteractionType;
+use crate::aello_neuro::watch_session::{WatchReport, WatchSession};
 use crate::models::video::{RelatedContentItem, VideoSummary};
 use crate::services::youtube_service::YoutubeService;
 
@@ -129,7 +129,7 @@ impl RecommendationService {
         self.brain_store.reload().await
     }
 
-    /// Deep Flow keeps a session out of the profile: nothing learns while it runs.
+    /// Deep Aello keeps a session out of the profile: nothing learns while it runs.
     pub(crate) async fn learning_paused(&self) -> bool {
         learning_paused(&self.pool, self.get_current_time_ms())
             .await
@@ -676,12 +676,12 @@ impl RecommendationService {
             entry.show_count += 1;
         }
 
-        crate::flow_neuro::caps::prune_feed_history(&mut brain, now_ms);
+        crate::aello_neuro::caps::prune_feed_history(&mut brain, now_ms);
 
         Ok(())
     }
 
-    pub async fn get_personality(&self) -> AppResult<FlowPersona> {
+    pub async fn get_personality(&self) -> AppResult<AelloPersona> {
         let brain = self.brain_store.read().await;
         Ok(classify_persona(&brain))
     }
@@ -1008,7 +1008,7 @@ impl RecommendationService {
     /// Learns gently from an imported watch history; returns how many videos it learned from.
     pub async fn bootstrap_from_history(&self, videos: Vec<ImportedVideo>) -> AppResult<usize> {
         let learned = bootstrap_from_history(&mut *self.brain_store.write().await, videos);
-        info!(learned, "[FlowNeuro] bootstrapped from imported history");
+        info!(learned, "[AelloNeuro] bootstrapped from imported history");
         Ok(learned)
     }
 
@@ -1021,7 +1021,7 @@ impl RecommendationService {
             bootstrap_from_subscriptions(&mut *self.brain_store.write().await, &channel_names);
         info!(
             seeded,
-            "[FlowNeuro] bootstrapped from imported subscriptions"
+            "[AelloNeuro] bootstrapped from imported subscriptions"
         );
         Ok(seeded)
     }
@@ -1029,7 +1029,7 @@ impl RecommendationService {
     /// Replaces the resident brain with an imported one, after checking it reads as a brain.
     pub async fn import_brain(&self, brain: serde_json::Value) -> AppResult<()> {
         let brain: UserBrain = serde_json::from_value(brain)
-            .map_err(|error| AppError::Validation(format!("Not a FlowNeuro brain: {error}")))?;
+            .map_err(|error| AppError::Validation(format!("Not a AelloNeuro brain: {error}")))?;
         self.brain_store.replace(brain).await
     }
 

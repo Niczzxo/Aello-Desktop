@@ -1,4 +1,4 @@
-//! The Flow sync server as a store (spec/api.md). Requests are signed in with this member's
+//! The Aello sync server as a store (spec/api.md). Requests are signed in with this member's
 //! roster key; the server never sees anything but sealed objects.
 
 use std::collections::BTreeMap;

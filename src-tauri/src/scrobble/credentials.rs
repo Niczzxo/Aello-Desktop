@@ -21,7 +21,7 @@ const CREDENTIALS_ENTRY: &str = "CREDENTIALS";
 /// Before one item held everything, each account (by service name) and the own key had their own.
 const LEGACY_OWN_KEY_ENTRY: &str = "LASTFM_OWN_KEY";
 
-/// Debug builds keep their own item, so a dev build and an installed Flow never take turns asking
+/// Debug builds keep their own item, so a dev build and an installed Aello never take turns asking
 /// for each other's.
 pub const fn keychain() -> Keychain {
     Keychain::new(KEYCHAIN_SERVICE)

@@ -1,4 +1,4 @@
-//! Orders within a lane and across a page, from Flow for Android's `HomeFeedRanking`: poor fits
+//! Orders within a lane and across a page, from Aello for Android's `HomeFeedRanking`: poor fits
 //! demoted (never dropped), pages laid out in short runs by source, channels spaced apart, and an
 //! even share per search.
 
@@ -6,7 +6,7 @@ use std::collections::{HashMap, HashSet, VecDeque};
 
 use super::card::Card;
 use super::mixer::FeedSource;
-use crate::flow_neuro::scoring::{FlowPersona, UserBrain};
+use crate::aello_neuro::scoring::{AelloPersona, UserBrain};
 
 /// Format words often tied to low-effort filler; they only demote, and only without a matching
 /// interest.
@@ -38,13 +38,13 @@ pub struct TasteProfile {
 
 impl TasteProfile {
     #[must_use]
-    pub fn of(brain: &UserBrain, persona: &FlowPersona) -> Self {
+    pub fn of(brain: &UserBrain, persona: &AelloPersona) -> Self {
         let comfort_seconds = match persona {
-            FlowPersona::DeepDiver
-            | FlowPersona::Scholar
-            | FlowPersona::Binger
-            | FlowPersona::Audiophile => 0,
-            FlowPersona::Skimmer => DURATION_COMFORT_SKIMMER_SEC,
+            AelloPersona::DeepDiver
+            | AelloPersona::Scholar
+            | AelloPersona::Binger
+            | AelloPersona::Audiophile => 0,
+            AelloPersona::Skimmer => DURATION_COMFORT_SKIMMER_SEC,
             _ => DURATION_COMFORT_DEFAULT_SEC,
         };
         let affinity_topics = brain

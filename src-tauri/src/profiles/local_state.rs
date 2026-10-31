@@ -1,5 +1,5 @@
 //! `profiles_local.json`: Desktop-only state about profiles, kept out of the registry so the
-//! registry stays byte-compatible with Flow for Android.
+//! registry stays byte-compatible with Aello for Android.
 
 use std::fs;
 use std::io::Write;

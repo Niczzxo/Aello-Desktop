@@ -3,7 +3,7 @@
 //! WebKitGTK runs each page in a separate web process. When that process
 //! crashes (issue #70: an abort in the COLRv1 emoji code), the window keeps its
 //! last frame and stops responding, and the single-instance plugin hands every
-//! new launch to that frozen window, so restarting Flow doesn't help either.
+//! new launch to that frozen window, so restarting Aello doesn't help either.
 //! Reloading brings the page back. A page that keeps crashing quits the app
 //! instead, which releases the single-instance lock so the next launch, with
 //! the startup tiers in `linux_startup`, starts clean.

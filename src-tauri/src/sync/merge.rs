@@ -1,4 +1,4 @@
-//! The CRDT merge engine for Flow Local Sync.
+//! The CRDT merge engine for Aello Local Sync.
 //!
 //! Every function here operates purely on the canonical wire model (`canonical.rs`) — no DB, no
 //! IO — so the merge laws can be property-tested in isolation. Each collection merge is
@@ -27,7 +27,7 @@ use serde::Serialize;
 
 use crate::sync::canonical::{
     AffinityWire, BrainCounters, BrainFlags, BrainLwwMaps, BrainPerVideo, BrainSets, BrainVectors,
-    ContentVectorWire, FlowNeuroBrainSnapshot, GCounter, GroupMember, Hlc, Like, LikeKind, Lww,
+    ContentVectorWire, AelloNeuroBrainSnapshot, GCounter, GroupMember, Hlc, Like, LikeKind, Lww,
     MusicBrainSnapshot, OrSet, Playlist, PlaylistItem, PlaylistOrigin, SettingEntry,
     SubscribedChannel, SubscriptionGroup, TrackMetaWire, WatchHistoryRecord,
 };
@@ -258,7 +258,7 @@ fn title_key(p: &Playlist) -> String {
     format!("{kind}:{}", normalize_title(&p.title))
 }
 
-/// First-contact matching, as Flow for Android does it: an incoming owned playlist this device
+/// First-contact matching, as Aello for Android does it: an incoming owned playlist this device
 /// doesn't know by id, with the same title as a local one the sender doesn't know either, is the
 /// same playlist. The local copy takes the sender's sync id, so the two devices share one id from
 /// then on and later renames on either side keep matching. Returns `(old, new)` sync id pairs.
@@ -552,7 +552,7 @@ fn merge_one_channel(a: &SubscribedChannel, b: &SubscribedChannel) -> Subscribed
 }
 
 // ===========================================================================================
-// FlowNeuro brain
+// AelloNeuro brain
 // ===========================================================================================
 
 /// One device's learned-vector contribution, kept verbatim so the effective brain can be
@@ -566,10 +566,10 @@ pub struct DeviceVectors {
     pub vectors: BrainVectors,
 }
 
-/// The merged FlowNeuro brain across all known devices.
+/// The merged AelloNeuro brain across all known devices.
 #[derive(Debug, Clone, PartialEq, Default, serde::Serialize, serde::Deserialize)]
 #[serde(default)]
-pub struct MergedFlowNeuroBrain {
+pub struct MergedAelloNeuroBrain {
     pub schema: i32,
     pub counters: BrainCounters,
     pub idf_word_frequency: BTreeMap<String, GCounter>,
@@ -585,9 +585,9 @@ pub struct MergedFlowNeuroBrain {
     pub key_language: String,
 }
 
-impl MergedFlowNeuroBrain {
+impl MergedAelloNeuroBrain {
     /// Fold one device's snapshot into the merged brain. Commutative, associative, idempotent.
-    pub fn merge_snapshot(&mut self, snap: &FlowNeuroBrainSnapshot) {
+    pub fn merge_snapshot(&mut self, snap: &AelloNeuroBrainSnapshot) {
         self.schema = self.schema.max(snap.schema);
 
         self.counters
@@ -750,9 +750,9 @@ impl MergedFlowNeuroBrain {
     }
 }
 
-/// Fold a list of FlowNeuro snapshots (from any number of devices) into one merged brain.
-pub fn merge_flow_neuro(snapshots: &[FlowNeuroBrainSnapshot]) -> MergedFlowNeuroBrain {
-    let mut merged = MergedFlowNeuroBrain::default();
+/// Fold a list of AelloNeuro snapshots (from any number of devices) into one merged brain.
+pub fn merge_aello_neuro(snapshots: &[AelloNeuroBrainSnapshot]) -> MergedAelloNeuroBrain {
+    let mut merged = MergedAelloNeuroBrain::default();
     for snap in snapshots {
         merged.merge_snapshot(snap);
     }

@@ -1,4 +1,4 @@
-//! The store a group syncs through: its Flow server, its `WebDAV` folder, or what its devices hold
+//! The store a group syncs through: its Aello server, its `WebDAV` folder, or what its devices hold
 //! on the LAN.
 
 use std::collections::BTreeMap;
@@ -29,7 +29,7 @@ macro_rules! each {
 }
 
 impl GroupStore {
-    /// The Flow server, for a server group.
+    /// The Aello server, for a server group.
     pub fn server(&self) -> Option<&ServerStore> {
         match self {
             Self::Server(store) => Some(&store.store),

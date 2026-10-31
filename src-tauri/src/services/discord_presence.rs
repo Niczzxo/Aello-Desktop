@@ -12,10 +12,10 @@ use discord_rich_presence::activity::{
 };
 use discord_rich_presence::{DiscordIpc, DiscordIpcClient};
 
-/// Flow's public Discord application id (`SET_ACTIVITY` needs no token).
+/// Aello's public Discord application id (`SET_ACTIVITY` needs no token).
 const CLIENT_ID: &str = "1526515771021328514";
 
-const APP_NAME: &str = "Flow";
+const APP_NAME: &str = "Aello";
 const PAUSED_TEXT: &str = "⏸\u{fe0e} Paused";
 const LIVE_TEXT: &str = "🔴 LIVE";
 

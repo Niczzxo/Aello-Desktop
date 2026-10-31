@@ -1,5 +1,5 @@
 //! Channels several of the viewer's own sit next to in related lists, and their latest uploads,
-//! from Flow for Android's `NeighbourChannels` and its repository. A neighbour ignored too often,
+//! from Aello for Android's `NeighbourChannels` and its repository. A neighbour ignored too often,
 //! or none of whose uploads is on the viewer's subjects, is dropped.
 
 use std::collections::{HashMap, HashSet};
@@ -8,7 +8,7 @@ use sqlx::SqlitePool;
 
 use super::card::Card;
 use crate::errors::AppResult;
-use crate::flow_neuro::co_watch::Source;
+use crate::aello_neuro::co_watch::Source;
 
 const MIN_POINTERS: usize = 2;
 const MAX_CHANNELS: usize = 12;

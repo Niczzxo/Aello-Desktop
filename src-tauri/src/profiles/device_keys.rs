@@ -1,5 +1,5 @@
 //! Settings shared by every profile. They live in Default's `settings` table, and the settings
-//! helpers route these keys there whichever profile is active. Rule (from Flow for Android): a
+//! helpers route these keys there whichever profile is active. Rule (from Aello for Android): a
 //! key with an Android twin takes the twin's scope; otherwise quality, network, storage,
 //! downloads, language and region, input controls, updates and OS integrations are device-wide.
 

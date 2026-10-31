@@ -1,5 +1,5 @@
 //! The subscription feed: every followed channel's uploads, newest first, with
-//! Shorts, premieres and members-only uploads told apart. Ported from Flow for
+//! Shorts, premieres and members-only uploads told apart. Ported from Aello for
 //! Android's `RssSubscriptionService`.
 
 pub mod reels;

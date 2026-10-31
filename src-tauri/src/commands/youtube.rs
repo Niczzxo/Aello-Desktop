@@ -917,7 +917,7 @@ fn normalize_sponsorblock_server_url(server_url: Option<&str>) -> crate::errors:
     Ok(origin)
 }
 
-const SPONSORBLOCK_USER_AGENT: &str = "FlowDesktop/1.0";
+const SPONSORBLOCK_USER_AGENT: &str = "AelloDesktop/1.0";
 const SPONSORBLOCK_TIMEOUT: std::time::Duration = std::time::Duration::from_secs(15);
 
 const SPONSORBLOCK_SUBMIT_CATEGORIES: [&str; 9] = [
@@ -999,7 +999,7 @@ async fn submit_sponsorblock_segment_inner(
         .append_pair("endTime", &end_time.to_string())
         .append_pair("category", category)
         .append_pair("userID", user_id)
-        .append_pair("userAgent", "FlowDesktop/1.0");
+        .append_pair("userAgent", "AelloDesktop/1.0");
 
     let res = crate::api::http::shared_client()
         .post(url)

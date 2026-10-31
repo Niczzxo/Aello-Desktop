@@ -7,7 +7,7 @@
 //! produce these shapes also serve no muxed format, so playback falls back to a
 //! video-only URL and the video plays silently.
 
-use flow_desktop_lib::api::innertube::extractors::player::{
+use aello_desktop_lib::api::innertube::extractors::player::{
     collect_audio_tracks, collect_audio_tracks_preferring,
 };
 use serde_json::{Value, json};
@@ -223,7 +223,7 @@ fn every_track_carries_the_fetching_user_agent() {
 // Dubbed-language selection
 // ---------------------------------------------------------------------------
 
-use flow_desktop_lib::api::innertube::extractors::player::select_playable_audio_tracks;
+use aello_desktop_lib::api::innertube::extractors::player::select_playable_audio_tracks;
 
 /// Real VISIONOS responses, with every signed URL replaced by a placeholder.
 fn fixture(name: &str) -> Value {

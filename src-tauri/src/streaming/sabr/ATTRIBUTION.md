@@ -1,7 +1,7 @@
 # SABR module attribution
 
 This module is a clean-room Rust implementation of YouTube's SABR (Server
-Adaptive Bit Rate) streaming protocol for Flow Desktop (GPL-3.0-only).
+Adaptive Bit Rate) streaming protocol for Aello Desktop (GPL-3.0-only).
 
 It was written by consulting the following references. No source files were
 copied verbatim; protobuf field numbers, UMP part-type IDs, and the UMP varint
@@ -14,7 +14,7 @@ algorithm are facts about YouTube's wire protocol, derived from these works:
 
 - **sabr** / **sabr-rs (luanrt-style)**  used to cross-check UMP part-type IDs and the `VideoPlaybackAbrRequest` shape.
 
-- **Flow for Android** SABR implementation (`FlowApp_mobile/.../player/sabr/`) —
+- **Aello for Android** SABR implementation (`AelloApp_mobile/.../player/sabr/`) —
   used to cross-check protobuf field numbers, the request builder, and the
   stream controller's part-dispatch logic.
 

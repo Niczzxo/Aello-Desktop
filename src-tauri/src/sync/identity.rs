@@ -1,4 +1,4 @@
-//! Device identity for Flow Local Sync.
+//! Device identity for Aello Local Sync.
 //!
 //! Each install has a stable `device_id` (UUID v4, persisted under the settings key
 //! `sync_device_id`) and a human-readable `device_name`. Persistence is left to the caller so this
@@ -14,7 +14,7 @@ pub fn new_device_id() -> String {
     uuid::Uuid::new_v4().to_string()
 }
 
-/// A friendly default device name, e.g. `"Flow Desktop (Windows)"`.
+/// A friendly default device name, e.g. `"Aello Desktop (Windows)"`.
 pub fn default_device_name() -> String {
     let os = match std::env::consts::OS {
         "windows" => "Windows",
@@ -22,7 +22,7 @@ pub fn default_device_name() -> String {
         "linux" => "Linux",
         other => other,
     };
-    format!("Flow Desktop ({os})")
+    format!("Aello Desktop ({os})")
 }
 
 // Tests for this module live in `tests/sync_phase1.rs` (integration test) — see the note in

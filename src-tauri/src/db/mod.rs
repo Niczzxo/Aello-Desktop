@@ -67,7 +67,7 @@ pub async fn open_closed_profile(dir: PathBuf) -> AppResult<SqlitePool> {
 async fn open_migrated(dir: PathBuf, max_connections: u32) -> AppResult<SqlitePool> {
     std::fs::create_dir_all(&dir).map_err(AppError::from)?;
 
-    let db_path = dir.join("flow-desktop.sqlite");
+    let db_path = dir.join("aello-desktop.sqlite");
     let database_url = format!("sqlite://{}", db_path.to_string_lossy());
 
     // Ensure SQLite database file is created if it does not exist

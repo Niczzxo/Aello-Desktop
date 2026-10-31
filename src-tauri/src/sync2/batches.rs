@@ -53,14 +53,14 @@ fn record_key(collection: Collection, record: &Value) -> Option<String> {
         Collection::Settings => field("key"),
         Collection::Subscriptions => field("name"),
         Collection::SubscribedChannels => field("channelId"),
-        Collection::FlowNeuroBrain | Collection::MusicBrain => Some(String::new()),
+        Collection::AelloNeuroBrain | Collection::MusicBrain => Some(String::new()),
     }
 }
 
 fn is_brain(collection: Collection) -> bool {
     matches!(
         collection,
-        Collection::FlowNeuroBrain | Collection::MusicBrain
+        Collection::AelloNeuroBrain | Collection::MusicBrain
     )
 }
 

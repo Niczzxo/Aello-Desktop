@@ -1,5 +1,5 @@
 //! The theme file's commands: where it lives, what it holds, and a watch that
-//! repaints Flow when a desktop shell rewrites it.
+//! repaints Aello when a desktop shell rewrites it.
 
 use crate::errors::{AppError, ErrorResponse};
 use crate::services::theme_file::{self, ChangeGate, ThemeFileState};
@@ -25,7 +25,7 @@ fn theme_file_path(app: &AppHandle) -> Result<PathBuf, ErrorResponse> {
         .map(|dir| dir.join(theme_file::FILE_NAME))
         .map_err(|error| {
             ErrorResponse::from(AppError::Internal(format!(
-                "Could not find Flow's config folder: {error}"
+                "Could not find Aello's config folder: {error}"
             )))
         })
 }

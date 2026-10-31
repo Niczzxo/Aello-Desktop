@@ -1,4 +1,4 @@
-//! Home's network sources, from Flow for Android's `HomeFeedSources`, `HomeSearchPages` and
+//! Home's network sources, from Aello for Android's `HomeFeedSources`, `HomeSearchPages` and
 //! `HomeSubscriptionUploads`: search pages kept half an hour with their next pages, related lists
 //! cached per seed, channel Videos tabs, and the RSS refresh of the subscription store.
 

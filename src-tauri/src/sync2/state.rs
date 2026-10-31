@@ -10,7 +10,7 @@ use super::roster::{Entry, parse_entry};
 use crate::sync::canonical::to_canonical_json;
 use crate::sync::error::SyncError;
 
-/// Where a group keeps its objects: a Flow server, a `WebDAV` folder, or only its devices on the
+/// Where a group keeps its objects: a Aello server, a `WebDAV` folder, or only its devices on the
 /// LAN.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, sqlx::Type, serde::Serialize)]
 #[sqlx(rename_all = "lowercase")]
@@ -34,7 +34,7 @@ pub struct GroupRecord {
 }
 
 impl GroupRecord {
-    /// A group on a Flow server this device has just joined: nothing written or read yet.
+    /// A group on a Aello server this device has just joined: nothing written or read yet.
     pub fn new(
         group_id: String,
         store_url: String,

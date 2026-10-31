@@ -1,6 +1,6 @@
 //! Desktop settings ⇄ the canonical setting keys on the wire (`FLOW-SYNC/1` §6.4).
 //!
-//! Flow for Android only understands its own canonical names (`autoplay`, `return_youtube_dislikes`,
+//! Aello for Android only understands its own canonical names (`autoplay`, `return_youtube_dislikes`,
 //! …) with typed values, so a shared setting is renamed and typed on the way out and mapped back
 //! on the way in. Settings only the desktop has travel under a `desktop.` prefix, which Android
 //! ignores and another desktop maps back. Older desktop builds sent raw desktop keys, which are
@@ -90,7 +90,7 @@ const SHARED: &[Shared] = &[
 ];
 
 /// Player, content and extension preferences only the desktop has. Download paths, proxy
-/// credentials, cache sizes, private ids and Deep Flow runtime state are deliberately absent.
+/// credentials, cache sizes, private ids and Deep Aello runtime state are deliberately absent.
 const DESKTOP_ONLY: &[&str] = &[
     "allow_volume_boost",
     "remember_playback_speed",

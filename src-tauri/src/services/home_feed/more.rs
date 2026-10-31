@@ -1,4 +1,4 @@
-//! Load-more, from Flow for Android's `HomeViewModel.loadNextPrefetchPage` and
+//! Load-more, from Aello for Android's `HomeViewModel.loadNextPrefetchPage` and
 //! `HomeLoadMorePolicy`: a page of eight from channel memory, the reserve, a related pass, the next
 //! discovery searches and deeper pages of productive ones, the subscription backlog, and a wider
 //! related pass last. A page too small waits for the next attempt; three empty attempts end the
@@ -20,7 +20,7 @@ use super::mixer::Page;
 use super::origin::{Origin, OriginKind, queries_by_id};
 use super::seeds::{SeedInput, feed_seed_inputs};
 use super::{HomeFeedService, cache, channel_memory, now_ms};
-use crate::flow_neuro::scoring::classify_persona;
+use crate::aello_neuro::scoring::classify_persona;
 use crate::services::recommendation_service::{DiscoverySurface, RecommendationService};
 use crate::services::youtube_service::YoutubeService;
 
@@ -281,7 +281,7 @@ impl HomeFeedService {
         rec: &RecommendationService,
         pool: &SqlitePool,
         inputs: &Inputs,
-        brain: &crate::flow_neuro::scoring::UserBrain,
+        brain: &crate::aello_neuro::scoring::UserBrain,
         followed: &HashSet<String>,
         now: u64,
         attempt: &mut Attempt,

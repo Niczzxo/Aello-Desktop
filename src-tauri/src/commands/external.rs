@@ -1,10 +1,10 @@
-//! Opening links and folders outside Flow.
+//! Opening links and folders outside Aello.
 //!
-//! The opener plugin starts `xdg-open` with Flow's own environment. Inside the
+//! The opener plugin starts `xdg-open` with Aello's own environment. Inside the
 //! `AppImage` that environment points into the bundle: `PATH` finds the bundled
 //! launcher first, and the loader paths hand host programs libraries built for
 //! another distro (issue #141, as #74 was for the shell). The plugin starts the
-//! launcher detached, so that failure never reached Flow and nothing opened.
+//! launcher detached, so that failure never reached Aello and nothing opened.
 //! There the host's own launcher runs through `host_tokio_command` and its exit
 //! status is checked. Everywhere else the plugin is right.
 

@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "identifier": "io.github.flow_tube.Flow-Desktop",
+  "identifier": "io.github.niczzxo.Aello-Desktop",
   "bundle": {
     "createUpdaterArtifacts": false
   }

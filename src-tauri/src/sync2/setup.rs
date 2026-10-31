@@ -1,4 +1,4 @@
-//! Creating a group on a fresh Flow sync server.
+//! Creating a group on a fresh Aello sync server.
 
 use std::collections::BTreeMap;
 

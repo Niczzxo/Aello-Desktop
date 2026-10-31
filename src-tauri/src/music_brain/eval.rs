@@ -1,6 +1,6 @@
 //! Offline evaluation harness for the music ranker.
 //!
-//! The video engine's eval (`flow_neuro::eval`) optimizes for novelty and *diversity* —
+//! The video engine's eval (`aello_neuro::eval`) optimizes for novelty and *diversity* —
 //! the right targets there are the wrong targets here. Music is repeat-dominated and
 //! coherence-loving, so this harness measures a deliberately different set of metrics:
 //!
@@ -296,7 +296,7 @@ mod tests {
 
     /// Regression backstop for the original leak: the music subsystem must never call the
     /// video engine's learning entry points. (It may share the read-only `TimeBucket` enum
-    /// from `flow_neuro::scoring` — that is not a learning call and is not forbidden.) This
+    /// from `aello_neuro::scoring` — that is not a learning call and is not forbidden.) This
     /// harness file is itself excluded, since it names the forbidden symbols on purpose.
     #[test]
     fn music_subsystem_never_calls_the_video_learner() {
@@ -325,7 +325,7 @@ mod tests {
         const FORBIDDEN: [&str; 3] = [
             "log_video_interaction",
             "apply_interaction",
-            "flow_neuro::signals",
+            "aello_neuro::signals",
         ];
         for file in files {
             let src = fs::read_to_string(&file).unwrap_or_default();
@@ -337,7 +337,7 @@ mod tests {
                     assert!(
                         !line.contains(needle),
                         "{file:?} reaches into the video learner via `{needle}` — \
-                         music must never train flow_neuro"
+                         music must never train aello_neuro"
                     );
                 }
             }

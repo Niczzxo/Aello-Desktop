@@ -1,4 +1,4 @@
-//! Shared error type for the Flow Local Sync transport/protocol layers.
+//! Shared error type for the Aello Local Sync transport/protocol layers.
 
 use tokio_tungstenite::tungstenite::Error as WsError;
 

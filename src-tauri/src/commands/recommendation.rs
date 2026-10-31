@@ -7,9 +7,9 @@ use tauri::{AppHandle, Manager, State};
 
 use crate::commands::linked::err as linked_err;
 use crate::errors::ErrorResponse;
-use crate::flow_neuro::bootstrap::ImportedVideo;
-use crate::flow_neuro::signals::InteractionType;
-use crate::flow_neuro::watch_session::{END_GRACE_SECONDS, WatchReport};
+use crate::aello_neuro::bootstrap::ImportedVideo;
+use crate::aello_neuro::signals::InteractionType;
+use crate::aello_neuro::watch_session::{END_GRACE_SECONDS, WatchReport};
 use crate::models::video::VideoSummary;
 use crate::profiles::ActiveProfile;
 use crate::services::blocked_channel_names::{self, BlockedChannelNames};
@@ -98,7 +98,7 @@ pub async fn end_watch_session(
             tokio::time::sleep(Duration::from_secs(END_GRACE_SECONDS)).await;
             let service = app.state::<RecommendationService>();
             if let Err(error) = service.settle_watch_session(Some(generation)).await {
-                tracing::warn!(%error, "[FlowNeuro] failed to settle a watch session");
+                tracing::warn!(%error, "[AelloNeuro] failed to settle a watch session");
             }
         });
     }
@@ -198,7 +198,7 @@ pub async fn get_onboarding_status(
 }
 
 #[tauri::command]
-pub async fn get_flow_persona(
+pub async fn get_aello_persona(
     recommendation_service: State<'_, RecommendationService>,
 ) -> Result<PersonaDetails, ErrorResponse> {
     let persona = recommendation_service
@@ -217,7 +217,7 @@ pub async fn get_flow_persona(
 #[tauri::command]
 pub async fn get_brain_snapshot(
     recommendation_service: State<'_, RecommendationService>,
-) -> Result<crate::flow_neuro::scoring::UserBrain, ErrorResponse> {
+) -> Result<crate::aello_neuro::scoring::UserBrain, ErrorResponse> {
     recommendation_service
         .get_brain_snapshot()
         .await

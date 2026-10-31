@@ -1,4 +1,4 @@
-//! The atomic apply pipeline for Flow Local Sync.
+//! The atomic apply pipeline for Aello Local Sync.
 //!
 //! Given the staged canonical payload from a received session ([`protocol::ReceivedPayload`]), this:
 //!  1. takes a **pre-merge backup snapshot** of the affected collections (the safety net for a
@@ -16,8 +16,8 @@ use std::collections::{BTreeMap, BTreeSet, HashMap};
 
 use sqlx::{Sqlite, SqlitePool, Transaction};
 
-use crate::flow_neuro::key_migration::{after_sync, spelled_before};
-use crate::flow_neuro::scoring::UserBrain;
+use crate::aello_neuro::key_migration::{after_sync, spelled_before};
+use crate::aello_neuro::scoring::UserBrain;
 use crate::music_brain::model::MusicBrain;
 use crate::sync::brain_attrib::{
     self, MUSIC_BASELINE_KEY, MusicBaseline, NEURO_BASELINE_KEY, NeuroBaseline, attribution,
@@ -25,14 +25,14 @@ use crate::sync::brain_attrib::{
 use crate::sync::brain_rekey;
 use crate::sync::brainmap;
 use crate::sync::canonical::{
-    Collection, FlowNeuroBrainSnapshot, GroupMember, Hlc, Like, LikeState, MusicBrainSnapshot,
+    Collection, AelloNeuroBrainSnapshot, GroupMember, Hlc, Like, LikeState, MusicBrainSnapshot,
     Playlist, PlaylistItem, SettingEntry, SubscribedChannel, SubscriptionGroup, WatchHistoryRecord,
 };
 use crate::sync::changes::{self, Change};
 use crate::sync::clock;
 use crate::sync::error::SyncError;
 use crate::sync::mapping::{self, WatchInsert, WatchRow};
-use crate::sync::merge::{self, MergedFlowNeuroBrain, MergedMusicBrain};
+use crate::sync::merge::{self, MergedAelloNeuroBrain, MergedMusicBrain};
 use crate::sync::protocol::StagedCollection;
 use crate::sync::settings_map;
 use crate::sync::tombstones;
@@ -137,8 +137,8 @@ async fn apply(
                 apply_settings(&mut tx, our_device_id, &sc.ndjson).await?,
                 true,
             ),
-            Collection::FlowNeuroBrain => (
-                apply_flow_neuro(&mut tx, our_device_id, &sc.ndjson).await?,
+            Collection::AelloNeuroBrain => (
+                apply_aello_neuro(&mut tx, our_device_id, &sc.ndjson).await?,
                 true,
             ),
             Collection::MusicBrain => {
@@ -189,7 +189,7 @@ async fn apply(
 fn is_brain(collection: Collection) -> bool {
     matches!(
         collection,
-        Collection::FlowNeuroBrain | Collection::MusicBrain
+        Collection::AelloNeuroBrain | Collection::MusicBrain
     )
 }
 
@@ -552,16 +552,16 @@ async fn apply_settings(
     Ok(stat)
 }
 
-async fn apply_flow_neuro(
+async fn apply_aello_neuro(
     tx: &mut Transaction<'_, Sqlite>,
     device_id: &str,
     ndjson: &[u8],
 ) -> Result<ApplyStats, SyncError> {
-    let received = parse_ndjson::<FlowNeuroBrainSnapshot>(ndjson)?;
+    let received = parse_ndjson::<AelloNeuroBrainSnapshot>(ndjson)?;
 
-    let mut merged: MergedFlowNeuroBrain = match get_setting(tx, NEURO_MERGED_KEY).await? {
+    let mut merged: MergedAelloNeuroBrain = match get_setting(tx, NEURO_MERGED_KEY).await? {
         Some(s) => serde_json::from_str(&s).unwrap_or_default(),
-        None => MergedFlowNeuroBrain::default(),
+        None => MergedAelloNeuroBrain::default(),
     };
     let mut base = get_setting(tx, NEURO_BRAIN_KEY)
         .await?
@@ -580,11 +580,11 @@ async fn apply_flow_neuro(
             reader.spec(),
         ));
     }
-    let incoming: Vec<FlowNeuroBrainSnapshot> =
+    let incoming: Vec<AelloNeuroBrainSnapshot> =
         received.iter().map(|snap| reader.snapshot(snap)).collect();
 
     if let Some(ub) = &base {
-        let prior_applies = prior_applies(tx, Collection::FlowNeuroBrain).await?;
+        let prior_applies = prior_applies(tx, Collection::AelloNeuroBrain).await?;
         brain_attrib::fold_local_flow(
             &mut merged,
             ub,
@@ -605,7 +605,7 @@ async fn apply_flow_neuro(
     let mut effective = brainmap::merged_flow_to_userbrain(&merged, &base);
     after_sync(&mut effective, &spelled);
     // The merged state keeps every entry any device ever had; this device's limits apply again.
-    crate::flow_neuro::caps::apply_all(&mut effective, now_ms());
+    crate::aello_neuro::caps::apply_all(&mut effective, now_ms());
     set_setting(tx, NEURO_BRAIN_KEY, &serde_json::to_string(&effective)?).await?;
     set_setting(
         tx,
@@ -615,7 +615,7 @@ async fn apply_flow_neuro(
     .await?;
 
     Ok(ApplyStats {
-        collection_key: Collection::FlowNeuroBrain.key().to_string(),
+        collection_key: Collection::AelloNeuroBrain.key().to_string(),
         updated: incoming.len() as u64,
         ..Default::default()
     })
@@ -920,7 +920,7 @@ async fn backup_snapshot(
                 }
                 obj.insert("settings".to_string(), serde_json::Value::Object(map));
             }
-            Collection::FlowNeuroBrain => {
+            Collection::AelloNeuroBrain => {
                 let raw = setting_value(pool, NEURO_BRAIN_KEY).await?;
                 obj.insert("user_neuro_brain".to_string(), serde_json::json!(raw));
             }

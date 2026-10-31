@@ -1,4 +1,4 @@
-//! Which videos open Home's related lane, from Flow for Android's `GraphSeedSelector` and
+//! Which videos open Home's related lane, from Aello for Android's `GraphSeedSelector` and
 //! `HomeFeedGraphCandidates`: real watches, likes and saved videos, scored by engagement, source and
 //! age, spread one per interest community, with the last seed kept for a lasting interest the
 //! recent ones miss.
@@ -6,10 +6,10 @@
 use std::collections::{HashMap, HashSet};
 
 use super::card::Card;
-use crate::flow_neuro::clusters::TopicCluster;
-use crate::flow_neuro::keyspec::KeySpec;
-use crate::flow_neuro::scoring::strip_domain_tag;
-use crate::flow_neuro::topic_catalog::TOPIC_CATEGORIES;
+use crate::aello_neuro::clusters::TopicCluster;
+use crate::aello_neuro::keyspec::KeySpec;
+use crate::aello_neuro::scoring::strip_domain_tag;
+use crate::aello_neuro::topic_catalog::TOPIC_CATEGORIES;
 
 const DAY_MS: u64 = 86_400_000;
 const MIN_LONG_WATCH_SECONDS: f64 = 180.0;

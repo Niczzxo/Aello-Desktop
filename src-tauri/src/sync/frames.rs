@@ -113,7 +113,7 @@ pub struct Capability {
     pub produce: bool,
     pub consume: bool,
     /// The key spec the collection's topic keys are written in; 0 when it has none or predates
-    /// them (Flow for Android #907).
+    /// them (Aello for Android #907).
     pub key_spec: i32,
     /// The language those keys are stemmed for.
     pub key_language: String,

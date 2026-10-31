@@ -3,7 +3,7 @@
 //! wires **watch_history** (a real `sqlx` table) through the apply pipeline. The other
 //! collections plug into the same pipeline as follow-on increments:
 //! * `settings` — needs the finalized cross-platform key whitelist
-//! * `flow_neuro_brain` / `music_brain` — Rust structs exist (`flow_neuro::scoring::UserBrain`,
+//! * `flow_neuro_brain` / `music_brain` — Rust structs exist (`aello_neuro::scoring::UserBrain`,
 //!   `music_brain::model::MusicBrain`) but their idempotent apply needs the per-device merged-state
 //!   persistence plus resident-store flush/reload coordination
 //! * `playlists` / `likes` — stored as frontend-authored JSON blobs in `settings`
@@ -381,7 +381,7 @@ fn like_from_value(mut v: Value, device_id: &str) -> Option<Like> {
     })
 }
 
-/// Flow for Android reads a like's title, artist and thumbnail from flat `meta` fields, while the
+/// Aello for Android reads a like's title, artist and thumbnail from flat `meta` fields, while the
 /// desktop item nests them under `video` or `song`. Copy them up so a desktop like doesn't arrive
 /// on the phone as a blank row; the nested object stays for desktop peers.
 fn add_flat_like_meta(item: &mut serde_json::Map<String, Value>) {

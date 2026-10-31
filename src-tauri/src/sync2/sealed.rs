@@ -26,7 +26,7 @@ fn box_keys(key: &[u8], salt: &[u8]) -> (Aes256Gcm, [u8; 12], [u8; 32]) {
 }
 
 /// # Panics
-/// If the operating system has no random source, which Flow can't run without.
+/// If the operating system has no random source, which Aello can't run without.
 pub fn random_bytes<const N: usize>() -> [u8; N] {
     let mut bytes = [0; N];
     SysRng

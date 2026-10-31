@@ -27,7 +27,7 @@ impl WatchHistoryRecord {
     #[must_use]
     pub fn is_short_video(&self) -> bool {
         self.is_short
-            || crate::flow_neuro::scoring::is_known_short(
+            || crate::aello_neuro::scoring::is_known_short(
                 self.total_duration_seconds
                     .and_then(|seconds| u64::try_from(seconds).ok()),
             )

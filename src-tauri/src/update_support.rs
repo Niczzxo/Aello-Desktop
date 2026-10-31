@@ -28,7 +28,7 @@ pub struct UpdateSupport {
 }
 
 impl UpdateSupport {
-    /// Flatpak and distro packages register `flow://` through their own
+    /// Flatpak and distro packages register `aello://` through their own
     /// .desktop file; registering at runtime would write a stray user-level
     /// handler (or fail inside the sandbox).
     pub fn package_owns_desktop_entry(self) -> bool {

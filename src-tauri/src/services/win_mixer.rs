@@ -1,9 +1,9 @@
-//! Names Flow's audio in the Windows volume mixer.
+//! Names Aello's audio in the Windows volume mixer.
 //!
 //! The webview plays sound from its own `msedgewebview2.exe` child process, so the mixer
 //! shows it under Edge's name and icon (`MicrosoftEdge/WebView2Feedback#2236`). This
 //! watches the audio sessions on every output device and renames the ones whose process
-//! is a WebView2 process descended from Flow's.
+//! is a WebView2 process descended from Aello's.
 //!
 //! Ported from Drapondur/ChangeVolumeMixerForWebView (MIT License, Copyright (c) 2023 Drapondur).
 #![cfg(windows)]
@@ -40,7 +40,7 @@ enum DeviceChange {
     Gone(String),
 }
 
-/// Starts a background thread that labels Flow's audio sessions for the life of the app.
+/// Starts a background thread that labels Aello's audio sessions for the life of the app.
 pub fn start(app: &AppHandle) {
     let Ok(exe) = std::env::current_exe() else {
         return;
@@ -50,7 +50,7 @@ pub fn start(app: &AppHandle) {
             .config()
             .product_name
             .as_deref()
-            .unwrap_or("Flow")
+            .unwrap_or("Aello")
             .into(),
         // tauri-build embeds the app icon under resource ID 32512. Naming it by ID rather than
         // by index lets EarTrumpet load it, as well as the Windows mixer.
@@ -60,7 +60,7 @@ pub fn start(app: &AppHandle) {
         .name("win-mixer".into())
         .spawn(move || {
             if let Err(error) = watch_devices(&label) {
-                tracing::warn!(%error, "Failed to label Flow in the volume mixer");
+                tracing::warn!(%error, "Failed to label Aello in the volume mixer");
             }
         });
     if let Err(error) = spawned {
@@ -171,7 +171,7 @@ fn descends_from_flow(pid: u32) -> bool {
     false
 }
 
-/// Only WebView2's processes, because a browser Flow starts to open a link is its child too.
+/// Only WebView2's processes, because a browser Aello starts to open a link is its child too.
 fn webview_parent_pids() -> HashMap<u32, u32> {
     let mut parents = HashMap::new();
     let Ok(snapshot) = (unsafe { CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0) }) else {

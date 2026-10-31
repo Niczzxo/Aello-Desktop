@@ -1,4 +1,4 @@
-//! Scrobbling to Last.fm, Libre.fm and `ListenBrainz`, ported from Flow for Android's
+//! Scrobbling to Last.fm, Libre.fm and `ListenBrainz`, ported from Aello for Android's
 //! `data/scrobble`. The music player reports listens; counted listens wait in SQLite and a
 //! background worker sends them, so offline listening loses nothing.
 

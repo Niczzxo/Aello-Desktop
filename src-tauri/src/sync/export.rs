@@ -1,4 +1,4 @@
-//! The **send** side of Flow Local Sync: project the local desktop database into the canonical
+//! The **send** side of Aello Local Sync: project the local desktop database into the canonical
 //! NDJSON payloads ([`OutgoingCollection`]) that the protocol streams to a peer.
 //!
 //! This is the mirror of [`apply`](crate::sync::apply): `apply` folds a received payload *into* the
@@ -16,7 +16,7 @@ use serde::Serialize;
 use serde_json::Value;
 use sqlx::SqlitePool;
 
-use crate::flow_neuro::scoring::UserBrain;
+use crate::aello_neuro::scoring::UserBrain;
 use crate::music_brain::model::MusicBrain;
 use crate::sync::apply::{MUSIC_BRAIN_KEY, MUSIC_MERGED_KEY, NEURO_BRAIN_KEY, NEURO_MERGED_KEY};
 use crate::sync::brain_attrib::{
@@ -28,7 +28,7 @@ use crate::sync::canonical::{Collection, Hlc, Playlist, SettingEntry, WatchHisto
 use crate::sync::changes::{self, Stamp};
 use crate::sync::error::SyncError;
 use crate::sync::mapping::{self, WatchRow};
-use crate::sync::merge::{MergedFlowNeuroBrain, MergedMusicBrain};
+use crate::sync::merge::{MergedAelloNeuroBrain, MergedMusicBrain};
 use crate::sync::protocol::OutgoingCollection;
 use crate::sync::settings_map;
 use crate::sync::tombstones;
@@ -52,7 +52,7 @@ pub async fn export_collections(
             Collection::Likes => export_likes(pool, device_id).await?,
             Collection::Playlists => export_playlists(pool, device_id).await?,
             Collection::Settings => export_settings(pool, device_id).await?,
-            Collection::FlowNeuroBrain => export_flow_neuro(pool, device_id).await?,
+            Collection::AelloNeuroBrain => export_aello_neuro(pool, device_id).await?,
             Collection::MusicBrain => export_music(pool, device_id).await?,
             Collection::Subscriptions => export_subscriptions(pool, device_id).await?,
             Collection::SubscribedChannels => export_subscribed_channels(pool, device_id).await?,
@@ -222,7 +222,7 @@ async fn export_settings(pool: &SqlitePool, device_id: &str) -> Result<Vec<u8>, 
     Ok(to_ndjson(&entries))
 }
 
-async fn export_flow_neuro(pool: &SqlitePool, device_id: &str) -> Result<Vec<u8>, SyncError> {
+async fn export_aello_neuro(pool: &SqlitePool, device_id: &str) -> Result<Vec<u8>, SyncError> {
     let merged = current_merged_flow(pool, device_id).await?;
     let mut snapshots = brainmap::merged_flow_to_snapshots(&merged);
     // Deterministic record order across platforms: by per-device snapshot id.
@@ -237,15 +237,15 @@ async fn export_music(pool: &SqlitePool, device_id: &str) -> Result<Vec<u8>, Syn
     Ok(to_ndjson(std::slice::from_ref(&snapshot)))
 }
 
-/// The merged FlowNeuro CRDT state with this device's current resident brain folded in (matches
+/// The merged AelloNeuro CRDT state with this device's current resident brain folded in (matches
 /// the fold the apply path does, so export and apply agree on this device's contribution).
 async fn current_merged_flow(
     pool: &SqlitePool,
     device_id: &str,
-) -> Result<MergedFlowNeuroBrain, SyncError> {
-    let mut merged: MergedFlowNeuroBrain = match get_setting(pool, NEURO_MERGED_KEY).await? {
+) -> Result<MergedAelloNeuroBrain, SyncError> {
+    let mut merged: MergedAelloNeuroBrain = match get_setting(pool, NEURO_MERGED_KEY).await? {
         Some(s) => serde_json::from_str(&s).unwrap_or_default(),
-        None => MergedFlowNeuroBrain::default(),
+        None => MergedAelloNeuroBrain::default(),
     };
     let Some(mut ub) = get_setting(pool, NEURO_BRAIN_KEY)
         .await?
@@ -258,7 +258,7 @@ async fn current_merged_flow(
         .await?
         .and_then(|s| serde_json::from_str(&s).ok());
     brain_rekey::align_flow(Some(&mut ub), &mut merged, baseline.as_mut());
-    let prior_applies = prior_applies(pool, Collection::FlowNeuroBrain).await?;
+    let prior_applies = prior_applies(pool, Collection::AelloNeuroBrain).await?;
     brain_attrib::fold_local_flow(
         &mut merged,
         &ub,

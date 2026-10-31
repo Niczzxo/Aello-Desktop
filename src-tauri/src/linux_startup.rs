@@ -28,7 +28,7 @@
 //! while its page runs still confirms, so the sentinel can't see that failure.
 //! Two things cover it: NVIDIA proprietary on Wayland, the known case, starts at
 //! tier 1 (Debian and Gentoo patch the same rule into their own WebKitGTK), and
-//! `--safe-graphics` / `FLOW_SAFE_GRAPHICS=1` forces tier 3 for one launch. A
+//! `--safe-graphics` / `AELLO_SAFE_GRAPHICS=1` forces tier 3 for one launch. A
 //! render confirmed under it is remembered like any other, so the next normal
 //! launch keeps working. The user can also set a floor in Settings.
 //!
@@ -253,7 +253,7 @@ impl LaunchFacts {
         .iter()
         .any(|key| std::env::var_os(key).is_some());
         let safe_graphics = std::env::args_os().any(|arg| arg == SAFE_GRAPHICS_ARG)
-            || std::env::var_os("FLOW_SAFE_GRAPHICS").is_some_and(|value| value == "1");
+            || std::env::var_os("AELLO_SAFE_GRAPHICS").is_some_and(|value| value == "1");
         Self {
             nvidia_wayland: nvidia && wayland,
             user_set_dmabuf,

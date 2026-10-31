@@ -2,7 +2,7 @@ use std::fmt;
 
 use serde::{Deserialize, Serialize};
 
-/// The services Flow can scrobble to. The names are stored, so never rename them.
+/// The services Aello can scrobble to. The names are stored, so never rename them.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum Service {
     #[serde(rename = "LASTFM")]

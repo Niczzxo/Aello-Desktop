@@ -14,8 +14,8 @@ use crate::db::settings::get_setting;
 use crate::db::watch_history::{WatchHistoryRecord, get_watch_history};
 use crate::db::{known_shorts, library, seen_videos, unplayable_videos};
 use crate::errors::AppResult;
-use crate::flow_neuro::gates::BlockedMatchers;
-use crate::flow_neuro::scoring::{CHANNEL_SUPPRESSION_DAYS, UserBrain};
+use crate::aello_neuro::gates::BlockedMatchers;
+use crate::aello_neuro::scoring::{CHANNEL_SUPPRESSION_DAYS, UserBrain};
 use crate::models::video::VideoSummary;
 
 const HISTORY_LOOKBACK: i64 = 400;
@@ -102,7 +102,7 @@ pub struct Exclusions {
     /// The oldest a video may be and the time it is measured from, when the viewer set a limit.
     age_limit: Option<(u64, u64)>,
     matchers: BlockedMatchers,
-    spec: crate::flow_neuro::keyspec::KeySpec,
+    spec: crate::aello_neuro::keyspec::KeySpec,
 }
 
 impl Exclusions {

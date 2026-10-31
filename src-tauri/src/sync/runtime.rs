@@ -18,7 +18,7 @@ pub async fn flush_brains(app: &AppHandle) {
     if let Some(svc) = app.try_state::<RecommendationService>()
         && let Err(e) = svc.flush_brain().await
     {
-        tracing::warn!(%e, "[sync] flush flow_neuro brain before merge failed");
+        tracing::warn!(%e, "[sync] flush aello_neuro brain before merge failed");
     }
     if let Some(store) = app.try_state::<Arc<MusicBrainStore>>()
         && let Err(e) = store.flush().await
@@ -34,7 +34,7 @@ pub async fn flush_and_hold_brains(app: &AppHandle) {
     if let Some(svc) = app.try_state::<RecommendationService>()
         && let Err(e) = svc.flush_and_hold_brain().await
     {
-        tracing::warn!(%e, "[sync] hold flow_neuro brain before merge failed");
+        tracing::warn!(%e, "[sync] hold aello_neuro brain before merge failed");
     }
 }
 
@@ -42,7 +42,7 @@ pub async fn reload_brains(app: &AppHandle) {
     if let Some(svc) = app.try_state::<RecommendationService>()
         && let Err(e) = svc.reload_brain().await
     {
-        tracing::warn!(%e, "[sync] reload flow_neuro brain after merge failed");
+        tracing::warn!(%e, "[sync] reload aello_neuro brain after merge failed");
     }
     if let Some(store) = app.try_state::<Arc<MusicBrainStore>>()
         && let Err(e) = store.reload().await

@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "Flow",
+  "productName": "Aello",
   "version": "0.1.0-beta3",
-  "identifier": "io.github.aedev.flow.desktop",
+  "identifier": "io.github.niczzxo.aello.desktop",
   "build": {
     "beforeDevCommand": "pnpm dev",
     "devUrl": "http://localhost:1420",
@@ -14,7 +14,7 @@
     "windows": [
       {
         "label": "main",
-        "title": "Flow",
+        "title": "Aello",
         "width": 1280,
         "height": 800,
         "minWidth": 960,
@@ -32,12 +32,14 @@
   "plugins": {
     "deep-link": {
       "desktop": {
-        "schemes": ["flow"]
+        "schemes": [
+          "aello"
+        ]
       }
     },
     "updater": {
       "endpoints": [
-        "https://github.com/Flow-Tube/Flow-Desktop/releases/latest/download/latest.json"
+        "https://github.com/Niczzxo/Aello-Desktop/releases/latest/download/latest.json"
       ],
       "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEQ3NjQyOEVCREQxMjY5MjkKUldRcGFSTGQ2eWhrMThHMzB3Y29Tc3JsTFhpOGJqR1lGY0M0Z01DaVlzL01zNXhLTWUzUDdxcFIK",
       "windows": {
@@ -50,9 +52,9 @@
     "createUpdaterArtifacts": true,
     "targets": "all",
     "category": "Entertainment",
-    "shortDescription": "The privacy-first desktop companion to Flow for Android.",
-    "longDescription": "Flow Desktop is a privacy-first YouTube and YouTube Music companion to Flow for Android, with native playback and the fully local FlowNeuro recommendation engine.",
-    "copyright": "Copyright © 2025-2026 A-EDev",
+    "shortDescription": "The privacy-first desktop companion to Aello for Android.",
+    "longDescription": "Aello Desktop is a privacy-first YouTube and YouTube Music companion to Aello for Android, with native playback and the fully local AelloNeuro recommendation engine.",
+    "copyright": "Copyright \u00a9 2025-2026 A-EDev",
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
@@ -80,7 +82,7 @@
         "bundleMediaFramework": true
       },
       "deb": {
-        "desktopTemplate": "linux/flow.desktop",
+        "desktopTemplate": "linux/aello.desktop",
         "depends": [
           "gstreamer1.0-plugins-base",
           "gstreamer1.0-plugins-good",
@@ -94,7 +96,7 @@
         ]
       },
       "rpm": {
-        "desktopTemplate": "linux/flow.desktop",
+        "desktopTemplate": "linux/aello.desktop",
         "depends": [
           "gstreamer1-plugins-base",
           "gstreamer1-plugins-good",
