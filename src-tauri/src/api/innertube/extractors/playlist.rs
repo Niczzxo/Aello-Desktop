@@ -1,0 +1,561 @@
+use crate::api::innertube::InnertubeClient;
+use crate::api::innertube::core::clients;
+use crate::api::innertube::core::utils::short_video_summary_from_item;
+use crate::api::innertube::json::continuation::{continuation_item_lists, last_continuation_token};
+use crate::api::innertube::json::count::parse_count;
+use crate::api::innertube::json::text::text_of;
+use crate::api::innertube::json::thumbnail::best_video_thumbnail_url;
+use crate::api::innertube::renderers::lockup::{lockup_item, related_to_video};
+use crate::api::innertube::renderers::video::video_from_renderer;
+use crate::errors::{AppError, AppResult};
+use crate::models::channel::ShortVideoSummary;
+use crate::models::playlist::PlaylistDetailsResponse;
+use crate::models::video::VideoSummary;
+use serde_json::Value;
+
+/// One playlist entry as a video card: a classic row, a video lockup, or a Short.
+/// Non-video lockups (channels, mixes) are skipped.
+fn video_from_playlist_item(item: &Value) -> Option<VideoSummary> {
+    let item = item.get("richItemRenderer").map_or(item, |r| &r["content"]);
+    if let Some(video) = item.get("playlistVideoRenderer") {
+        return video_from_renderer(video);
+    }
+    if let Some(lockup) = item.get("lockupViewModel") {
+        return lockup_item(lockup)
+            .filter(|related| related.item_type == "video")
+            .map(related_to_video);
+    }
+    if item.get("shortsLockupViewModel").is_some() || item.get("reelItemRenderer").is_some() {
+        return short_video_summary_from_item(item).map(video_summary_from_short);
+    }
+    None
+}
+
+/// The item lists of a first page: the classic `playlistVideoListRenderer`, the
+/// lockup list now sent straight in the section, or the Shorts grid.
+fn first_page_item_lists(val: &Value) -> Vec<&Vec<Value>> {
+    let mut lists = Vec::new();
+    let tabs = val["contents"]["twoColumnBrowseResultsRenderer"]["tabs"]
+        .as_array()
+        .into_iter()
+        .flatten();
+    for tab in tabs {
+        let content = &tab["tabRenderer"]["content"];
+        if let Some(grid) = content["richGridRenderer"]["contents"].as_array() {
+            lists.push(grid);
+        }
+        let sections = content["sectionListRenderer"]["contents"]
+            .as_array()
+            .into_iter()
+            .flatten();
+        for section in sections {
+            let Some(contents) = section["itemSectionRenderer"]["contents"].as_array() else {
+                continue;
+            };
+            let nested: Vec<&Vec<Value>> = contents
+                .iter()
+                .filter_map(|sub| {
+                    sub["playlistVideoListRenderer"]["contents"]
+                        .as_array()
+                        .or_else(|| sub["richGridRenderer"]["contents"].as_array())
+                })
+                .collect();
+            if nested.is_empty() {
+                lists.push(contents);
+            } else {
+                lists.extend(nested);
+            }
+        }
+    }
+    lists
+}
+
+/// Videos of a playlist page and the token of the next one.
+///
+/// A first page carries its items under `contents`; later pages carry them only in
+/// a continuation action, with `contents` left as an empty shell. A list's token
+/// only counts when that list held videos, so a stray token in another section is
+/// not mistaken for the playlist's next page.
+fn extract_videos_from_playlist_browse(val: &Value) -> (Vec<VideoSummary>, Option<String>) {
+    let mut items = Vec::new();
+    let mut next_page_token = None;
+    let lists = continuation_item_lists(val)
+        .into_iter()
+        .chain(first_page_item_lists(val));
+    for list in lists {
+        let before = items.len();
+        items.extend(list.iter().filter_map(video_from_playlist_item));
+        if items.len() > before
+            && let Some(token) = last_continuation_token(list)
+        {
+            next_page_token = Some(token);
+        }
+    }
+    (items, next_page_token)
+}
+
+/// Neither Shorts layout carries a channel, duration, or publish date.
+fn video_summary_from_short(short: ShortVideoSummary) -> VideoSummary {
+    VideoSummary {
+        thumbnail_url: short
+            .thumbnail_url
+            .or_else(|| best_video_thumbnail_url(&short.id, None)),
+        id: short.id,
+        title: short.title,
+        channel_name: String::new(),
+        channel_id: None,
+        duration_seconds: None,
+        published_text: None,
+        view_count_text: short.view_count_text,
+        channel_avatar_url: None,
+        is_live: false,
+        ..Default::default()
+    }
+}
+
+fn extract_text_from_runs_or_simple(value: &Value) -> Option<String> {
+    value["runs"]
+        .as_array()
+        .and_then(|runs| runs.first())
+        .and_then(|run| run["text"].as_str())
+        .or_else(|| value.as_str())
+        .or_else(|| value["simpleText"].as_str())
+        .or_else(|| value["content"].as_str())
+        .map(str::trim)
+        .filter(|text| !text.is_empty())
+        .map(ToOwned::to_owned)
+}
+
+fn extract_playlist_title(res: &Value) -> String {
+    let header = &res["header"];
+
+    let title_candidates = [
+        header
+            .get("playlistHeaderRenderer")
+            .and_then(|h| h.get("title")),
+        header
+            .get("pageHeaderRenderer")
+            .and_then(|h| h.get("pageTitle")),
+        header["pageHeaderRenderer"]["content"]
+            .get("pageHeaderViewModel")
+            .and_then(|h| h.get("title"))
+            .and_then(|title| title.get("dynamicTextViewModel"))
+            .and_then(|vm| vm.get("text")),
+        res["metadata"]
+            .get("playlistMetadataRenderer")
+            .and_then(|m| m.get("title")),
+    ];
+
+    for candidate in title_candidates {
+        if let Some(title) = candidate.and_then(extract_text_from_runs_or_simple) {
+            if !title.eq_ignore_ascii_case("unknown playlist") {
+                return title;
+            }
+        }
+    }
+
+    "Unknown Playlist".to_string()
+}
+
+fn extract_playlist_description(header: &Value) -> Option<String> {
+    extract_text_from_runs_or_simple(&header["descriptionText"])
+}
+
+fn is_unknown_owner(name: &str) -> bool {
+    name.eq_ignore_ascii_case("unknown owner") || name.is_empty()
+}
+
+fn extract_playlist_owner_name(header: &Value) -> Option<String> {
+    extract_text_from_runs_or_simple(&header["ownerText"]).filter(|name| !is_unknown_owner(name))
+}
+
+fn extract_owner_from_page_header(res: &Value) -> Option<String> {
+    let rows = res["header"]["pageHeaderRenderer"]["content"]["pageHeaderViewModel"]["metadata"]
+        ["contentMetadataViewModel"]["metadataRows"]
+        .as_array()?;
+
+    let parts = || {
+        rows.iter()
+            .filter_map(|row| row["metadataParts"].as_array())
+            .flatten()
+    };
+    // The owner sits in the avatar stack ("by Linus Tech Tips"), a part with no text of its own.
+    if let Some(name) = parts()
+        .filter_map(|part| part["avatarStack"]["avatarStackViewModel"]["text"]["content"].as_str())
+        .map(|text| text.trim().trim_start_matches("by ").trim())
+        .find(|name| !is_unknown_owner(name))
+    {
+        return Some(name.to_string());
+    }
+
+    for row in rows {
+        let Some(parts) = row["metadataParts"].as_array() else {
+            continue;
+        };
+        for part in parts {
+            let Some(text) = part["text"]["content"]
+                .as_str()
+                .map(str::trim)
+                .filter(|value| !value.is_empty())
+            else {
+                continue;
+            };
+            let lower = text.to_lowercase();
+            if lower.contains("view") || lower.contains("subscriber") {
+                continue;
+            }
+            if lower.contains("video") && !lower.contains("by ") {
+                continue;
+            }
+            if !is_unknown_owner(text) {
+                return Some(text.to_string());
+            }
+        }
+    }
+
+    None
+}
+
+/// `VL` plus the playlist id, removing only a `VL` the id already starts with.
+fn playlist_browse_id(playlist_id: &str) -> String {
+    format!(
+        "VL{}",
+        playlist_id.strip_prefix("VL").unwrap_or(playlist_id)
+    )
+}
+
+fn extract_owner_from_sidebar(res: &Value) -> Option<String> {
+    let items = res["sidebar"]["playlistSidebarRenderer"]["items"].as_array()?;
+    for item in items {
+        if let Some(name) = item
+            .get("playlistSidebarSecondaryInfoRenderer")
+            .and_then(|info| info.get("videoOwner"))
+            .and_then(|owner| owner.get("videoOwnerRenderer"))
+            .and_then(|renderer| renderer.get("title"))
+            .and_then(extract_text_from_runs_or_simple)
+            .filter(|value| !is_unknown_owner(value))
+        {
+            return Some(name);
+        }
+    }
+    None
+}
+
+fn extract_playlist_owner(res: &Value, header: Option<&Value>) -> String {
+    let candidates = [
+        header.and_then(extract_playlist_owner_name),
+        extract_owner_from_page_header(res),
+        extract_owner_from_sidebar(res),
+        res["metadata"]["playlistMetadataRenderer"]["ownerChannelName"]
+            .as_str()
+            .map(str::trim)
+            .filter(|value| !value.is_empty())
+            .map(ToOwned::to_owned),
+        header.and_then(|h| {
+            extract_text_from_runs_or_simple(&h["ownerBadge"]["badgeRenderer"]["title"])
+        }),
+    ];
+
+    for candidate in candidates.into_iter().flatten() {
+        if !is_unknown_owner(&candidate) {
+            return candidate;
+        }
+    }
+
+    "Unknown Owner".to_string()
+}
+
+fn metadata_row_mentions_views(text: &str) -> bool {
+    let lower = text.to_lowercase();
+    lower.contains("view") || lower == "no views"
+}
+
+fn extract_view_count_from_page_header(res: &Value) -> Option<String> {
+    let rows = res["header"]["pageHeaderRenderer"]["content"]["pageHeaderViewModel"]["metadata"]
+        ["contentMetadataViewModel"]["metadataRows"]
+        .as_array()?;
+
+    for row in rows {
+        let parts = row["metadataParts"].as_array()?;
+        for part in parts {
+            if let Some(text) = part["text"]["content"]
+                .as_str()
+                .map(str::trim)
+                .filter(|value| !value.is_empty())
+            {
+                if metadata_row_mentions_views(text) {
+                    return Some(text.to_string());
+                }
+            }
+        }
+    }
+
+    None
+}
+
+fn extract_view_count_from_sidebar(res: &Value) -> Option<String> {
+    let items = res["sidebar"]["playlistSidebarRenderer"]["items"].as_array()?;
+    for item in items {
+        let Some(stats) = item["playlistSidebarPrimaryInfoRenderer"]["stats"].as_array() else {
+            continue;
+        };
+        for stat in stats {
+            if let Some(text) = extract_text_from_runs_or_simple(stat) {
+                if metadata_row_mentions_views(&text) {
+                    return Some(text);
+                }
+            }
+        }
+    }
+    None
+}
+
+fn extract_playlist_view_count_text(res: &Value, header: Option<&Value>) -> Option<String> {
+    header
+        .and_then(|h| extract_text_from_runs_or_simple(&h["viewCountText"]))
+        .or_else(|| extract_view_count_from_page_header(res))
+        .or_else(|| extract_view_count_from_sidebar(res))
+        .filter(|text| !text.is_empty())
+}
+
+fn extract_playlist_video_count(header: &Value) -> Option<u64> {
+    header["numVideosText"]["runs"][0]["text"]
+        .as_str()
+        .and_then(|s| s.parse::<u64>().ok())
+        .or_else(|| {
+            header["numVideosText"]["simpleText"]
+                .as_str()
+                .and_then(parse_count)
+        })
+}
+
+/// The video count from the sidebar's first stat ("1,234 videos"), which the
+/// current layout sends instead of the old header's `numVideosText`.
+fn extract_video_count_from_sidebar(res: &Value) -> Option<u64> {
+    let items = res["sidebar"]["playlistSidebarRenderer"]["items"].as_array()?;
+    let stat = items
+        .iter()
+        .find_map(|item| item["playlistSidebarPrimaryInfoRenderer"]["stats"].get(0))?;
+    let digits: String = text_of(stat)?
+        .chars()
+        .filter(char::is_ascii_digit)
+        .collect();
+    digits.parse().ok()
+}
+
+impl InnertubeClient {
+    pub async fn get_playlist_details(
+        &self,
+        playlist_id: &str,
+        page_token: Option<String>,
+    ) -> AppResult<PlaylistDetailsResponse> {
+        let playlist_id_trimmed = playlist_id.trim();
+        if playlist_id_trimmed.is_empty() {
+            return Err(AppError::Validation("Playlist ID cannot be empty".into()));
+        }
+
+        let mut payload = if let Some(ref token) = page_token {
+            serde_json::json!({
+                "continuation": token
+            })
+        } else {
+            serde_json::json!({
+                "browseId": playlist_browse_id(playlist_id_trimmed)
+            })
+        };
+
+        let res = self
+            .post_innertube("browse", &clients::WEB, &mut payload)
+            .await?;
+
+        let title = extract_playlist_title(&res);
+        let playlist_header = res["header"].get("playlistHeaderRenderer");
+        let description = playlist_header.and_then(extract_playlist_description);
+        let channel_name = extract_playlist_owner(&res, playlist_header);
+        let video_count = playlist_header
+            .and_then(extract_playlist_video_count)
+            .or_else(|| extract_video_count_from_sidebar(&res));
+        let view_count_text = extract_playlist_view_count_text(&res, playlist_header);
+
+        let (videos, next_page_token) = extract_videos_from_playlist_browse(&res);
+
+        Ok(PlaylistDetailsResponse {
+            id: playlist_id_trimmed.to_string(),
+            title,
+            description,
+            channel_name,
+            video_count,
+            view_count_text,
+            videos,
+            next_page_token,
+        })
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{
+        extract_owner_from_page_header, extract_playlist_title, extract_video_count_from_sidebar,
+        extract_videos_from_playlist_browse, playlist_browse_id,
+    };
+    use serde_json::{Value, json};
+
+    fn browse_page(section_contents: Vec<Value>) -> Value {
+        json!({
+            "contents": { "twoColumnBrowseResultsRenderer": { "tabs": [{ "tabRenderer": {
+                "content": { "sectionListRenderer": { "contents": section_contents } }
+            }}]}}
+        })
+    }
+
+    #[test]
+    fn view_model_playlist_collects_videos_and_shorts_in_order() {
+        let val = browse_page(vec![json!({ "itemSectionRenderer": { "contents": [{
+            "richGridRenderer": { "contents": [
+                { "richItemRenderer": { "content": { "lockupViewModel": {
+                    "contentType": "LOCKUP_CONTENT_TYPE_VIDEO",
+                    "contentId": "vid00000001",
+                    "metadata": { "lockupMetadataViewModel": { "title": { "content": "A video" } } }
+                }}}},
+                { "richItemRenderer": { "content": { "lockupViewModel": {
+                    "contentType": "LOCKUP_CONTENT_TYPE_PLAYLIST",
+                    "rendererContext": { "commandContext": { "onTap": { "innertubeCommand": {
+                        "watchPlaylistEndpoint": { "playlistId": "PLskipped" } } } } }
+                }}}},
+                { "richItemRenderer": { "content": { "shortsLockupViewModel": {
+                    "onTap": { "innertubeCommand": { "reelWatchEndpoint": { "videoId": "short0000001" } } },
+                    "overlayMetadata": {
+                        "primaryText": { "content": "A short" },
+                        "secondaryText": { "content": "1.2M views" }
+                    }
+                }}}},
+                { "richItemRenderer": { "content": { "reelItemRenderer": {
+                    "videoId": "reel00000001",
+                    "headline": { "simpleText": "A reel" },
+                    "viewCountText": { "simpleText": "3K views" }
+                }}}}
+            ]}
+        }]}})]);
+
+        let (videos, token) = extract_videos_from_playlist_browse(&val);
+        let ids: Vec<&str> = videos.iter().map(|video| video.id.as_str()).collect();
+        assert_eq!(ids, ["vid00000001", "short0000001", "reel00000001"]);
+        assert_eq!(videos[0].title, "A video");
+        assert_eq!(videos[1].title, "A short");
+        assert_eq!(videos[1].view_count_text.as_deref(), Some("1.2M views"));
+        assert_eq!(videos[2].view_count_text.as_deref(), Some("3K views"));
+        assert_eq!(token, None);
+    }
+
+    #[test]
+    fn classic_playlist_reads_video_info_and_ignores_tokens_outside_its_list() {
+        let val = browse_page(vec![
+            json!({ "itemSectionRenderer": { "contents": [{ "playlistVideoListRenderer": { "contents": [
+                { "playlistVideoRenderer": {
+                    "videoId": "vid00000001",
+                    "title": { "runs": [{ "text": "Title" }] },
+                    "videoInfo": { "runs": [
+                        { "text": "1.2M views" }, { "text": " · " }, { "text": "3 years ago" }
+                    ]}
+                }}
+            ]}}]}}),
+            json!({ "itemSectionRenderer": { "contents": [
+                { "continuationItemRenderer": { "continuationEndpoint": {
+                    "continuationCommand": { "token": "ANOTHER_SECTION" } } } }
+            ]}}),
+        ]);
+
+        let (videos, token) = extract_videos_from_playlist_browse(&val);
+        assert_eq!(videos.len(), 1);
+        assert_eq!(videos[0].view_count_text.as_deref(), Some("1.2M views"));
+        assert_eq!(videos[0].published_text.as_deref(), Some("3 years ago"));
+        assert_eq!(token, None);
+    }
+
+    #[test]
+    fn browse_id_only_strips_a_leading_vl() {
+        assert_eq!(playlist_browse_id("PLabc"), "VLPLabc");
+        assert_eq!(playlist_browse_id("VLPLabc"), "VLPLabc");
+        assert_eq!(playlist_browse_id("PLxVLy"), "VLPLxVLy");
+    }
+
+    #[test]
+    fn page_header_owner_is_read_from_the_avatar_stack() {
+        let res = json!({ "header": { "pageHeaderRenderer": { "content": { "pageHeaderViewModel": {
+            "metadata": { "contentMetadataViewModel": { "metadataRows": [
+                { "metadataParts": [
+                    { "avatarStack": { "avatarStackViewModel": { "text": { "content": "by Linus Tech Tips" } } } }
+                ] },
+                { "metadataParts": [ { "text": { "content": "1,234 videos" } } ] }
+            ] } }
+        } } } } });
+        assert_eq!(
+            extract_owner_from_page_header(&res).as_deref(),
+            Some("Linus Tech Tips")
+        );
+    }
+
+    fn lockup(id: &str) -> Value {
+        json!({ "lockupViewModel": {
+            "contentType": "LOCKUP_CONTENT_TYPE_VIDEO",
+            "contentId": id,
+            "metadata": { "lockupMetadataViewModel": { "title": { "content": id } } }
+        }})
+    }
+
+    fn view_model_token(token: &str) -> Value {
+        json!({ "continuationItemViewModel": { "continuationCommand": {
+            "innertubeCommand": { "continuationCommand": { "token": token } } } } })
+    }
+
+    #[test]
+    fn lockup_first_page_hands_out_the_view_model_token() {
+        let val = browse_page(vec![json!({ "itemSectionRenderer": { "contents": [
+            lockup("vid00000001"),
+            lockup("vid00000002"),
+            view_model_token("PAGE2"),
+        ]}})]);
+        let (videos, token) = extract_videos_from_playlist_browse(&val);
+        assert_eq!(videos.len(), 2);
+        assert_eq!(token.as_deref(), Some("PAGE2"));
+    }
+
+    #[test]
+    fn later_pages_read_their_items_from_the_append_action() {
+        let val = json!({
+            "contents": { "twoColumnBrowseResultsRenderer": { "tabs": [{ "tabRenderer": {} }] } },
+            "onResponseReceivedActions": [{ "appendContinuationItemsAction": { "continuationItems": [
+                lockup("vid00000101"),
+                lockup("vid00000102"),
+                view_model_token("PAGE3"),
+            ]}}]
+        });
+        let (videos, token) = extract_videos_from_playlist_browse(&val);
+        let ids: Vec<&str> = videos.iter().map(|video| video.id.as_str()).collect();
+        assert_eq!(ids, ["vid00000101", "vid00000102"]);
+        assert_eq!(token.as_deref(), Some("PAGE3"));
+    }
+
+    #[test]
+    fn sidebar_stat_gives_the_video_count() {
+        let res = json!({ "sidebar": { "playlistSidebarRenderer": { "items": [
+            { "playlistSidebarPrimaryInfoRenderer": { "stats": [
+                { "runs": [{ "text": "1,234" }, { "text": " videos" }] },
+                { "simpleText": "5,678 views" }
+            ] } }
+        ] } } });
+        assert_eq!(extract_video_count_from_sidebar(&res), Some(1234));
+    }
+
+    #[test]
+    fn title_is_read_from_the_plain_page_title() {
+        let res = json!({
+            "header": { "pageHeaderRenderer": { "pageTitle": "WAN Show" } },
+            "metadata": { "playlistMetadataRenderer": { "title": "WAN Show (metadata)" } }
+        });
+        assert_eq!(extract_playlist_title(&res), "WAN Show");
+        let metadata_only =
+            json!({ "metadata": { "playlistMetadataRenderer": { "title": "From metadata" } } });
+        assert_eq!(extract_playlist_title(&metadata_only), "From metadata");
+    }
+}

@@ -1,0 +1,488 @@
+//! Tauri commands for the YouTube Music subsystem.
+//!
+//! These are additive and independent of `commands::youtube`. The playback
+//! command reuses the shared streaming proxy exactly like `get_stream_info`.
+
+use std::collections::HashMap;
+use std::sync::Arc;
+
+use sqlx::SqlitePool;
+use tauri::State;
+use uuid::Uuid;
+
+use crate::api::innertube::music::client::{
+    MusicRequestDiagnostics, music_request_diagnostics, record_public_cache_hit,
+};
+use crate::api::innertube::music::clients::WEB_REMIX;
+use crate::commands::music_brain::graph_taste;
+use crate::db::{music_content, music_home};
+use crate::errors::{AppError, ErrorResponse};
+use crate::models::music::{
+    AlbumItem, ArtistItem, ArtistPage, ChartsPage, ExplorePage, MoodAndGenreGroup,
+    MoodAndGenreItem, SongItem,
+};
+use crate::models::music_pages::{
+    AlbumPage, CachedMusicHomePage, MoodGenrePage, MusicHomePage, MusicPlaylistPage,
+    MusicSearchResponse, MusicSearchSuggestions, QueuePage, RelatedPage, SearchSummaryPage,
+};
+use crate::models::music_stream::{MusicAudioQuality, MusicStreamInfo};
+use crate::music_brain::store::MusicBrainStore;
+use crate::security::validation::{validate_search_query, validate_video_id};
+use crate::services::music_service::{Freshness, MusicService};
+use crate::streaming::hls;
+use crate::streaming::images::{image_content_type, is_local_host, proxyable_image_url};
+use crate::streaming::proxy::StreamingManager;
+
+type CmdResult<T> = Result<T, ErrorResponse>;
+
+// --- Browse ---------------------------------------------------------------
+
+/// Home responses vary only with the request's `hl`/`gl`, so the cache is keyed on
+/// the values the music client actually sends rather than the UI language.
+fn music_home_cache_stamp() -> String {
+    let context = WEB_REMIX.context(None, None);
+    let client = &context["client"];
+    format!(
+        "{}-{}",
+        client["hl"].as_str().unwrap_or_default(),
+        client["gl"].as_str().unwrap_or_default()
+    )
+}
+
+#[tauri::command]
+pub async fn get_music_home_page(
+    continuation: Option<String>,
+    music: State<'_, MusicService>,
+    pool: State<'_, SqlitePool>,
+) -> CmdResult<MusicHomePage> {
+    let page = music
+        .home(continuation.as_deref())
+        .await
+        .map_err(ErrorResponse::from)?;
+    if continuation.is_none()
+        && let Err(error) = music_home::save(&pool, &music_home_cache_stamp(), &page).await
+    {
+        tracing::warn!(%error, "Could not cache typed music home");
+    }
+    Ok(page)
+}
+
+#[tauri::command]
+pub async fn get_cached_music_home_page(
+    pool: State<'_, SqlitePool>,
+) -> CmdResult<Option<CachedMusicHomePage>> {
+    let cached = music_home::get_cached(&pool, &music_home_cache_stamp())
+        .await
+        .map_err(ErrorResponse::from)?;
+    if cached.is_some() {
+        record_public_cache_hit();
+    }
+    Ok(cached)
+}
+
+#[tauri::command]
+#[must_use]
+pub fn get_music_request_diagnostics() -> MusicRequestDiagnostics {
+    music_request_diagnostics()
+}
+
+#[tauri::command]
+pub async fn get_music_explore_page(music: State<'_, MusicService>) -> CmdResult<ExplorePage> {
+    music.explore().await.map_err(ErrorResponse::from)
+}
+
+#[tauri::command]
+pub async fn get_music_charts_page(
+    continuation: Option<String>,
+    country: Option<String>,
+    music: State<'_, MusicService>,
+) -> CmdResult<ChartsPage> {
+    music
+        .charts(continuation.as_deref(), country.as_deref())
+        .await
+        .map_err(ErrorResponse::from)
+}
+
+#[tauri::command]
+pub async fn get_music_moods(music: State<'_, MusicService>) -> CmdResult<Vec<MoodAndGenreItem>> {
+    music.moods().await.map_err(ErrorResponse::from)
+}
+
+#[tauri::command]
+pub async fn get_music_trending_songs(
+    country: Option<String>,
+    music: State<'_, MusicService>,
+) -> CmdResult<Vec<SongItem>> {
+    music
+        .trending_songs(country.as_deref())
+        .await
+        .map_err(ErrorResponse::from)
+}
+
+#[tauri::command]
+pub async fn get_music_mood_groups(
+    music: State<'_, MusicService>,
+) -> CmdResult<Vec<MoodAndGenreGroup>> {
+    music.mood_groups().await.map_err(ErrorResponse::from)
+}
+
+#[tauri::command]
+pub async fn get_music_new_releases(music: State<'_, MusicService>) -> CmdResult<Vec<AlbumItem>> {
+    music.new_releases().await.map_err(ErrorResponse::from)
+}
+
+#[tauri::command]
+pub async fn get_music_mood_genre(
+    browse_id: String,
+    params: Option<String>,
+    continuation: Option<String>,
+    music: State<'_, MusicService>,
+) -> CmdResult<MoodGenrePage> {
+    music
+        .mood_genre(&browse_id, params.as_deref(), continuation.as_deref())
+        .await
+        .map_err(ErrorResponse::from)
+}
+
+/// Artist "see all" — same browse shape as a mood/genre detail.
+#[tauri::command]
+pub async fn get_music_artist_items(
+    browse_id: String,
+    params: Option<String>,
+    continuation: Option<String>,
+    music: State<'_, MusicService>,
+) -> CmdResult<MoodGenrePage> {
+    music
+        .mood_genre(&browse_id, params.as_deref(), continuation.as_deref())
+        .await
+        .map_err(ErrorResponse::from)
+}
+
+// --- Search ---------------------------------------------------------------
+
+#[tauri::command]
+pub async fn search_music_typed(
+    query: String,
+    filter: String,
+    music: State<'_, MusicService>,
+) -> CmdResult<MusicSearchResponse> {
+    validate_search_query(&query).map_err(ErrorResponse::from)?;
+    music
+        .search(&query, &filter)
+        .await
+        .map_err(ErrorResponse::from)
+}
+
+#[tauri::command]
+pub async fn search_music_continuation(
+    continuation: String,
+    music: State<'_, MusicService>,
+) -> CmdResult<MusicSearchResponse> {
+    music
+        .search_continuation(&continuation)
+        .await
+        .map_err(ErrorResponse::from)
+}
+
+#[tauri::command]
+pub async fn get_music_search_summary(
+    query: String,
+    music: State<'_, MusicService>,
+) -> CmdResult<SearchSummaryPage> {
+    validate_search_query(&query).map_err(ErrorResponse::from)?;
+    music
+        .search_summary(&query)
+        .await
+        .map_err(ErrorResponse::from)
+}
+
+#[tauri::command]
+pub async fn get_music_search_suggestions(
+    query: String,
+    music: State<'_, MusicService>,
+) -> CmdResult<MusicSearchSuggestions> {
+    music
+        .search_suggestions(&query)
+        .await
+        .map_err(ErrorResponse::from)
+}
+
+// --- Album / Artist / Playlist -------------------------------------------
+
+#[tauri::command]
+pub async fn get_music_album_page(
+    browse_id: String,
+    prefer_cached: Option<bool>,
+    music: State<'_, MusicService>,
+) -> CmdResult<AlbumPage> {
+    music
+        .album(&browse_id, Freshness::prefer_cached(prefer_cached))
+        .await
+        .map_err(ErrorResponse::from)
+}
+
+#[tauri::command]
+pub async fn get_music_album_continuation(
+    continuation: String,
+    music: State<'_, MusicService>,
+) -> CmdResult<(Vec<SongItem>, Option<String>)> {
+    music
+        .album_continuation(&continuation)
+        .await
+        .map_err(ErrorResponse::from)
+}
+
+#[tauri::command]
+pub async fn get_music_artist_page(
+    browse_id: String,
+    prefer_cached: Option<bool>,
+    music: State<'_, MusicService>,
+) -> CmdResult<ArtistPage> {
+    music
+        .artist(&browse_id, Freshness::prefer_cached(prefer_cached))
+        .await
+        .map_err(ErrorResponse::from)
+}
+
+#[tauri::command]
+pub async fn get_music_playlist_page(
+    playlist_id: String,
+    prefer_cached: Option<bool>,
+    music: State<'_, MusicService>,
+) -> CmdResult<MusicPlaylistPage> {
+    music
+        .playlist(&playlist_id, Freshness::prefer_cached(prefer_cached))
+        .await
+        .map_err(ErrorResponse::from)
+}
+
+#[tauri::command]
+pub async fn get_music_playlist_continuation(
+    continuation: String,
+    music: State<'_, MusicService>,
+) -> CmdResult<(Vec<SongItem>, Option<String>)> {
+    music
+        .playlist_continuation(&continuation)
+        .await
+        .map_err(ErrorResponse::from)
+}
+
+// --- Watch / queue / lyrics ----------------------------------------------
+
+#[tauri::command]
+pub async fn get_music_watch_queue(
+    video_id: Option<String>,
+    playlist_id: Option<String>,
+    params: Option<String>,
+    music: State<'_, MusicService>,
+) -> CmdResult<QueuePage> {
+    music
+        .watch_queue(
+            video_id.as_deref(),
+            playlist_id.as_deref(),
+            params.as_deref(),
+        )
+        .await
+        .map_err(ErrorResponse::from)
+}
+
+#[tauri::command]
+pub async fn get_music_queue_continuation(
+    continuation: String,
+    music: State<'_, MusicService>,
+) -> CmdResult<QueuePage> {
+    music
+        .queue_continuation(&continuation)
+        .await
+        .map_err(ErrorResponse::from)
+}
+
+#[tauri::command]
+pub async fn get_music_queue(
+    video_ids: Vec<String>,
+    playlist_id: Option<String>,
+    music: State<'_, MusicService>,
+) -> CmdResult<QueuePage> {
+    music
+        .get_queue(&video_ids, playlist_id.as_deref())
+        .await
+        .map_err(ErrorResponse::from)
+}
+
+#[tauri::command]
+pub async fn get_music_related_typed(
+    video_id: String,
+    music: State<'_, MusicService>,
+) -> CmdResult<RelatedPage> {
+    validate_video_id(&video_id).map_err(ErrorResponse::from)?;
+    music.related(&video_id).await.map_err(ErrorResponse::from)
+}
+
+#[tauri::command]
+pub async fn get_music_deep_cuts(
+    limit: Option<i64>,
+    pool: State<'_, SqlitePool>,
+    music_brain: State<'_, Arc<MusicBrainStore>>,
+) -> CmdResult<Vec<SongItem>> {
+    let taste = graph_taste(&*music_brain.read().await);
+    music_content::deep_cuts(&pool, &taste, limit.unwrap_or(20))
+        .await
+        .map_err(ErrorResponse::from)
+}
+
+#[tauri::command]
+pub async fn get_music_linked_artists(
+    limit: Option<i64>,
+    pool: State<'_, SqlitePool>,
+    music_brain: State<'_, Arc<MusicBrainStore>>,
+) -> CmdResult<Vec<ArtistItem>> {
+    let taste = graph_taste(&*music_brain.read().await);
+    music_content::linked_artists(&pool, &taste, limit.unwrap_or(20))
+        .await
+        .map_err(ErrorResponse::from)
+}
+
+#[tauri::command]
+pub async fn get_music_lyrics_typed(
+    video_id: String,
+    music: State<'_, MusicService>,
+) -> CmdResult<Option<crate::models::music_pages::MusicLyrics>> {
+    validate_video_id(&video_id).map_err(ErrorResponse::from)?;
+    music.lyrics(&video_id).await.map_err(ErrorResponse::from)
+}
+
+#[derive(serde::Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct LyricsHttpResponse {
+    pub status: u16,
+    pub body: String,
+}
+
+/// HTTPS GET passthrough for the client-side lyrics engine, limited to the lyrics providers.
+#[tauri::command]
+pub async fn lyrics_http_get(
+    url: String,
+    headers: Option<HashMap<String, String>>,
+) -> CmdResult<LyricsHttpResponse> {
+    let response = crate::api::lyrics_http::get(&url, headers.unwrap_or_default())
+        .await
+        .map_err(ErrorResponse::from)?;
+    Ok(LyricsHttpResponse {
+        status: response.status,
+        body: response.body,
+    })
+}
+
+// --- Playback (reuses the shared streaming proxy) -------------------------
+
+#[tauri::command]
+#[tracing::instrument(skip_all, fields(video_id = %video_id, kind = "music"))]
+pub async fn get_music_stream(
+    video_id: String,
+    audio_quality: Option<String>,
+    prefer_aac: Option<bool>,
+    music: State<'_, MusicService>,
+    streaming_manager: State<'_, StreamingManager>,
+) -> CmdResult<MusicStreamInfo> {
+    validate_video_id(&video_id).map_err(ErrorResponse::from)?;
+    let audio_quality = audio_quality
+        .as_deref()
+        .map(str::parse::<MusicAudioQuality>)
+        .transpose()
+        .map_err(|message| ErrorResponse::from(AppError::Validation(message)))?
+        .unwrap_or_default();
+
+    let mut info = music
+        .resolve_stream(&video_id, audio_quality, prefer_aac.unwrap_or(false))
+        .await
+        .map_err(ErrorResponse::from)?;
+
+    // Register the upstream audio URL with the shared proxy and rewrite to a
+    // loopback URL — identical mechanism to the video `get_stream_info`.
+    let token = uuid::Uuid::new_v4().to_string();
+    let content_type = info
+        .mime_type
+        .split(';')
+        .next()
+        .unwrap_or("audio/webm")
+        .to_string();
+    streaming_manager.register_session(
+        token.clone(),
+        info.audio_url.clone(),
+        content_type,
+        info.user_agent.clone(),
+    );
+    let port = streaming_manager.get_port();
+    let media = format!("/stream/{token}");
+    info.audio_url = format!("http://127.0.0.1:{port}{media}");
+    if hls::SERVE_AAC_AS_HLS
+        && info.mime_type.starts_with("audio/mp4")
+        && let Some(playlist) = hls::aac_playlist(port, &media).await
+    {
+        let token = uuid::Uuid::new_v4().to_string();
+        streaming_manager.register_inline_session(
+            token.clone(),
+            playlist.into_bytes(),
+            "application/vnd.apple.mpegurl".into(),
+        );
+        info.audio_url = format!("http://127.0.0.1:{port}/stream/{token}");
+    }
+    info.user_agent = String::new();
+
+    Ok(info)
+}
+
+#[tauri::command]
+pub async fn proxy_image_url(
+    url: String,
+    streaming_manager: State<'_, StreamingManager>,
+) -> CmdResult<String> {
+    let trimmed = url.trim();
+    let parsed = reqwest::Url::parse(trimmed)
+        .map_err(|_| ErrorResponse::from(AppError::Validation("Invalid image URL".into())))?;
+
+    match parsed.scheme() {
+        "http" | "https" => {}
+        _ => {
+            return Err(ErrorResponse::from(AppError::Validation(
+                "Unsupported image URL".into(),
+            )));
+        }
+    }
+
+    if parsed.host_str().is_none_or(is_local_host) {
+        return Err(ErrorResponse::from(AppError::Validation(
+            "Local image URLs cannot be proxied".into(),
+        )));
+    }
+
+    let upstream_url = proxyable_image_url(&parsed);
+    let token = format!("img-{}", Uuid::new_v4());
+    streaming_manager.register_session(
+        token.clone(),
+        upstream_url.clone(),
+        image_content_type(&upstream_url),
+        crate::api::http::BROWSER_USER_AGENT.to_string(),
+    );
+
+    Ok(format!(
+        "http://127.0.0.1:{}/stream/{}",
+        streaming_manager.get_image_port(),
+        token
+    ))
+}
+
+/// Base URL of the proxy's image route when the webview can't fetch HTTPS
+/// images itself (the Linux AppImage, see `streaming::images`); `None`
+/// everywhere else, where images load directly.
+#[tauri::command]
+pub fn image_proxy_base(streaming_manager: State<'_, StreamingManager>) -> Option<String> {
+    let needed = cfg!(target_os = "linux") && std::env::var_os("APPIMAGE").is_some();
+    needed.then(|| {
+        format!(
+            "http://127.0.0.1:{}/img/{}",
+            streaming_manager.get_image_port(),
+            crate::streaming::images::route_token()
+        )
+    })
+}
