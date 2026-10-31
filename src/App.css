@@ -1,0 +1,808 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #FF0000;
+  --color-on-primary: var(--color-on-primary-val);
+  --color-secondary: var(--color-secondary-val);
+  --color-background: var(--color-background-val);
+  --color-surface: var(--color-surface-val);
+  --color-surface-container-low: var(--color-surface-container-low-val);
+  --color-surface-container: var(--color-surface-container-val);
+  --color-surface-container-high: var(--color-surface-container-high-val);
+  --color-surface-container-highest: var(--color-surface-container-highest-val);
+  --color-outline-variant: var(--color-outline-variant-val);
+  --color-on-surface: var(--color-on-surface-val);
+  --color-on-surface-variant: var(--color-on-surface-variant-val);
+  --color-error: #F44336;
+
+  /* Profile colours: Flow for Android's eight seeds keep their hue and take the tones of
+     ProfileColors.kt (light: container 90, content 10; dark: container 30, content 90). */
+  --color-profile-blue-container: var(--profile-blue-container-val);
+  --color-profile-blue-content: var(--profile-blue-content-val);
+  --color-profile-teal-container: var(--profile-teal-container-val);
+  --color-profile-teal-content: var(--profile-teal-content-val);
+  --color-profile-green-container: var(--profile-green-container-val);
+  --color-profile-green-content: var(--profile-green-content-val);
+  --color-profile-amber-container: var(--profile-amber-container-val);
+  --color-profile-amber-content: var(--profile-amber-content-val);
+  --color-profile-orange-container: var(--profile-orange-container-val);
+  --color-profile-orange-content: var(--profile-orange-content-val);
+  --color-profile-red-container: var(--profile-red-container-val);
+  --color-profile-red-content: var(--profile-red-content-val);
+  --color-profile-pink-container: var(--profile-pink-container-val);
+  --color-profile-pink-content: var(--profile-pink-content-val);
+  --color-profile-purple-container: var(--profile-purple-container-val);
+  --color-profile-purple-content: var(--profile-purple-content-val);
+
+  /* --- Chrome palette (custom-themes migration) ---
+     Mirrors Tailwind's default palette exactly (oklch values copied from
+     tailwindcss/theme.css) so swapping a literal `zinc-800`-style class for
+     one of these tokens is a zero-diff refactor. Not split by light/dark on
+     purpose: the classes they replace never responded to color-scheme either. */
+  --color-chrome-white: #ffffff;
+  --color-chrome-black: #000000;
+
+  --color-chrome-neutral-50: oklch(98.5% 0 0);
+  --color-chrome-neutral-100: oklch(97% 0 0);
+  --color-chrome-neutral-200: oklch(92.2% 0 0);
+  --color-chrome-neutral-300: oklch(87% 0 0);
+  --color-chrome-neutral-400: oklch(70.8% 0 0);
+  --color-chrome-neutral-500: oklch(55.6% 0 0);
+  --color-chrome-neutral-600: oklch(43.9% 0 0);
+  --color-chrome-neutral-700: oklch(37.1% 0 0);
+  --color-chrome-neutral-800: oklch(26.9% 0 0);
+  --color-chrome-neutral-900: oklch(20.5% 0 0);
+  --color-chrome-neutral-950: oklch(14.5% 0 0);
+
+  --color-chrome-zinc-100: oklch(96.7% 0.001 286.375);
+  --color-chrome-zinc-200: oklch(92% 0.004 286.32);
+  --color-chrome-zinc-300: oklch(87.1% 0.006 286.286);
+  --color-chrome-zinc-400: oklch(70.5% 0.015 286.067);
+  --color-chrome-zinc-500: oklch(55.2% 0.016 285.938);
+  --color-chrome-zinc-600: oklch(44.2% 0.017 285.786);
+  --color-chrome-zinc-700: oklch(37% 0.013 285.805);
+  --color-chrome-zinc-800: oklch(27.4% 0.006 286.033);
+  --color-chrome-zinc-900: oklch(21% 0.006 285.885);
+  --color-chrome-zinc-950: oklch(14.1% 0.005 285.823);
+
+  --color-chrome-red-300: oklch(80.8% 0.114 19.571);
+  --color-chrome-red-400: oklch(70.4% 0.191 22.216);
+  --color-chrome-red-500: oklch(63.7% 0.237 25.331);
+  --color-chrome-red-600: oklch(57.7% 0.245 27.325);
+  --color-chrome-red-700: oklch(50.5% 0.213 27.518);
+  --color-chrome-red-800: oklch(44.4% 0.177 26.899);
+  --color-chrome-red-900: oklch(39.6% 0.141 25.723);
+  --color-chrome-red-950: oklch(25.8% 0.092 26.042);
+
+  --color-chrome-emerald-400: oklch(76.5% 0.177 163.223);
+  --color-chrome-emerald-500: oklch(69.6% 0.17 162.48);
+  --color-chrome-emerald-800: oklch(43.2% 0.095 166.913);
+  --color-chrome-emerald-900: oklch(37.8% 0.077 168.94);
+  --color-chrome-emerald-950: oklch(26.2% 0.051 172.552);
+
+  --color-chrome-amber-400: oklch(82.8% 0.189 84.429);
+  --color-chrome-amber-500: oklch(76.9% 0.188 70.08);
+
+  --color-chrome-blue-400: oklch(70.7% 0.165 254.624);
+  --color-chrome-sky-400: oklch(74.6% 0.16 232.661);
+  --color-chrome-green-400: oklch(79.2% 0.209 151.711);
+  --color-chrome-green-500: oklch(72.3% 0.219 149.579);
+
+  /* One-off literal UI-chrome colors (player toasts/popovers/search bars),
+     named instead of inline hex so a future theme can restyle them too. */
+  --color-chrome-toast: #1A1A1A;
+  --color-chrome-toast-border: #2A2A2A;
+  --color-chrome-popover: #151515;
+  --color-chrome-searchbar: #121212;
+  --color-chrome-dropdown: #181818;
+  --color-chrome-input-surface: #0F0F0F;
+}
+
+@layer base {
+  :root {
+    --color-player-ambient-1: rgba(10, 10, 10, 0.95);
+    --color-player-ambient-2: rgba(8, 8, 8, 0.9);
+    --color-player-ambient-3: rgba(18, 18, 18, 0.65);
+    --color-secondary-val: #606060;
+    --color-background-val: #FFFFFF;
+    --color-surface-val: #F9F9F9;
+    --color-surface-container-low-val: #F3F3F3;
+    --color-surface-container-val: #EEEEEE;
+    --color-surface-container-high-val: #E8E8E8;
+    --color-surface-container-highest-val: #E1E1E1;
+    --color-outline-variant-val: #D7D7D7;
+    --color-on-surface-val: #111111;
+    --color-on-surface-variant-val: #5F5F5F;
+    --color-on-primary-val: #FFFFFF;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-secondary-val: #AAAAAA;
+      --color-background-val: #0F0F0F;
+      --color-surface-val: #1d1d1d;
+      --color-surface-container-low-val: #171717;
+      --color-surface-container-val: #1D1D1D;
+      --color-surface-container-high-val: #242424;
+      --color-surface-container-highest-val: #303030;
+      --color-outline-variant-val: #2A2A2A;
+      --color-on-surface-val: #F4F4F4;
+      --color-on-surface-variant-val: #B8B8B8;
+      --color-on-primary-val: #FFFFFF;
+    }
+  }
+
+  /* Dark tones by default (dark and amoled), light tones once a light theme applies. */
+  :root {
+    --profile-blue-container-val: #0043A4;
+    --profile-blue-content-val: #BEDDFF;
+    --profile-teal-container-val: #005448;
+    --profile-teal-content-val: #8BF5E4;
+    --profile-green-container-val: #005500;
+    --profile-green-content-val: #9BF897;
+    --profile-amber-container-val: #6F3B00;
+    --profile-amber-content-val: #FFD443;
+    --profile-orange-container-val: #8E1700;
+    --profile-orange-content-val: #FFBC5D;
+    --profile-red-container-val: #990013;
+    --profile-red-content-val: #FFB0A2;
+    --profile-pink-container-val: #95004A;
+    --profile-pink-content-val: #FFB2E6;
+    --profile-purple-container-val: #533197;
+    --profile-purple-content-val: #FCCCFF;
+  }
+
+  :root[data-theme-variant="light"] {
+    --profile-blue-container-val: #BEDDFF;
+    --profile-blue-content-val: #001B6F;
+    --profile-teal-container-val: #8BF5E4;
+    --profile-teal-content-val: #00281D;
+    --profile-green-container-val: #9BF897;
+    --profile-green-content-val: #002900;
+    --profile-amber-container-val: #FFD443;
+    --profile-amber-content-val: #430C00;
+    --profile-orange-container-val: #FFBC5D;
+    --profile-orange-content-val: #590000;
+    --profile-red-container-val: #FFB0A2;
+    --profile-red-content-val: #5F0000;
+    --profile-pink-container-val: #FFB2E6;
+    --profile-pink-content-val: #5B001F;
+    --profile-purple-container-val: #FCCCFF;
+    --profile-purple-content-val: #180263;
+  }
+
+  body {
+    @apply bg-background text-chrome-zinc-100 antialiased overflow-hidden select-none;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-chrome-zinc-800 rounded-full hover:bg-chrome-zinc-700 transition-colors;
+}
+
+.active-nav-item {
+  @apply bg-chrome-red-950/40 text-primary border-l-4 border-primary;
+}
+
+.deep-flow-topbar-active {
+  color: var(--color-primary);
+  background-color: color-mix(in srgb, var(--color-primary) 15%, transparent);
+}
+
+.deep-flow-topbar-active:hover {
+  color: var(--color-primary);
+  background-color: color-mix(in srgb, var(--color-primary) 22%, transparent);
+}
+
+@keyframes pane-fade-in {
+  from {
+    opacity: 0;
+    transform: translateX(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-pane-in {
+  animation: pane-fade-in 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.shimmer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--color-chrome-white) 6%, transparent),
+    transparent
+  );
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+
+@keyframes player-feedback-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.82);
+  }
+  14% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  74% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+}
+
+.animate-player-feedback {
+  animation: player-feedback-pop 1.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes player-seek-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.78);
+  }
+  16% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  72% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+}
+
+/*
+  Shared motion. Enters use the side rail's curve; exits accelerate away and are always
+  shorter than the enter, so nothing that is closing seems to linger. Scripted motion
+  reads these same tokens (src/lib/motion.ts).
+*/
+:root {
+  --motion-ease: cubic-bezier(0.2, 0, 0, 1);
+  --motion-ease-exit: cubic-bezier(0.3, 0, 1, 1);
+  --motion-menu-in: 150ms;
+  --motion-menu-out: 100ms;
+  --motion-pane: 180ms;
+  --motion-page: 200ms;
+  --motion-layout: 320ms;
+  --motion-panel: 360ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-menu-in: 0ms;
+    --motion-menu-out: 0ms;
+    --motion-pane: 0ms;
+    --motion-page: 0ms;
+    --motion-layout: 0ms;
+    --motion-panel: 0ms;
+  }
+}
+
+/* Menus grow from the corner nearest the button that opened them; the menu sets that origin. */
+@keyframes menu-pop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.animate-menu-in {
+  animation: menu-pop-in var(--motion-menu-in) var(--motion-ease);
+  transform-origin: top;
+}
+
+/* The bell swings once, from its top, when notifications for a channel turn on. */
+@keyframes bell-ring {
+  0%, 100% { transform: rotate(0); }
+  15% { transform: rotate(14deg); }
+  32% { transform: rotate(-12deg); }
+  50% { transform: rotate(8deg); }
+  68% { transform: rotate(-5deg); }
+  84% { transform: rotate(2deg); }
+}
+
+.animate-bell-ring {
+  animation: bell-ring 700ms var(--motion-ease);
+  transform-origin: 50% 8%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-bell-ring {
+    animation: none;
+  }
+}
+
+.animate-player-seek {
+  animation: player-seek-pop 1.15s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/*
+  The side rail pushes the page as it opens and closes. One duration and curve serve both
+  directions and the drawer on the watch and settings pages, so they all move alike.
+  Icons sit in a fixed 56 px slot, so only labels and the extra sections fade.
+*/
+:root {
+  --sidebar-motion-duration: 600ms;
+  --sidebar-motion-ease: cubic-bezier(0.2, 0, 0, 1);
+}
+
+.sidebar-rail {
+  width: 72px;
+  transition: width var(--sidebar-motion-duration) var(--sidebar-motion-ease);
+}
+
+.sidebar-rail[data-expanded="true"] {
+  width: 240px;
+}
+
+/* Hidden content keeps no height, so the rail never scrolls through it. */
+.sidebar-when-expanded,
+.sidebar-when-collapsed {
+  overflow: hidden;
+}
+
+[data-expanded="false"] .sidebar-when-expanded,
+[data-expanded="true"] .sidebar-when-collapsed {
+  max-height: 0;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 200ms linear, visibility 0s linear 200ms, max-height 0s linear 200ms;
+}
+
+[data-expanded="true"] .sidebar-when-expanded,
+[data-expanded="false"] .sidebar-when-collapsed {
+  max-height: 9999px;
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 320ms linear 200ms, visibility 0s linear 200ms, max-height 0s linear 200ms;
+}
+
+.sidebar-label {
+  transition: opacity 200ms linear;
+}
+
+[data-expanded="false"] .sidebar-label {
+  opacity: 0;
+}
+
+[data-expanded="true"] .sidebar-label {
+  opacity: 1;
+  transition: opacity 320ms linear 160ms;
+}
+
+.sidebar-drawer {
+  transform: translateX(-100%);
+  visibility: hidden;
+  transition:
+    transform var(--sidebar-motion-duration) var(--sidebar-motion-ease),
+    visibility 0s linear var(--sidebar-motion-duration);
+}
+
+[data-open="true"] > .sidebar-drawer {
+  transform: none;
+  visibility: visible;
+  transition: transform var(--sidebar-motion-duration) var(--sidebar-motion-ease), visibility 0s;
+}
+
+.sidebar-scrim {
+  opacity: 0;
+  transition: opacity 300ms linear;
+}
+
+[data-open="true"] > .sidebar-scrim {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sidebar-drawer,
+  .sidebar-scrim,
+  .sidebar-rail,
+  .sidebar-label,
+  .sidebar-when-expanded,
+  .sidebar-when-collapsed {
+    transition: none !important;
+  }
+}
+
+/*
+  The full player's colours ease over a second on a song change, as on Android.
+  Registering them as colours is what lets a gradient that reads them animate.
+*/
+@property --player-ground { syntax: "<color>"; inherits: true; initial-value: black; }
+@property --player-base { syntax: "<color>"; inherits: true; initial-value: black; }
+@property --player-accent { syntax: "<color>"; inherits: true; initial-value: black; }
+
+.player-palette-ease {
+  transition: --player-ground 1s linear, --player-base 1s linear, --player-accent 1s linear;
+}
+
+/* The routed page while the full music player covers it (useCoverAppContent). */
+[data-app-content][data-covered] {
+  content-visibility: hidden;
+}
+
+@keyframes music-wave {
+  0%,
+  100% {
+    transform: scaleY(0.35);
+  }
+  45% {
+    transform: scaleY(1);
+  }
+}
+
+.music-wave-bar {
+  transform-origin: bottom;
+  animation: music-wave 760ms ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .music-wave-bar {
+    animation: none;
+  }
+
+  /* The wash animates through inline styles, so reduced motion has to outrank them. */
+  .color-wash {
+    transform: none !important;
+    transition: opacity 120ms linear !important;
+  }
+}
+
+/*
+  Material 3 Expressive slider.
+
+  The 3px handle sits inside a 6px gap cut out of the track, and that gap has to
+  show the surface behind it rather than a colour — so the two track segments are
+  positioned off `--m3-fill` (0..1) instead of being painted as one gradient.
+  Handle position is measured from its centre so narrowing it on press stays
+  symmetric.
+*/
+.m3-slider {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 1.75rem;
+  touch-action: none;
+}
+
+.m3-slider__track {
+  position: absolute;
+  height: 0.75rem;
+  border-radius: 9999px;
+}
+
+.m3-slider__track--active {
+  left: 0;
+  width: max(0px, calc(var(--m3-fill) * (100% - 3px) - 6px));
+  background-color: var(--color-primary);
+}
+
+.m3-slider__track--inactive {
+  left: calc(var(--m3-fill) * (100% - 3px) + 9px);
+  right: 0;
+  background-color: var(--color-surface-container-highest);
+}
+
+.m3-slider__handle {
+  position: absolute;
+  left: calc(1.5px + var(--m3-fill) * (100% - 3px));
+  transform: translateX(-50%);
+  width: 3px;
+  height: 1.5rem;
+  border-radius: 9999px;
+  background-color: var(--color-primary);
+  transition: width 120ms ease-out;
+}
+
+.m3-slider[data-pressed="true"] .m3-slider__handle {
+  width: 2px;
+}
+
+/* Marks the end of travel; pointless once the handle has reached it. */
+.m3-slider__stop {
+  position: absolute;
+  right: 6px;
+  width: 3px;
+  height: 3px;
+  border-radius: 9999px;
+  background-color: var(--color-primary);
+}
+
+/* The real control: invisible, but keeps native dragging, keyboard and a11y. */
+.m3-slider__input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.m3-slider__input:disabled {
+  cursor: not-allowed;
+}
+
+.m3-slider[data-disabled="true"] {
+  opacity: 0.5;
+}
+
+/* Progressive enhancement — `:has()` is missing on older WebKitGTK builds. */
+.m3-slider:has(.m3-slider__input:focus-visible) .m3-slider__handle {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/*
+  Vertical variant (EQ bands). Same geometry rotated: the fill grows from the
+  bottom, so every offset is measured from `bottom` instead of `left`. The
+  hidden input keeps the writing-mode pair the EQ sliders already used, which is
+  what makes a native range drag bottom-to-top.
+*/
+.m3-slider--vertical {
+  width: 1.25rem;
+  height: 6.5rem;
+  justify-content: center;
+}
+
+.m3-slider--vertical .m3-slider__track {
+  left: 50%;
+  height: auto;
+  width: 0.75rem;
+  transform: translateX(-50%);
+}
+
+.m3-slider--vertical .m3-slider__track--active {
+  top: auto;
+  bottom: 0;
+  height: max(0px, calc(var(--m3-fill) * (100% - 3px) - 6px));
+}
+
+.m3-slider--vertical .m3-slider__track--inactive {
+  top: 0;
+  left: 50%;
+  right: auto;
+  bottom: calc(var(--m3-fill) * (100% - 3px) + 9px);
+}
+
+.m3-slider--vertical .m3-slider__handle {
+  left: 50%;
+  top: auto;
+  bottom: calc(1.5px + var(--m3-fill) * (100% - 3px));
+  width: 1.25rem;
+  height: 3px;
+  transform: translate(-50%, 50%);
+  transition: height 120ms ease-out;
+}
+
+.m3-slider--vertical[data-pressed="true"] .m3-slider__handle {
+  width: 1.25rem;
+  height: 2px;
+}
+
+.m3-slider--vertical .m3-slider__stop {
+  right: auto;
+  left: 50%;
+  top: 6px;
+  transform: translateX(-50%);
+}
+
+.m3-slider--vertical .m3-slider__input {
+  writing-mode: vertical-lr;
+  direction: rtl;
+}
+
+/* The pre-expressive look, kept for the Settings opt-out. */
+.m3-slider-legacy {
+  width: 100%;
+  height: 0.25rem;
+  accent-color: var(--color-primary);
+  cursor: pointer;
+}
+
+.m3-slider-legacy--vertical {
+  writing-mode: vertical-lr;
+  direction: rtl;
+  width: 1.25rem;
+  height: 6.5rem;
+  background: transparent;
+}
+
+.m3-slider-legacy:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .m3-slider__handle {
+    transition: none;
+  }
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.scrollbar-none {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/*
+  A Short fills its slide's height, but its 9:16 width must still fit beside the
+  two side columns and an open side panel, or a tall narrow window clips it.
+  `--short-sides` is both 260/280px columns plus the row's gaps and padding. The
+  floor keeps the video usable on a small window; the side panel narrows instead.
+*/
+.short-stage {
+  container-type: size;
+  --short-sides: 616px;
+}
+
+@media (width >= 64rem) {
+  .short-stage {
+    --short-sides: 672px;
+  }
+}
+
+.short-frame {
+  height: clamp(
+    min(100%, 360px),
+    calc((100cqw - var(--short-sides) - var(--short-panel, 0px)) * 16 / 9),
+    100%
+  );
+}
+
+#flow-player-root[data-fullscreen="true"] {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  aspect-ratio: auto !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  background-color: var(--color-chrome-black) !important;
+}
+
+#flow-player-root[data-fullscreen="true"] video {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
+  object-fit: contain !important;
+}
+
+/*
+  Adaptive content grids.
+
+  `--flow-grid-columns` is the ceiling the user picked in Settings, not a fixed
+  count: each track is at least `--flow-grid-card-min` wide, so a window too
+  narrow for that many columns sheds columns instead of squashing cards. The
+  `100% / n - gap` min is deliberately a hair under the exact per-track width —
+  the slack keeps sub-pixel rounding from dropping the last track on a window
+  that is wide enough.
+
+  auto-fill, not auto-fit: a half-empty last row must keep the same track width
+  as the full rows above it instead of stretching to fill.
+*/
+.flow-grid {
+  display: grid;
+  column-gap: var(--flow-grid-gap, 1rem);
+  grid-template-columns: repeat(
+    auto-fill,
+    minmax(
+      max(
+        var(--flow-grid-card-min, 13rem),
+        calc(100% / var(--flow-grid-columns, 4) - var(--flow-grid-gap, 1rem))
+      ),
+      1fr
+    )
+  );
+}
+
+/*
+  Offscreen feed cards are skipped by content-visibility, so their placeholder
+  height has to track the column count — a stale guess makes the scrollbar jump
+  as cards paint in. 0.5625 is the 16:9 thumbnail; the addend is the meta row.
+*/
+.flow-grid-card {
+  content-visibility: auto;
+  /*
+    `--flow-grid-track-w` is the used track width, published by
+    `useResolvedGridColumns` from the same measurement that resolves the column
+    count. The `100vw` fallback covers the frames before that lands, but it is
+    only a guess: it counts the sidebar and page padding the grid does not
+    occupy, so it overshoots and the scrollbar creeps as cards render and
+    correct themselves.
+  */
+  contain-intrinsic-size: auto calc(
+    var(--flow-grid-track-w, calc(100vw / var(--flow-grid-columns, 4))) * 0.5625 + 4.5rem
+  );
+}
