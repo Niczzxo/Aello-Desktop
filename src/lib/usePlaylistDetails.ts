@@ -1,0 +1,290 @@
+import { useCallback, useEffect, useRef, useState } from "react";
+import { getPlaylistDetails, getVideoMetadata } from "./api/youtube";
+import {
+  formatVideoCountText,
+  getStoredPlaylistById,
+  isProtectedPlaylistId,
+  normalizePlaylist,
+  resolvePlaylistTitle,
+  updateStoredPlaylistTracks,
+  type StoredPlaylist,
+} from "./playlistLibrary";
+import { appendUniqueVideos, loadRemainingPlaylistVideos } from "./playlistPages";
+import {
+  applyVideoMetadata,
+  ENRICHMENT_CHUNK_DELAY_MS,
+  ENRICHMENT_CHUNK_SIZE,
+  ENRICHMENT_TRACK_LIMIT,
+  needsEnrichment,
+} from "./playlistEnrichment";
+import { recentlyCheckedIds, rememberChecks } from "./playlistMetadataChecks";
+import type { VideoMetadata, VideoSummary } from "../types/video";
+
+export interface PlaylistDetailsMeta {
+  id: string;
+  title: string;
+  description?: string | null;
+  channelName: string;
+  viewCountText: string | null;
+  videoCount: number;
+  videoCountText: string;
+  thumbnailUrl: string | null;
+  updatedLabel: string;
+}
+
+export function usePlaylistDetails(playlistId: string | undefined) {
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [storedPlaylist, setStoredPlaylist] = useState<StoredPlaylist | null>(null);
+  const [meta, setMeta] = useState<PlaylistDetailsMeta | null>(null);
+  const [videos, setVideos] = useState<VideoSummary[]>([]);
+  // The next page of a playlist read from YouTube; a saved playlist shows its own tracks.
+  const [nextPageToken, setNextPageToken] = useState<string | null>(null);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [loadMoreFailed, setLoadMoreFailed] = useState(false);
+  const pagingRef = useRef(false);
+
+  const load = useCallback(async () => {
+    if (!playlistId) {
+      setLoading(false);
+      setError("Playlist not found");
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+    setNextPageToken(null);
+    setLoadMoreFailed(false);
+    // Cleared so enrichment never pairs the old list with the new playlist.
+    setVideos([]);
+
+    try {
+      const stored = await getStoredPlaylistById(playlistId);
+      const normalizedStored = stored ? normalizePlaylist(stored) : null;
+      setStoredPlaylist(normalizedStored);
+
+      let remoteVideos: VideoSummary[] = [];
+      let remoteTitle: string | null = null;
+      let remoteChannel = isProtectedPlaylistId(playlistId) ? "Flow" : "YouTube";
+      let remoteDescription: string | null = null;
+      let remoteCount: number | null = null;
+      let remoteViewCountText: string | null = null;
+      let remoteNextPageToken: string | null = null;
+
+      if (!isProtectedPlaylistId(playlistId)) {
+        try {
+          const details = await getPlaylistDetails(playlistId);
+          remoteVideos = details.videos ?? [];
+          remoteTitle = details.title;
+          remoteChannel = details.channelName || remoteChannel;
+          remoteDescription = details.description ?? null;
+          remoteCount = details.videoCount ?? remoteVideos.length;
+          remoteViewCountText = details.viewCountText ?? null;
+          remoteNextPageToken = details.nextPageToken ?? null;
+        } catch (fetchError) {
+          console.warn("Failed to fetch remote playlist details", fetchError);
+          if (!normalizedStored) {
+            throw fetchError;
+          }
+        }
+      }
+
+      const resolvedVideos = normalizedStored?.tracks.length
+        ? normalizedStored.tracks
+        : remoteVideos;
+
+      const usesRemote = !normalizedStored?.tracks.length;
+      const videoCount = usesRemote && remoteCount
+        ? Math.max(remoteCount, resolvedVideos.length)
+        : resolvedVideos.length || remoteCount || normalizedStored?.videoCount || 0;
+
+      const thumbnailUrl = normalizedStored?.thumbnailUrl
+        ?? resolvedVideos[0]?.thumbnailUrl
+        ?? remoteVideos[0]?.thumbnailUrl
+        ?? null;
+
+      const title = resolvePlaylistTitle(
+        normalizedStored?.name,
+        normalizedStored?.sourceTitle,
+        remoteTitle,
+      );
+
+      const updatedAt = normalizedStored?.createdAt;
+      const updatedLabel = normalizedStored?.isProtected
+        ? "Built-in playlist"
+        : updatedAt
+        ? formatUpdatedLabel(updatedAt)
+        : "Updated recently";
+
+      setVideos(resolvedVideos);
+      setNextPageToken(usesRemote ? remoteNextPageToken : null);
+      const resolvedOwner = !isUnknownOwner(remoteChannel)
+        ? remoteChannel
+        : resolvedVideos[0]?.channelName ?? remoteChannel;
+
+      setMeta({
+        id: playlistId,
+        title,
+        description: normalizedStored?.description ?? remoteDescription,
+        channelName: resolvedOwner,
+        viewCountText: remoteViewCountText,
+        videoCount: videoCount > 0 ? videoCount : resolvedVideos.length,
+        videoCountText: formatVideoCountText(
+          videoCount > 0 ? videoCount : resolvedVideos.length,
+        ),
+        thumbnailUrl,
+        updatedLabel,
+      });
+    } catch (loadError) {
+      console.error("Failed to load playlist details", loadError);
+      setError("Could not load this playlist.");
+      setMeta(null);
+      setVideos([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [playlistId]);
+
+  useEffect(() => {
+    void load();
+  }, [load]);
+
+  const loadMore = useCallback(async () => {
+    if (!playlistId || !nextPageToken || pagingRef.current) return;
+    pagingRef.current = true;
+    setLoadingMore(true);
+    setLoadMoreFailed(false);
+    try {
+      const page = await getPlaylistDetails(playlistId, nextPageToken);
+      setVideos((current) => appendUniqueVideos(current, page.videos ?? []));
+      setNextPageToken(page.nextPageToken ?? null);
+    } catch (pageError) {
+      console.warn("Failed to load the next playlist page", pageError);
+      setLoadMoreFailed(true);
+    } finally {
+      pagingRef.current = false;
+      setLoadingMore(false);
+    }
+  }, [playlistId, nextPageToken]);
+
+  /** Every video of the playlist, reading the pages not loaded yet. */
+  const loadAllVideos = useCallback(async (): Promise<VideoSummary[]> => {
+    if (!playlistId || !nextPageToken || pagingRef.current) return videos;
+    pagingRef.current = true;
+    setLoadingMore(true);
+    try {
+      const all = await loadRemainingPlaylistVideos(playlistId, videos, nextPageToken);
+      setVideos(all);
+      setNextPageToken(null);
+      return all;
+    } finally {
+      pagingRef.current = false;
+      setLoadingMore(false);
+    }
+  }, [playlistId, nextPageToken, videos]);
+
+  // Per playlist, since this hook outlives a switch; a pass stops once its playlist leaves the screen.
+  // Tracks this visit has dealt with, looked up or skipped, and how many lookups it has made.
+  const consideredTracks = useRef(new Set<string>());
+  const lookupsThisVisit = useRef(0);
+  const enrichmentRunning = useRef<string | null>(null);
+  const activePlaylistId = useRef(playlistId);
+  const latestVideos = useRef(videos);
+  latestVideos.current = videos;
+  useEffect(() => {
+    activePlaylistId.current = playlistId;
+    consideredTracks.current = new Set();
+    lookupsThisVisit.current = 0;
+    return () => {
+      activePlaylistId.current = undefined;
+    };
+  }, [playlistId]);
+
+  const enrichTracks = useCallback((id: string, tracks: VideoSummary[]) => {
+    // The visit's budget: at most ENRICHMENT_TRACK_LIMIT lookups, however many passes it takes.
+    const budget = ENRICHMENT_TRACK_LIMIT - lookupsThisVisit.current;
+    if (budget <= 0 || enrichmentRunning.current === id) return;
+    const candidates = tracks.filter((track) => needsEnrichment(track) && !consideredTracks.current.has(track.id));
+    if (candidates.length === 0) return;
+    enrichmentRunning.current = id;
+    let lookedUp = 0;
+
+    void (async () => {
+      try {
+        const checked = await recentlyCheckedIds();
+        for (const track of candidates) {
+          if (checked.has(track.id)) consideredTracks.current.add(track.id);
+        }
+        const targets = candidates.filter((track) => !checked.has(track.id)).slice(0, budget);
+        for (const track of targets) consideredTracks.current.add(track.id);
+        lookupsThisVisit.current += targets.length;
+        lookedUp = targets.length;
+
+        for (let start = 0; start < targets.length; start += ENRICHMENT_CHUNK_SIZE) {
+          if (activePlaylistId.current !== id) return;
+          const chunk = targets.slice(start, start + ENRICHMENT_CHUNK_SIZE);
+          const refreshed = new Map<string, VideoMetadata>();
+          for (const track of chunk) {
+            try {
+              refreshed.set(track.id, await getVideoMetadata(track.id));
+            } catch {
+              // Private or removed videos are expected in old playlists.
+            }
+          }
+          if (refreshed.size > 0) {
+            setVideos((previous) => applyVideoMetadata(previous, refreshed));
+            // Applied to what's stored now, so a reorder or removal meanwhile survives.
+            await updateStoredPlaylistTracks(id, (stored) => applyVideoMetadata(stored, refreshed));
+          }
+          // Failed or still incomplete: leave it alone for a while instead of on every visit.
+          const enriched = applyVideoMetadata(chunk, refreshed);
+          await rememberChecks(enriched.filter(needsEnrichment).map((track) => track.id));
+          await new Promise((resolve) => setTimeout(resolve, ENRICHMENT_CHUNK_DELAY_MS));
+        }
+      } catch (enrichError) {
+        console.warn("Failed to save enriched playlist tracks", enrichError);
+      } finally {
+        if (enrichmentRunning.current === id) enrichmentRunning.current = null;
+      }
+      // Pages loaded while the pass ran are looked at now, within what is left of the budget.
+      if (lookedUp > 0 && activePlaylistId.current === id) enrichTracks(id, latestVideos.current);
+    })();
+  }, []);
+
+  useEffect(() => {
+    if (playlistId && storedPlaylist?.id === playlistId) enrichTracks(playlistId, videos);
+  }, [videos, playlistId, storedPlaylist?.id, enrichTracks]);
+
+  return {
+    loading,
+    error,
+    storedPlaylist,
+    meta,
+    videos,
+    setVideos,
+    reload: load,
+    hasMore: nextPageToken !== null,
+    loadingMore,
+    loadMoreFailed,
+    loadMore,
+    loadAllVideos,
+  };
+}
+
+function isUnknownOwner(name: string) {
+  return name.trim().toLowerCase() === "unknown owner";
+}
+
+function formatUpdatedLabel(isoDate: string) {
+  const timestamp = Date.parse(isoDate);
+  if (Number.isNaN(timestamp)) return "Updated recently";
+
+  const diffMs = Date.now() - timestamp;
+  const dayMs = 86_400_000;
+
+  if (diffMs < dayMs) return "Updated today";
+  if (diffMs < dayMs * 2) return "Updated yesterday";
+  if (diffMs < dayMs * 7) return "Updated this week";
+
+  return `Updated ${new Date(timestamp).toLocaleDateString()}`;
+}

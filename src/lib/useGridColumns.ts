@@ -1,0 +1,124 @@
+import { useLayoutEffect, useMemo, useState, type CSSProperties, type RefObject } from 'react';
+import { SETTINGS } from './settings/schema';
+import { useNumberPref } from './usePreference';
+
+export const GRID_COLUMN_OPTIONS = [2, 3, 4, 5, 6, 7, 8] as const;
+export const GRID_COLUMNS_DEFAULT = 4;
+
+/**
+ * Square/portrait cards (shorts, albums, artists, channels) carry no meta column,
+ * so they fit more per row than a 16:9 video card at the same readable width.
+ */
+const DENSE_COLUMN_OFFSET = 2;
+
+export type GridDensity = 'video' | 'dense';
+
+/** Below this a card's title/avatar row stops being legible, so a column is dropped instead. */
+const CARD_MIN_REM: Record<GridDensity, number> = {
+  video: 13,
+  dense: 8,
+};
+
+interface GridStyleOptions {
+  density?: GridDensity;
+  /** Column gap in rem. `.flow-grid` owns column-gap, so pair this with a `gap-y-*` class only. */
+  gapRem?: number;
+}
+
+/**
+ * CSS variables for `.flow-grid` / `.flow-grid-card`, derived from the user's
+ * column preference. The count is a ceiling — the class steps down on narrow
+ * windows rather than shrinking cards past `CARD_MIN_REM`.
+ */
+export function useGridStyle({ density = 'video', gapRem = 1 }: GridStyleOptions = {}): CSSProperties {
+  const [columns] = useNumberPref(SETTINGS.GRID_COLUMNS, GRID_COLUMNS_DEFAULT);
+
+  return useMemo(() => {
+    const target = density === 'dense' ? columns + DENSE_COLUMN_OFFSET : columns;
+    return {
+      '--flow-grid-columns': String(target),
+      '--flow-grid-card-min': `${CARD_MIN_REM[density]}rem`,
+      '--flow-grid-gap': `${gapRem}rem`,
+    } as CSSProperties;
+  }, [columns, density, gapRem]);
+}
+
+/**
+ * How many cards actually share a row right now.
+ *
+ * `.flow-grid` fills with `auto-fill`, so the user's column preference is only
+ * a ceiling — a narrow window sheds columns rather than shrinking cards. Only
+ * the resolved track list knows the real count, so anything that has to line up
+ * with a row boundary (a shelf slotted into the feed) has to measure it.
+ *
+ * Also returns the used track width in whole px, for cards that size their
+ * images to it. Both are 0 until the first measurement lands.
+ */
+export function useResolvedGridColumns(
+  ref: RefObject<HTMLElement | null>,
+  style: CSSProperties,
+): { columns: number; trackWidth: number } {
+  const [columns, setColumns] = useState(0);
+  const [trackWidth, setTrackWidth] = useState(0);
+
+  // Layout effect, not a passive one: the count decides where a row break goes,
+  // and correcting that after paint would visibly reshuffle the feed.
+  useLayoutEffect(() => {
+    const element = ref.current;
+    if (!element) return;
+
+    let lastInlineSize = -1;
+
+    const measure = () => {
+      // A laid-out grid always reports used track sizes in px; anything else
+      // (`none`, an unresolved `repeat()`) means there is nothing to count yet.
+      const tracks = getComputedStyle(element).gridTemplateColumns;
+      const widths = tracks.split(' ').filter((track) => track.endsWith('px'));
+      setColumns((previous) => (previous === widths.length ? previous : widths.length));
+
+      /*
+        Publish the used track width so `contain-intrinsic-size` can placehold an
+        unrendered card at its real height. The CSS fallback has to guess from
+        `100vw`, which counts the sidebar and page padding it does not occupy —
+        overshooting every card that has not been rendered yet, so the scrollbar
+        shrinks continuously as you scroll and cards correct themselves.
+      */
+      const width = Number.parseFloat(widths[0] ?? '');
+      if (Number.isFinite(width) && width > 0) {
+        element.style.setProperty('--flow-grid-track-w', `${width}px`);
+        setTrackWidth(Math.round(width));
+      }
+    };
+
+    measure();
+
+    let frame: number | null = null;
+    const observer = new ResizeObserver((entries) => {
+      /*
+        Width is the only thing that can change the track count or their size.
+        Height changes constantly — every card that scrolls into view and gets
+        laid out by `content-visibility` grows the grid — and reacting to those
+        meant a `getComputedStyle` read throughout every scroll.
+      */
+      const entry = entries[entries.length - 1];
+      const inlineSize = entry?.contentBoxSize?.[0]?.inlineSize ?? entry?.contentRect.width;
+      if (inlineSize === undefined) return;
+      if (inlineSize === lastInlineSize) return;
+      lastInlineSize = inlineSize;
+      if (frame !== null) return;
+      frame = window.requestAnimationFrame(() => {
+        frame = null;
+        measure();
+      });
+    });
+    observer.observe(element);
+    return () => {
+      observer.disconnect();
+      if (frame !== null) window.cancelAnimationFrame(frame);
+    };
+    // `style` carries the column preference, which changes the track count
+    // without changing the element's size — the observer alone would miss it.
+  }, [ref, style]);
+
+  return { columns, trackWidth };
+}

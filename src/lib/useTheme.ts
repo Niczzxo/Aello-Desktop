@@ -1,0 +1,86 @@
+import { useEffect, useMemo } from "react";
+import { getCurrentWindow } from "@tauri-apps/api/window";
+import { setNativeWindowBackground } from "./nativeWindowAppearance";
+import { IS_MACOS_RUNTIME } from "./platform";
+import { logToBackend } from "./diagnostics";
+import { SETTINGS } from "./settings/schema";
+import {
+  DEFAULT_THEME,
+  isThemeVariant,
+  parseCustomThemes,
+  resolveTheme,
+  themeCssVariables,
+  type CustomThemeDefinition,
+  type ThemeVariant,
+} from "./themes";
+import { useAppSettingsStore } from "../store/useAppSettingsStore";
+import { useThemeFileStore } from "../store/useThemeFileStore";
+import { THEME_FILE_ID } from "./themeFile";
+import { useThemeFileSync } from "./useThemeFile";
+import { saveBootTheme } from "./profiles/bootTheme";
+
+export function useTheme() {
+  const themeId = useAppSettingsStore((state) => state.values[SETTINGS.THEME_ID] ?? "default");
+  const variantValue = useAppSettingsStore((state) => state.values[SETTINGS.THEME_VARIANT] ?? "dark");
+  const serializedCustomThemes = useAppSettingsStore((state) => state.values[SETTINGS.CUSTOM_THEMES] ?? "[]");
+  const setSettingValue = useAppSettingsStore((state) => state.setSettingValue);
+  const fileTheme = useThemeFileStore((state) => (themeId === THEME_FILE_ID ? state.applied : null));
+  const chosenVariant: ThemeVariant = isThemeVariant(variantValue) ? variantValue : "dark";
+  // The theme file sets its own light or dark, so a shell switching schemes switches Flow too.
+  const variant: ThemeVariant = fileTheme?.scheme ?? chosenVariant;
+  const customThemes = useMemo(
+    () => parseCustomThemes(serializedCustomThemes),
+    [serializedCustomThemes],
+  );
+  const theme = useMemo(
+    () => fileTheme?.theme ?? resolveTheme(themeId, customThemes),
+    [customThemes, fileTheme, themeId],
+  );
+
+  return {
+    theme,
+    themeId,
+    variant,
+    customThemes,
+    setTheme: (nextThemeId: string) => setSettingValue(SETTINGS.THEME_ID, nextThemeId),
+    setVariant: (nextVariant: ThemeVariant) => setSettingValue(SETTINGS.THEME_VARIANT, nextVariant),
+    saveCustomThemes: (themes: CustomThemeDefinition[]) =>
+      setSettingValue(SETTINGS.CUSTOM_THEMES, JSON.stringify(themes)),
+  };
+}
+
+export function ThemeController() {
+  const { theme, themeId, variant } = useTheme();
+  const settingsLoaded = useAppSettingsStore((state) => state.loaded);
+  useThemeFileSync(themeId === THEME_FILE_ID);
+
+  // Only once settings are in: the schema defaults shown before must not replace the snapshot.
+  useEffect(() => {
+    if (!settingsLoaded) return;
+    saveBootTheme(theme.id, theme.variants[variant] ?? DEFAULT_THEME.variants.dark, variant);
+  }, [settingsLoaded, theme, variant]);
+
+  useEffect(() => {
+    const root = document.documentElement;
+    const colors = theme.variants[variant] ?? DEFAULT_THEME.variants.dark;
+    const variables = themeCssVariables(colors, variant);
+    Object.entries(variables).forEach(([name, value]) => root.style.setProperty(name, value));
+    root.dataset.theme = theme.id;
+    root.dataset.themeVariant = variant;
+    root.style.colorScheme = variant === "light" ? "light" : "dark";
+
+    if (!IS_MACOS_RUNTIME) return;
+    let disposed = false;
+    const appWindow = getCurrentWindow();
+    void appWindow.setTheme(variant === "light" ? "light" : "dark")
+      .then(async () => {
+        if (!disposed) await setNativeWindowBackground(colors.background);
+      })
+      .catch((cause) => {
+        void logToBackend("warn", "native window appearance failed", { cause: String(cause) });
+      });
+    return () => { disposed = true; };
+  }, [theme, variant]);
+
+  return null;
+}
