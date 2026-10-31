@@ -33,7 +33,7 @@ describe("themes", () => {
     expect(resolveTheme(custom.id, parsed)).toEqual(custom);
   });
 
-  it("carries Flow for Android's six extra palettes with readable contrast", () => {
+  it("carries Aello for Android's six extra palettes with readable contrast", () => {
     const luminance = (hex: string) => {
       const [r, g, b] = [1, 3, 5].map((i) => {
         const c = parseInt(hex.slice(i, i + 2), 16) / 255;
@@ -59,7 +59,7 @@ describe("themes", () => {
     }
   });
 
-  it("falls back to Flow Default for an unknown selection", () => {
+  it("falls back to Aello Default for an unknown selection", () => {
     expect(resolveTheme("missing", []).id).toBe("default");
   });
 

@@ -63,7 +63,7 @@ describe("the shared sleep timer", () => {
     expect(quitApp).not.toHaveBeenCalled();
   });
 
-  it("quits Flow after the pause when asked to", () => {
+  it("quits Aello after the pause when asked to", () => {
     timer().start(10, true);
     vi.advanceTimersByTime(10 * 60_000);
     tickSleepTimer();

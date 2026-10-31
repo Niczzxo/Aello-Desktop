@@ -5,7 +5,7 @@ import { recordDiagnostic } from './diagnostics';
 import { getString } from './i18n/index';
 import { useUiStore } from '../store/useUiStore';
 
-/** Opens a web or mail link outside Flow. Resolves false when nothing opened it. */
+/** Opens a web or mail link outside Aello. Resolves false when nothing opened it. */
 export async function openExternal(url: string): Promise<boolean> {
   if (!(await isTauriEnv())) return window.open(url, '_blank', 'noopener,noreferrer') !== null;
   try {

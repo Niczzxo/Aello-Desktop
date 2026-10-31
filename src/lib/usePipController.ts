@@ -22,13 +22,13 @@ const MINIMIZE_DEBOUNCE_MS = 150;
 /**
  * The main window's half of the pop-out player handoff: it mirrors what the
  * pop-out is playing, takes playback back when the pop-out returns it, and
- * pops the player out when Flow is minimized mid-video.
+ * pops the player out when Aello is minimized mid-video.
  */
 export function usePipController() {
   const navigate = useNavigate();
   const { pathname } = useLocation();
   // Both must be on: the pop-out is the only mini player that stays visible
-  // once Flow itself is off screen.
+  // once Aello itself is off screen.
   const popoutOnMinimize = useAppSettingsStore(
     (s) =>
       s.values[SETTINGS.PIP_SEPARATE_WINDOW] !== "false" &&
@@ -67,7 +67,7 @@ export function usePipController() {
         store.applyPipRemoteState({ video: payload.video });
       }),
       listen<PipHandbackPayload>(PIP_EVENTS.handback, async ({ payload }) => {
-        // "Back to Flow" always brings playback home. A plain close only does
+        // "Back to Aello" always brings playback home. A plain close only does
         // when this window is already showing that video — otherwise it would
         // leave audio running behind a window the user cannot see, so playback
         // ends instead.

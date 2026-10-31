@@ -26,7 +26,7 @@ export function profileColorClasses(colorKey: string): string {
   return COLOR_CLASSES[colorKey] ?? ACCENT_CLASSES;
 }
 
-// Not in this project's TypeScript lib yet; every webview Flow runs in has it.
+// Not in this project's TypeScript lib yet; every webview Aello runs in has it.
 type GraphemeSegmenter = new () => { segment(text: string): Iterable<{ segment: string }> };
 const Segmenter = (Intl as unknown as { Segmenter?: GraphemeSegmenter }).Segmenter;
 

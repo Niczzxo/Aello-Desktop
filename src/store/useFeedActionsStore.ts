@@ -7,7 +7,7 @@ import {
   blockChannel as apiBlockChannel,
   unblockChannel as apiUnblockChannel,
 } from "../lib/api/recommendation";
-import { shouldRecordWatchHistory } from "../lib/deepFlow";
+import { shouldRecordWatchHistory } from "../lib/deepAello";
 import { isKnownShort } from "../lib/videoKind";
 import { isMusicVideo } from "../lib/utils";
 import type { VideoSummary } from "../types/video";

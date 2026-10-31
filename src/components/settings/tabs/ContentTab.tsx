@@ -7,11 +7,11 @@ import { getString } from '../../../lib/i18n/index';
 import { SETTINGS } from '../../../lib/settings/schema';
 import { isSettingDisabledUntilWired } from '../../../lib/settings/values';
 import {
-  DEEP_FLOW_DURATION_OPTIONS,
-  DEEP_FLOW_NEVER_EXPIRES_HOURS,
-  getDeepFlowDurationLabel,
-  setDeepFlowEnabled,
-} from '../../../lib/deepFlow';
+  DEEP_AELLO_DURATION_OPTIONS,
+  DEEP_AELLO_NEVER_EXPIRES_HOURS,
+  getDeepAelloDurationLabel,
+  setDeepAelloEnabled,
+} from '../../../lib/deepAello';
 import { useAppSettingsStore } from '../../../store/useAppSettingsStore';
 import { REGION_OPTIONS } from '../../../lib/regionOptions';
 import { CONTENT_LANGUAGE_OPTIONS } from '../../../lib/contentLanguages';
@@ -19,7 +19,7 @@ import { GRID_COLUMN_OPTIONS, GRID_COLUMNS_DEFAULT } from '../../../lib/useGridC
 import { BlockedKeywordsPanel } from '../BlockedKeywordsPanel';
 
 export function ContentTab() {
-  const deepFlowActive = useAppSettingsStore((state) => state.values[SETTINGS.DEEP_FLOW_ACTIVE] === 'true');
+  const deepAelloActive = useAppSettingsStore((state) => state.values[SETTINGS.DEEP_AELLO_ACTIVE] === 'true');
   const [titleMaxLines, setTitleMaxLines] = useNumberPref(SETTINGS.VIDEO_TITLE_MAX_LINES, 1);
   const [gridColumns, setGridColumns] = useNumberPref(SETTINGS.GRID_COLUMNS, GRID_COLUMNS_DEFAULT);
   const [homeFeed, setHomeFeed] = useBoolPref(SETTINGS.HOME_FEED_ENABLED, true);
@@ -51,46 +51,46 @@ export function ContentTab() {
   const [regionPicker, setRegionPicker] = useBoolPref(SETTINGS.SHOW_REGION_PICKER_IN_EXPLORE, true);
   const [trendingRegion, setTrendingRegion] = usePreference(SETTINGS.TRENDING_REGION, 'US');
   const [contentLanguage, setContentLanguage] = usePreference(SETTINGS.CONTENT_LANGUAGE, '');
-  const [deepFlowExpireHours, setDeepFlowExpireHours] = usePreference(SETTINGS.DEEP_FLOW_EXPIRE_HOURS, '4');
-  const [deepFlowSaveHistory, setDeepFlowSaveHistory] = useBoolPref(SETTINGS.DEEP_FLOW_SAVE_HISTORY, false);
+  const [deepAelloExpireHours, setDeepAelloExpireHours] = usePreference(SETTINGS.DEEP_AELLO_EXPIRE_HOURS, '4');
+  const [deepAelloSaveHistory, setDeepAelloSaveHistory] = useBoolPref(SETTINGS.DEEP_AELLO_SAVE_HISTORY, false);
 
-  const deepFlowHours = Number(deepFlowExpireHours);
-  const deepFlowDurationLabel = getDeepFlowDurationLabel(deepFlowHours);
-  const deepFlowDescription = deepFlowActive
-    ? deepFlowHours === DEEP_FLOW_NEVER_EXPIRES_HOURS
+  const deepAelloHours = Number(deepAelloExpireHours);
+  const deepAelloDurationLabel = getDeepAelloDurationLabel(deepAelloHours);
+  const deepAelloDescription = deepAelloActive
+    ? deepAelloHours === DEEP_AELLO_NEVER_EXPIRES_HOURS
       ? getString('deep_flow_active_until_disabled')
-      : getString('deep_flow_learning_paused')
-    : getString('deep_flow_mode_subtitle');
+      : getString('deep_aello_learning_paused')
+    : getString('deep_aello_mode_subtitle');
 
   return (
     <div className="space-y-6 pb-8">
-      <SettingsGroup title={getString('deep_flow_mode_title')}>
-        <SettingItem title={getString('deep_flow_mode_title')} description={deepFlowDescription} disabled={isSettingDisabledUntilWired(SETTINGS.DEEP_FLOW_ACTIVE)}>
+      <SettingsGroup title={getString('deep_aello_mode_title')}>
+        <SettingItem title={getString('deep_aello_mode_title')} description={deepAelloDescription} disabled={isSettingDisabledUntilWired(SETTINGS.DEEP_AELLO_ACTIVE)}>
           <ToggleSwitch
-            checked={deepFlowActive}
+            checked={deepAelloActive}
             onChange={(enabled) => {
-              void setDeepFlowEnabled(enabled);
+              void setDeepAelloEnabled(enabled);
             }}
-            disabled={isSettingDisabledUntilWired(SETTINGS.DEEP_FLOW_ACTIVE)}
+            disabled={isSettingDisabledUntilWired(SETTINGS.DEEP_AELLO_ACTIVE)}
           />
         </SettingItem>
         <SettingItem
-          title={getString('deep_flow_expire_duration_title')}
-          description={getString('deep_flow_expire_duration_subtitle', deepFlowDurationLabel)}
-          disabled={isSettingDisabledUntilWired(SETTINGS.DEEP_FLOW_EXPIRE_HOURS)}
+          title={getString('deep_aello_expire_duration_title')}
+          description={getString('deep_aello_expire_duration_subtitle', deepAelloDurationLabel)}
+          disabled={isSettingDisabledUntilWired(SETTINGS.DEEP_AELLO_EXPIRE_HOURS)}
         >
           <Select
-            value={deepFlowExpireHours}
-            onChange={setDeepFlowExpireHours}
-            disabled={isSettingDisabledUntilWired(SETTINGS.DEEP_FLOW_EXPIRE_HOURS)}
-            options={DEEP_FLOW_DURATION_OPTIONS.map((hours) => ({
+            value={deepAelloExpireHours}
+            onChange={setDeepAelloExpireHours}
+            disabled={isSettingDisabledUntilWired(SETTINGS.DEEP_AELLO_EXPIRE_HOURS)}
+            options={DEEP_AELLO_DURATION_OPTIONS.map((hours) => ({
               value: String(hours),
-              label: getDeepFlowDurationLabel(hours),
+              label: getDeepAelloDurationLabel(hours),
             }))}
           />
         </SettingItem>
-        <SettingItem title={getString('deep_flow_save_history_title')} description={getString('deep_flow_save_history_subtitle')} disabled={isSettingDisabledUntilWired(SETTINGS.DEEP_FLOW_SAVE_HISTORY)}>
-          <ToggleSwitch checked={deepFlowSaveHistory} onChange={setDeepFlowSaveHistory} disabled={isSettingDisabledUntilWired(SETTINGS.DEEP_FLOW_SAVE_HISTORY)} />
+        <SettingItem title={getString('deep_flow_save_history_title')} description={getString('deep_flow_save_history_subtitle')} disabled={isSettingDisabledUntilWired(SETTINGS.DEEP_AELLO_SAVE_HISTORY)}>
+          <ToggleSwitch checked={deepAelloSaveHistory} onChange={setDeepAelloSaveHistory} disabled={isSettingDisabledUntilWired(SETTINGS.DEEP_AELLO_SAVE_HISTORY)} />
         </SettingItem>
       </SettingsGroup>
 

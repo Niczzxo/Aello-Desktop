@@ -36,7 +36,7 @@ export interface ExploreSeeAll {
 const pageCache = new Map<string, { page: ExplorePage; at: number }>();
 
 /**
- * Explore's destinations, as Flow for Android shows them: a destination's shelves, its category
+ * Explore's destinations, as Aello for Android shows them: a destination's shelves, its category
  * tabs (News has several), and a shelf's full grid behind "See all", paged on demand.
  */
 export function useExplore() {

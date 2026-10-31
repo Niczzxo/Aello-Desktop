@@ -102,7 +102,7 @@ export function registerMediaSessionClient(name: MediaSessionOwner, client: Medi
 
 let claimListener: (() => void) | null = null;
 
-/** Told whenever a player here starts, so other Flow windows can pause theirs. */
+/** Told whenever a player here starts, so other Aello windows can pause theirs. */
 export function setMediaSessionClaimListener(listener: (() => void) | null): void {
   claimListener = listener;
 }

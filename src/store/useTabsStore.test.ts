@@ -115,7 +115,7 @@ describe("useTabsStore titles and copies", () => {
 
   it("duplicates a tab's whole list in the background, with fresh keys and its title", () => {
     const source = useTabsStore.getState().tabs[0]!;
-    useTabsStore.getState().setTabTitle("tab-1", source.entries[1]!.key, "FlowNeuro");
+    useTabsStore.getState().setTabTitle("tab-1", source.entries[1]!.key, "AelloNeuro");
     useTabsStore.getState().duplicateTab("tab-1");
     const state = useTabsStore.getState();
     const copy = state.tabs[1]!;
@@ -123,7 +123,7 @@ describe("useTabsStore titles and copies", () => {
     expect(copy.entries.map((entry) => entry.pathname)).toEqual(["/", "/feed"]);
     expect(copy.index).toBe(1);
     expect(copy.entries[1]!.key).not.toBe(source.entries[1]!.key);
-    expect(state.titles[copy.id]).toEqual({ key: copy.entries[1]!.key, text: "FlowNeuro" });
+    expect(state.titles[copy.id]).toEqual({ key: copy.entries[1]!.key, text: "AelloNeuro" });
   });
 
   it("keeps the same title object when nothing changed", () => {

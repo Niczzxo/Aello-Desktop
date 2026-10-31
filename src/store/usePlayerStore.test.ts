@@ -11,7 +11,7 @@ import { usePlayerStore } from "./usePlayerStore";
 const video = (id: string): VideoSummary => ({
   id,
   title: `Video ${id}`,
-  channelName: "Flow",
+  channelName: "Aello",
 });
 
 afterEach(() => {

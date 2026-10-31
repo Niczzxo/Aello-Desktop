@@ -17,7 +17,7 @@ export function selectionMenuFor(event: RightClick, selection: Selection | null)
 }
 
 /**
- * Opens Flow's own menu on a right-click over highlighted text. Card and player
+ * Opens Aello's own menu on a right-click over highlighted text. Card and player
  * menus claim the event first with preventDefault, and this listener sits on the
  * document, so it only sees right-clicks nothing else has taken.
  */

@@ -11,12 +11,12 @@ interface ActiveProfileInfo {
 
 declare global {
   interface Window {
-    __FLOW_PROFILE__?: ActiveProfileInfo;
+    __AELLO_PROFILE__?: ActiveProfileInfo;
   }
 }
 
 export function activeProfile(): ActiveProfileInfo {
-  const injected = typeof window === "undefined" ? undefined : window.__FLOW_PROFILE__;
+  const injected = typeof window === "undefined" ? undefined : window.__AELLO_PROFILE__;
   return injected?.id ? injected : { id: "", isDefault: true };
 }
 

@@ -65,7 +65,7 @@ export function usePlaylistDetails(playlistId: string | undefined) {
 
       let remoteVideos: VideoSummary[] = [];
       let remoteTitle: string | null = null;
-      let remoteChannel = isProtectedPlaylistId(playlistId) ? "Flow" : "YouTube";
+      let remoteChannel = isProtectedPlaylistId(playlistId) ? "Aello" : "YouTube";
       let remoteDescription: string | null = null;
       let remoteCount: number | null = null;
       let remoteViewCountText: string | null = null;

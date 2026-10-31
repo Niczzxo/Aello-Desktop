@@ -344,7 +344,7 @@ export const ImportStep: React.FC = () => {
         <h4 className="text-xs font-bold uppercase tracking-widest text-chrome-zinc-500">Supported formats</h4>
         <ul className="text-sm text-chrome-zinc-400 space-y-2 list-disc pl-5 leading-normal">
           <li><strong>Google Takeout:</strong> CSV export containing subscriptions list.</li>
-          <li><strong>Flow Mobile & Desktop:</strong> Upload exported Master Backups (.zip containing app_data.json) or raw database exports.</li>
+          <li><strong>Aello Mobile & Desktop:</strong> Upload exported Master Backups (.zip containing app_data.json) or raw database exports.</li>
           <li><strong>NewPipe & LibreTube:</strong> Standard exported JSON backups.</li>
           <li><strong>Standard OPML / XML:</strong> Feed schemas exported from FreeTube, RSS readers, or other players.</li>
         </ul>

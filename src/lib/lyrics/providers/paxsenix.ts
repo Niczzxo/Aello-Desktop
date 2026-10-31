@@ -140,7 +140,7 @@ function lyricsQuality(entries: LyricsEntry[]): number {
 }
 
 async function fetchLyrics(appleId: string): Promise<LyricsEntry[]> {
-  const res = await lyricsHttpGet(`${PAX_LYRICS}?id=${enc(appleId)}`, { "User-Agent": "Flow Desktop" });
+  const res = await lyricsHttpGet(`${PAX_LYRICS}?id=${enc(appleId)}`, { "User-Agent": "Aello Desktop" });
   if (res.status < 200 || res.status >= 300) return [];
   const data = JSON.parse(res.body) as PaxLyrics;
   if (data.ttmlContent) return parseTTMLToLyricsEntries(data.ttmlContent);

@@ -13,7 +13,7 @@ import { isSettingKey } from "./settings/values";
 
 /*
   The Zustand stores load from SQLite once and then trust themselves. Anything
-  that writes SQLite behind their back (a sync merge, a restore, another Flow
+  that writes SQLite behind their back (a sync merge, a restore, another Aello
   window) reloads them through here.
 */
 

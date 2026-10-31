@@ -31,7 +31,7 @@ const SECTION_ORDER = [
 ];
 const LISTEN_AGAIN_SIZE = 12;
 const SPEED_DIAL_SIZE = 18;
-/** [minimum to show, maximum shown] per shelf, matching Flow for Android. */
+/** [minimum to show, maximum shown] per shelf, matching Aello for Android. */
 const LIMITS: Record<string, [number, number]> = {
   rotation: [3, 20],
   rediscover: [3, 12],

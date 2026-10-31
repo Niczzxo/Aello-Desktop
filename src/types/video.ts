@@ -594,7 +594,7 @@ export interface CommentsResponse {
   commentsDisabled?: boolean;
 }
 
-/** Explore's destinations, as Flow for Android lists them. */
+/** Explore's destinations, as Aello for Android lists them. */
 export type ExploreDestinationId = "live" | "gaming" | "music" | "news" | "sports" | "learning" | "fashion";
 
 /** A page to browse: a destination, one of its tabs, or a shelf's full grid. */

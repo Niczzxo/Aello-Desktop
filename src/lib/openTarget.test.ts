@@ -16,7 +16,7 @@ const { openedInBackgroundTab } = await import("./openTarget");
 const setTabsOn = (on: boolean) =>
   useAppSettingsStore.setState((state) => ({ values: { ...state.values, tabs_enabled: String(on) } }));
 
-const video = (id: string): VideoSummary => ({ id, title: id, channelName: "Flow" });
+const video = (id: string): VideoSummary => ({ id, title: id, channelName: "Aello" });
 
 beforeEach(() => {
   useTabsStore.setState({

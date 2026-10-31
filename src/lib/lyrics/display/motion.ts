@@ -1,7 +1,7 @@
 /**
  * The Compose motion the Android lyrics use, as time-based maths so it reads the same at any refresh
  * rate. Springs follow Compose's SpringSimulation (unit mass, exact step response per frame), the
- * fling Compose's exponential decay, and the specs Flow's MaterialExpressiveTheme gets from
+ * fling Compose's exponential decay, and the specs Aello's MaterialExpressiveTheme gets from
  * MotionScheme.expressive() (material3 1.5.0-alpha26 ExpressiveMotionTokens).
  */
 

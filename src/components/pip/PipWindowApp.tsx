@@ -9,7 +9,7 @@ import { usePipWindowAspectLock } from "../../lib/usePipWindowAspectLock";
 import { useMediaSessionMetadata } from "../../lib/useMediaSessionMetadata";
 import { usePlayerStore } from "../../store/usePlayerStore";
 import { WindowResizeEdges } from "../ui/WindowResizeEdges";
-import { FlowPlayerCore } from "../watch/FlowPlayerCore";
+import { AelloPlayerCore } from "../watch/AelloPlayerCore";
 
 const chromeButton =
   "grid h-7 w-7 shrink-0 place-items-center rounded-full text-chrome-white/90 transition-colors hover:bg-chrome-white/15 hover:text-chrome-white";
@@ -39,7 +39,7 @@ export function PipWindowApp() {
         // Widest 16:9 box that still fits the window, so the transport controls
         // stay inside the frame even mid-resize.
         <div className="w-full max-w-[calc(100vh*16/9)]">
-          <FlowPlayerCore videoId={currentVideo.id} videoDetails={null} />
+          <AelloPlayerCore videoId={currentVideo.id} videoDetails={null} />
         </div>
       ) : (
         <div

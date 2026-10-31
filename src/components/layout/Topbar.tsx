@@ -7,7 +7,7 @@ import { IconButton } from '../ui/IconButton';
 import { TopbarSearch } from './TopbarSearch';
 import { SETTINGS } from '../../lib/settings/schema';
 import { getString } from '../../lib/i18n/index';
-import { toggleDeepFlow } from '../../lib/deepFlow';
+import { toggleDeepAello } from '../../lib/deepAello';
 import { NotificationsBell } from '../notifications/NotificationsBell';
 import { activeTab, useTabsStore } from '../../store/useTabsStore';
 import { ProfileMenuButton } from '../profiles/ProfileMenuButton';
@@ -25,7 +25,7 @@ export function Topbar() {
   const usesDrawer = location.pathname.startsWith('/watch/') || location.pathname.startsWith('/settings');
   const sidebarOpen = usesDrawer ? isWatchSidebarOpen : isSidebarExpanded;
   const showAppLogo = useAppSettingsStore((state) => state.values[SETTINGS.SHOW_APP_LOGO_ICON] !== 'false');
-  const deepFlowActive = useAppSettingsStore((state) => state.values[SETTINGS.DEEP_FLOW_ACTIVE] === 'true');
+  const deepAelloActive = useAppSettingsStore((state) => state.values[SETTINGS.DEEP_AELLO_ACTIVE] === 'true');
   const canGoBack = useTabsStore((state) => activeTab(state).index > 0);
   const tabCount = useTabsStore((state) => state.tabs.length);
   const canGoForward = useTabsStore((state) => {
@@ -93,11 +93,11 @@ export function Topbar() {
         <NotificationsBell />
         <IconButton
           onClick={() => {
-            void toggleDeepFlow();
+            void toggleDeepAello();
           }}
-          title={getString(deepFlowActive ? 'deep_flow_topbar_disable' : 'deep_flow_topbar_enable')}
-          aria-pressed={deepFlowActive}
-          className={deepFlowActive ? 'deep-flow-topbar-active' : undefined}
+          title={getString(deepAelloActive ? 'deep_aello_topbar_disable' : 'deep_aello_topbar_enable')}
+          aria-pressed={deepAelloActive}
+          className={deepAelloActive ? 'deep-aello-topbar-active' : undefined}
         >
           <HatGlasses />
         </IconButton>

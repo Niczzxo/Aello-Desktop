@@ -209,7 +209,7 @@ export interface DownloadRecord {
   fileSizeBytes: number | null;
   collectionDbId: number | null;
   createdAt: string;
-  /** A loopback link to Flow's own copy of the cover; works offline. */
+  /** A loopback link to Aello's own copy of the cover; works offline. */
   coverUrl: string | null;
   /** JSON array of the credited artists. */
   artistsJson: string | null;

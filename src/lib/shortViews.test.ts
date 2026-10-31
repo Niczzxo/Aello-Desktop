@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("./api/db", () => ({ addWatchRecord: vi.fn(() => Promise.resolve()) }));
-vi.mock("./deepFlow", () => ({ shouldRecordWatchHistory: () => true }));
+vi.mock("./deepAello", () => ({ shouldRecordWatchHistory: () => true }));
 vi.mock("./api/shorts", () => ({
   reportShortView: vi.fn(() => Promise.resolve()),
   recordSeenShorts: vi.fn(() => Promise.resolve()),

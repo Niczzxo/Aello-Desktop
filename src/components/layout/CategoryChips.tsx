@@ -11,7 +11,7 @@ interface CategoryChipsProps {
 
 export function CategoryChips({
   categories = [
-    "All", "Music", "Gaming", "FlowNeuro Insights", "Live", "Podcasts", "News", "Coding", "Lo-fi"
+    "All", "Music", "Gaming", "AelloNeuro Insights", "Live", "Podcasts", "News", "Coding", "Lo-fi"
   ],
   activeCategory,
   onCategoryChange,

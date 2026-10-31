@@ -1,5 +1,5 @@
 /**
- * Picks a song's official music video out of a video search, ported from Flow
+ * Picks a song's official music video out of a video search, ported from Aello
  * Android's `MusicVideoMatching`. Signed-out responses never carry YouTube
  * Music's own song-to-video link, so the match is the artist's official upload
  * of the same title, never a live take, remix, cover or an "official audio" upload.

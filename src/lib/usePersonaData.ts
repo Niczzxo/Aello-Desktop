@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 
 import {
   getBrainSnapshot,
-  getFlowPersona,
+  getAelloPersona,
   type PersonaDetails,
   type UserBrain,
 } from "./api/recommendation";
@@ -25,7 +25,7 @@ export function usePersonaData() {
     try {
       const snapshot = await getBrainSnapshot(force);
       setBrain(snapshot);
-      const personaDetails = await getFlowPersona();
+      const personaDetails = await getAelloPersona();
       setPersona(personaDetails);
       setFailed(false);
     } catch (e) {

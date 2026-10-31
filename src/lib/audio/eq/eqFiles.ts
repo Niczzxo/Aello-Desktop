@@ -7,7 +7,7 @@ import type { EqState } from "./models";
 import { activeCopy } from "./stateOps";
 
 /**
- * The active curve as EqualizerAPO text. With auto preamp on, the file carries the preamp Flow
+ * The active curve as EqualizerAPO text. With auto preamp on, the file carries the preamp Aello
  * would apply, so it plays without clipping in EqualizerAPO too.
  */
 export function eqExportText(state: EqState): string {

@@ -1,6 +1,6 @@
 import { MAX_CUSTOM_THEMES, parseCustomThemes, type CustomThemeDefinition } from "./themes";
 
-/** One theme exports as a bare object and several as a list, the format Flow for Android reads. */
+/** One theme exports as a bare object and several as a list, the format Aello for Android reads. */
 export function customThemesJson(themes: readonly CustomThemeDefinition[]): string {
   return JSON.stringify(themes.length === 1 ? themes[0] : themes, null, 2);
 }

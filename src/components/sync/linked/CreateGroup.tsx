@@ -94,7 +94,7 @@ function OnLan() {
   );
 }
 
-/** Starts a group on a Flow server, in a WebDAV folder, or only on this network's devices. */
+/** Starts a group on a Aello server, in a WebDAV folder, or only on this network's devices. */
 export function CreateGroup() {
   const [place, setPlace] = useState<Place>("server");
   return (

@@ -11,7 +11,7 @@ import { isMusicVideo } from "./utils";
 import { SETTINGS } from "./settings/schema";
 import { filterByPreferredCodec, selectPreferredStreamVariant } from "./settings/playerRuntime";
 import { codecRank } from "./codecPreference";
-import { shouldRecordWatchHistory } from "./deepFlow";
+import { shouldRecordWatchHistory } from "./deepAello";
 import { recoveryPosition } from "./playerProgress";
 import { recordAutoReResolve, shouldAutoReResolve, type ReResolveHistory } from "./videoRecoveryPolicy";
 import { useAppSettingsStore } from "../store/useAppSettingsStore";
@@ -75,7 +75,7 @@ export const clearLocalWatchProgress = (videoId: string) => {
  * Where playback should pick up, and whether it should be running when it does.
  * A handoff between the main window and the pop-out player wins over saved
  * progress: it is exact, it carries the paused state the user chose, and it
- * survives Deep Flow, which suppresses the saved-progress write entirely.
+ * survives Deep Aello, which suppresses the saved-progress write entirely.
  */
 const resolveHandoff = (video: VideoSummary, isLive: boolean) => {
   const handoff = usePlayerStore.getState().consumePipHandoff(video.id);

@@ -2,7 +2,7 @@
 // Mirrors the style of `youtube.ts`; every function maps 1:1 to a
 // `#[tauri::command]` in `src-tauri/src/commands/music.rs`.
 
-import { isDeepFlowCurrentlyActive } from "../deepFlow";
+import { isDeepAelloCurrentlyActive } from "../deepAello";
 import { invokeBackend } from "./errors";
 import type {
   AlbumItem,
@@ -229,7 +229,7 @@ export async function recordMusicInteraction(params: {
   percentPlayed: number;
   isExplicitLike?: boolean;
 }): Promise<void> {
-  if (isDeepFlowCurrentlyActive()) return;
+  if (isDeepAelloCurrentlyActive()) return;
   return invokeBackend<void>("record_music_interaction", {
     trackId: params.trackId,
     artistId: params.artistId ?? null,

@@ -3,7 +3,7 @@ import { stripRemoteResources } from "./themeFile";
 const STYLE_ID = "flow-theme-file";
 
 /**
- * Puts the theme file's CSS on the page after Flow's own styles, so its rules win
+ * Puts the theme file's CSS on the page after Aello's own styles, so its rules win
  * over Tailwind's layered ones without `!important`. The sheet stays switched off
  * until its remote loads are stripped. Returns how many were stripped.
  */

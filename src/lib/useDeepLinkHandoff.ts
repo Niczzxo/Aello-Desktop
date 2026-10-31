@@ -9,7 +9,7 @@ import { useProfilesStore } from "../store/useProfilesStore";
 import { getVideoDetails } from "./api/youtube";
 import { getMusicQueue } from "./api/music";
 import { addWatchRecord } from "./api/db";
-import { shouldRecordWatchHistory } from "./deepFlow";
+import { shouldRecordWatchHistory } from "./deepAello";
 import { seekWhenVideoReady } from "./playerSeek";
 import { prefetchStreamInfo } from "./streamResolution";
 import { getString } from "./i18n/index";
@@ -28,10 +28,10 @@ type Handoff =
   | { action: "download"; v: string }
   | { action: "music-download"; v: string };
 
-// Both transports deliver the same `flow://action?…` string: the deep-link
+// Both transports deliver the same `aello://action?…` string: the deep-link
 // plugin (app launched or already running) and the loopback bridge (silent
 // handoff from the extension, re-emitted on the `handoff://url` event).
-function parseFlowUrl(raw: string): Handoff | null {
+function parseAelloUrl(raw: string): Handoff | null {
   let url: URL;
   try {
     url = new URL(raw);
@@ -40,7 +40,7 @@ function parseFlowUrl(raw: string): Handoff | null {
   }
   if (url.protocol !== "flow:") return null;
 
-  // flow://watch → host "watch"; tolerate flow:///watch → path "/watch".
+  // aello://watch → host "watch"; tolerate aello:///watch → path "/watch".
   const action = (url.host || url.pathname.replace(/^\/+/, "")).toLowerCase();
   const v = url.searchParams.get("v") ?? "";
   if (!VIDEO_ID.test(v)) return null;
@@ -71,7 +71,7 @@ async function resolveSong(videoId: string): Promise<SongItem | null> {
 }
 
 /**
- * Subscribes to `flow://` deep links and bridge handoffs and routes them:
+ * Subscribes to `aello://` deep links and bridge handoffs and routes them:
  * `watch`/`music` → the Watch page (which resolves the video from its id),
  * `download` → the global download dialog. Mounted once at the App root.
  */
@@ -191,13 +191,13 @@ export function useDeepLinkHandoff() {
   }, [route]);
 
   const acceptRef = useRef((raw: string) => {
-    const handoff = parseFlowUrl(raw);
+    const handoff = parseAelloUrl(raw);
     if (!handoff) return;
     pendingRef.current = handoff;
     flush();
   });
   acceptRef.current = (raw: string) => {
-    const handoff = parseFlowUrl(raw);
+    const handoff = parseAelloUrl(raw);
     if (!handoff) return;
     // During a profile switch the link belongs to the next profile, not this dying process.
     if (useProfilesStore.getState().switchingTo) {

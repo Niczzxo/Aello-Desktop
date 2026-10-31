@@ -112,7 +112,7 @@ export interface PlayerState {
   /** Playback handed over by the other window, consumed by whichever player
    * mounts next so a handoff resumes exactly where — and how — it left off.
    * Kept in memory rather than written to the saved-progress store, which Deep
-   * Flow disables. */
+   * Aello disables. */
   pipHandoff: { videoId: string; positionSeconds: number; playing: boolean } | null;
   /** True while this window is decoding a video the *other* window is still
    * playing out loud — the pop-out warming up behind a handoff. It silences the

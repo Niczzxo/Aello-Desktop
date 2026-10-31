@@ -84,7 +84,7 @@ export const SYNC_COLLECTIONS: ReadonlyArray<{ key: string; label: string; descr
   { key: "playlists", label: "Playlists", description: "Your playlists and Watch Later" },
   { key: "likes", label: "Likes", description: "Liked videos and songs" },
   { key: "settings", label: "Player & UI settings", description: "Playback, content and quality preferences" },
-  { key: "flow_neuro_brain", label: "Recommendation brain", description: "Your FlowNeuro taste profile" },
+  { key: "flow_neuro_brain", label: "Recommendation brain", description: "Your AelloNeuro taste profile" },
   { key: "music_brain", label: "Music taste", description: "Artist affinities and listening history" },
   { key: "subscribed_channels", label: "Subscriptions", description: "The channels you follow" },
   { key: "subscriptions", label: "Subscription groups", description: "The folders you sort your channels into" },

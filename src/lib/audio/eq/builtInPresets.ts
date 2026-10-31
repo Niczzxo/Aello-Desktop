@@ -8,7 +8,7 @@ export interface BuiltInEqPreset {
 }
 
 /**
- * The presets Flow ships, with Android's stable ids (`BuiltInEqPresets.kt`), so a preset picked on
+ * The presets Aello ships, with Android's stable ids (`BuiltInEqPresets.kt`), so a preset picked on
  * one device is the same preset on the other. Shelves use the Butterworth Q.
  */
 export const FLAT_PRESET_ID = "builtin:flat";

@@ -26,7 +26,7 @@ describe("themeFileScheme", () => {
 });
 
 describe("buildThemeFileTheme", () => {
-  it("falls back to Flow Default when the file sets nothing", () => {
+  it("falls back to Aello Default when the file sets nothing", () => {
     const built = buildThemeFileTheme(tokens({}), hexOnly);
     expect(built.scheme).toBe("dark");
     expect(built.ignoredTokens).toEqual([]);
@@ -60,7 +60,7 @@ describe("buildThemeFileTheme", () => {
     expect(built.theme.variants.dark.primary).toBe(DEFAULT_THEME.variants.dark.primary);
   });
 
-  it("gives a light file Flow's dark greys with its accent for the always-dark surfaces", () => {
+  it("gives a light file Aello's dark greys with its accent for the always-dark surfaces", () => {
     const built = buildThemeFileTheme(tokens({
       "--flow-background": "#ffffff",
       "--flow-primary": "#1e66f5",

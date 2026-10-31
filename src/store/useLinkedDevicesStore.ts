@@ -67,7 +67,7 @@ interface LinkedState {
   createOnWebdav: (url: string, user: string, password: string) => Promise<void>;
   updateLogin: (user: string, password: string) => Promise<void>;
   retryKeychain: () => Promise<void>;
-  /** Restores from a Flow server, or with `login` from a WebDAV folder. */
+  /** Restores from a Aello server, or with `login` from a WebDAV folder. */
   restore: (url: string, words: string, login?: WebdavLogin) => Promise<void>;
   enterCode: (code: string, folder?: FolderAccess) => Promise<void>;
   askToJoin: (url: string, adminToken: string) => Promise<void>;

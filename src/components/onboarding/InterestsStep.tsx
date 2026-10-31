@@ -20,7 +20,7 @@ export const InterestsStep: React.FC<InterestsStepProps> = ({
           What are you into?
         </h1>
         <p className="text-lg text-chrome-neutral-400">
-          Pick 3 or more topics to initialize FlowNeuro's local algorithm.{" "}
+          Pick 3 or more topics to initialize AelloNeuro's local algorithm.{" "}
           {remaining > 0 ? (
             <span className="text-primary font-medium">{remaining} left.</span>
           ) : (

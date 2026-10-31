@@ -3,7 +3,7 @@ import { parseToTimestamp } from "./publishedDate";
 import type { VideoSummary } from "../types/video";
 import { profileStorage } from "./storage/profileStorage";
 
-// Mirrors Flow-Android's PlaylistSorting.
+// Mirrors Aello-Android's PlaylistSorting.
 
 const TIMESTAMP_TOLERANCE_MS = 30 * 60 * 1000;
 const SORT_ORDERS_STORAGE_KEY = "flow_playlist_sort_orders";

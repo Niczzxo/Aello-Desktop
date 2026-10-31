@@ -1,6 +1,6 @@
 import { addWatchRecord } from "./api/db";
 import { recordSeenShorts, reportShortView } from "./api/shorts";
-import { shouldRecordWatchHistory } from "./deepFlow";
+import { shouldRecordWatchHistory } from "./deepAello";
 import type { ShortItem } from "../types/shorts";
 
 /** How long a Short has to stay on screen before it counts as seen. */
@@ -62,7 +62,7 @@ export function finishShortView() {
   clearTimeout(view.seenTimer);
   // Never started playing: there is nothing to learn from.
   if (view.durationMs <= 0) return;
-  // In history a watched Short can open related reel chains, as Flow for Android's do.
+  // In history a watched Short can open related reel chains, as Aello for Android's do.
   if (view.positionMs >= HISTORY_MIN_MS && shouldRecordWatchHistory()) {
     void addWatchRecord({
       videoId: view.short.id,

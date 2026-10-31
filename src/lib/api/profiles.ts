@@ -78,7 +78,7 @@ export function cancelProfileSwitch(): Promise<void> {
   return invokeBackend<void>("profiles_cancel_switch");
 }
 
-/** Makes the profile active and restarts Flow into it. */
+/** Makes the profile active and restarts Aello into it. */
 export function finishProfileSwitch(id: string): Promise<void> {
   return invokeBackend<void>("profiles_switch", { id });
 }

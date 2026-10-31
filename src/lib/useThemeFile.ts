@@ -16,7 +16,7 @@ function applyThemeFile(state: ThemeFileState) {
   const store = useThemeFileStore.getState();
   store.setFile(state);
   // A missing or unreadable version keeps the last good one, so a tool that
-  // deletes and rewrites the file never flashes Flow back to its defaults.
+  // deletes and rewrites the file never flashes Aello back to its defaults.
   if (state.status !== "loaded" || state.css === null) return;
   const removedRemote = applyThemeFileCss(state.css);
   store.setApplied({ ...buildThemeFileTheme(readRootToken, resolveCssColor), removedRemote });

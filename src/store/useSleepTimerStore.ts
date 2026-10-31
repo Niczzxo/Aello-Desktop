@@ -9,7 +9,7 @@ interface SleepTimerState {
   mode: SleepTimerMode;
   /** When a countdown stops playback, in epoch milliseconds; null otherwise. */
   endsAt: number | null;
-  /** Whether this timer quits Flow instead of pausing. */
+  /** Whether this timer quits Aello instead of pausing. */
   quitOnExpiry: boolean;
 
   start: (minutes: number, quit: boolean) => void;
@@ -19,7 +19,7 @@ interface SleepTimerState {
   cancel: () => void;
 }
 
-/** The remembered "Quit Flow when it ends" choice, which new timers start from. */
+/** The remembered "Quit Aello when it ends" choice, which new timers start from. */
 export const prefersQuitOnExpiry = (): boolean =>
   getSettingValue(SETTINGS.SLEEP_TIMER_CLOSE_APP_ON_EXPIRY) === "true";
 

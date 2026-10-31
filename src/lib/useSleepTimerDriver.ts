@@ -7,7 +7,7 @@ import { musicAudioEngine } from "./audio/musicAudioEngine";
 import { quitApp } from "./api/process";
 import { SLEEP_FADE_SECONDS, fadeLevel } from "./sleepTimer";
 
-/** Long enough for the pause to save the queue and the listen before Flow quits. */
+/** Long enough for the pause to save the queue and the listen before Aello quits. */
 const QUIT_DELAY_MS = 1_000;
 /** The backstop clock for when no music plays to drive the timer. */
 const FALLBACK_TICK_MS = 1_000;
@@ -20,7 +20,7 @@ function stopFading(): void {
   musicAudioEngine.resetFade();
 }
 
-/** The timer ran out: pause whatever plays, or quit Flow when that was asked for. */
+/** The timer ran out: pause whatever plays, or quit Aello when that was asked for. */
 function expire(): void {
   const { quitOnExpiry, cancel } = useSleepTimerStore.getState();
   cancel();

@@ -8,7 +8,7 @@ import { usePlayerStore } from "../store/usePlayerStore";
 
 const libraryKind = (progress: DownloadProgress) => (progress.mediaKind === "video" ? "video" : "audio");
 
-/** A download's artwork: the cover Flow saved once it has finished, the item's
+/** A download's artwork: the cover Aello saved once it has finished, the item's
  *  thumbnail before that. */
 export function useDownloadItemArtwork(progress: DownloadProgress): string | null {
   return useDownloadsLibraryStore((state) => {

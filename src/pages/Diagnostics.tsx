@@ -10,7 +10,7 @@ import { getString } from "../lib/i18n/index";
 import { copyText } from "../lib/clipboard";
 import { useUiStore } from "../store/useUiStore";
 
-const GITHUB_ISSUES_URL = "https://github.com/FlowNeuro/Flow-Desktop/issues/new?template=bug_report.yml";
+const GITHUB_ISSUES_URL = "https://github.com/AelloNeuro/Aello-Desktop/issues/new?template=bug_report.yml";
 
 export const Diagnostics: React.FC = () => {
   const showToast = useUiStore((state) => state.showToast);

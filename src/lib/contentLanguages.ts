@@ -1,5 +1,5 @@
 /**
- * Languages the site can write its text in, by the host language Flow sends. Each has
+ * Languages the site can write its text in, by the host language Aello sends. Each has
  * an upload-date table on the backend; regional variants other than Portuguese and
  * Chinese collapse to their language, as the site's own picker does.
  */

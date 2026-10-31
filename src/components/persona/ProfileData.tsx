@@ -3,10 +3,10 @@ import { createPortal } from "react-dom";
 import { AlertTriangle, Check, Download, Loader2, RotateCcw, Upload } from "lucide-react";
 import type { UserBrain } from "../../lib/api/recommendation";
 import {
-  convertFlowNeuroBrainData,
-  extractFlowNeuroBrainCandidate,
-  isFlowNeuroBrainCandidate,
-} from "../../lib/flowNeuroImport";
+  convertAelloNeuroBrainData,
+  extractAelloNeuroBrainCandidate,
+  isAelloNeuroBrainCandidate,
+} from "../../lib/aelloNeuroImport";
 import { getString } from "../../lib/i18n/index";
 
 interface ProfileDataProps {
@@ -57,13 +57,13 @@ export function ProfileData({ brain, onImport, onReset }: ProfileDataProps) {
       try {
         const text = event.target?.result as string;
         const parsed = JSON.parse(text) as unknown;
-        const brainCandidate = extractFlowNeuroBrainCandidate(parsed);
+        const brainCandidate = extractAelloNeuroBrainCandidate(parsed);
 
-        if (!brainCandidate || !isFlowNeuroBrainCandidate(brainCandidate)) {
+        if (!brainCandidate || !isAelloNeuroBrainCandidate(brainCandidate)) {
           throw new Error(getString("persona_import_invalid"));
         }
 
-        await onImport(convertFlowNeuroBrainData(brainCandidate));
+        await onImport(convertAelloNeuroBrainData(brainCandidate));
         showNotification("success", getString("persona_import_success"));
       } catch (err: any) {
         console.error("Brain import parse failed:", err);

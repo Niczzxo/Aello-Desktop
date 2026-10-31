@@ -20,7 +20,7 @@ export interface AppWindowSession {
   handoff: WindowVideoHandoff | null;
 }
 
-/** Opens another Flow window on `route`; resolves to its label. */
+/** Opens another Aello window on `route`; resolves to its label. */
 export function openAppWindow(route: string, handoff: WindowVideoHandoff | null = null): Promise<string> {
   return invokeBackend<string>("open_app_window", { session: { route, handoff } satisfies AppWindowSession });
 }

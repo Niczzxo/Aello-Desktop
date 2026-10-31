@@ -1,4 +1,4 @@
-import { relaunchFlow } from "./process";
+import { relaunchAello } from "./process";
 import { isTauriEnv } from "./env";
 import { invokeBackend } from "./errors";
 import { parseUpdateSupport, type UpdateSupport } from "../updateSupport";
@@ -75,5 +75,5 @@ export async function downloadAndInstallUpdate(
 /** Relaunches the app into the freshly installed build. */
 export async function relaunchApp(): Promise<void> {
   if (!(await isTauriEnv())) return;
-  await relaunchFlow();
+  await relaunchAello();
 }

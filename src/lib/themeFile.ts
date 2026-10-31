@@ -42,7 +42,7 @@ const CONTAINER_KEYS = [
 export interface ThemeFileTheme {
   theme: ThemeDefinition;
   scheme: ThemeFileScheme;
-  /** `--flow-*` names whose value is not a colour, so Flow's default was used. */
+  /** `--flow-*` names whose value is not a colour, so Aello's default was used. */
   ignoredTokens: string[];
 }
 
@@ -72,8 +72,8 @@ function seedOf(colors: ThemeColors): ThemeSeed {
 /**
  * Builds a theme from the values a file declared. `readToken` returns a token's
  * raw value ("" when unset); `resolveColor` returns it as hex, or null when it is
- * not a colour. Unset or invalid colours keep Flow Default's, and the always-dark
- * surfaces of a light file keep Flow's dark greys with the file's accent.
+ * not a colour. Unset or invalid colours keep Aello Default's, and the always-dark
+ * surfaces of a light file keep Aello's dark greys with the file's accent.
  */
 export function buildThemeFileTheme(
   readToken: (name: string) => string,
@@ -129,7 +129,7 @@ function isLocalReference(target: string): boolean {
   return value.startsWith("data:") || value.startsWith("#");
 }
 
-/** Whether a declared value would make the webview fetch something from outside Flow. */
+/** Whether a declared value would make the webview fetch something from outside Aello. */
 export function loadsRemoteResource(value: string): boolean {
   for (const match of value.matchAll(URL_ARGUMENT)) {
     if (!isLocalReference(match[2] ?? "")) return true;

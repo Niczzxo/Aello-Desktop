@@ -8,10 +8,10 @@ import { getSetting, setSetting, addWatchRecordsBulk } from "../lib/api/db";
 import { useHistoryStore } from "../store/useHistoryStore";
 import { bootstrapFromHistory, bootstrapFromSubscriptions, importBrain } from "../lib/api/recommendation";
 import {
-  convertFlowNeuroBrainData,
-  extractFlowNeuroBrainCandidate,
-  isFlowNeuroBrainCandidate,
-} from "../lib/flowNeuroImport";
+  convertAelloNeuroBrainData,
+  extractAelloNeuroBrainCandidate,
+  isAelloNeuroBrainCandidate,
+} from "../lib/aelloNeuroImport";
 import { useSubscriptionStore } from "../store/useSubscriptionStore";
 import { parseSubscriptionExport } from "../lib/api/youtube";
 import { getString } from "../lib/i18n/index";
@@ -235,7 +235,7 @@ export const ImportData: React.FC = () => {
           setSettingsCount(importedSettingsCount);
         }
 
-        // Flow v2 backup: restore the full-fidelity collections (watch history, brains,
+        // Aello v2 backup: restore the full-fidelity collections (watch history, brains,
         // likes, playlists, subscriptions) through the backend sync apply pipeline. On
         // failure fall back to the legacy fuzzy parsers below rather than aborting.
         let restoredViaCollections = false;
@@ -285,10 +285,10 @@ export const ImportData: React.FC = () => {
         }
 
         let brainToImport: unknown | null = null;
-        if (isJson && backupData) brainToImport = extractFlowNeuroBrainCandidate(backupData);
-        if (importNeuro && brainToImport && isFlowNeuroBrainCandidate(brainToImport)) {
+        if (isJson && backupData) brainToImport = extractAelloNeuroBrainCandidate(backupData);
+        if (importNeuro && brainToImport && isAelloNeuroBrainCandidate(brainToImport)) {
           setStatusMessage(getString("import_importing_neuro"));
-          await importBrain(convertFlowNeuroBrainData(brainToImport));
+          await importBrain(convertAelloNeuroBrainData(brainToImport));
           setNeuroCount(1);
         }
 
@@ -349,11 +349,11 @@ export const ImportData: React.FC = () => {
           }
         }
 
-        // Defense against the Deep Flow restore trap: an imported active flag without its
+        // Defense against the Deep Aello restore trap: an imported active flag without its
         // (internal, never-exported) activation timestamp would otherwise mute watch-history
-        // recording and FlowNeuro learning indefinitely.
-        await setSettingValue(SETTINGS.DEEP_FLOW_ACTIVE, "false");
-        await setSettingValue(SETTINGS.DEEP_FLOW_ACTIVATED_AT, "0");
+        // recording and AelloNeuro learning indefinitely.
+        await setSettingValue(SETTINGS.DEEP_AELLO_ACTIVE, "false");
+        await setSettingValue(SETTINGS.DEEP_AELLO_ACTIVATED_AT, "0");
 
         setProgress(100); setImportState("success");
       } catch (err: any) { console.error("Import failure", err); setImportState("error"); setErrorMessage(err?.message || getString("import_file_not_recognized")); }

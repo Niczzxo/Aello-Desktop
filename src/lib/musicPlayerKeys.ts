@@ -1,6 +1,6 @@
 /**
- * The full player's keyboard map. Flow Android's `MediaKeyboardShortcuts` was
- * written from this set ("the keys Flow Desktop and YouTube use"), so both apps
+ * The full player's keyboard map. Aello Android's `MediaKeyboardShortcuts` was
+ * written from this set ("the keys Aello Desktop and YouTube use"), so both apps
  * answer the same keys.
  */
 export type MusicPlayerKeyAction =

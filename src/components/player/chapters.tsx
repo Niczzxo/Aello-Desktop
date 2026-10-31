@@ -287,7 +287,7 @@ export const Chapters: React.FC<ChaptersProps> = ({
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center bg-chrome-zinc-950 font-bold text-chrome-zinc-700 text-xs">
-                          FLOW
+                          AELLO
                         </div>
                       )}
 

@@ -1,6 +1,6 @@
 import { addWatchRecord } from "./api/db";
 import { recordMusicInteraction } from "./api/music";
-import { shouldRecordWatchHistory } from "./deepFlow";
+import { shouldRecordWatchHistory } from "./deepAello";
 import type { SongItem } from "../types/music";
 
 const videoIdOf = (t: SongItem): string => t.videoId ?? t.id;

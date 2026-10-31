@@ -10,11 +10,11 @@ export interface LastSync {
 }
 
 export interface LinkedStatus {
-  /** The group this device is in: on a Flow server, in a WebDAV folder, or on its devices on the network. */
+  /** The group this device is in: on a Aello server, in a WebDAV folder, or on its devices on the network. */
   kind: "server" | "webdav" | "lan" | null;
   /** Why syncing stopped by itself: the group shut this device out (an `EngineError::kind`). */
   stopped?: "linkedRemoved" | "linkedSignInRefused" | null;
-  /** The Flow server or WebDAV folder this device syncs with. */
+  /** The Aello server or WebDAV folder this device syncs with. */
   storeUrl?: string | null;
   /** The WebDAV folder refused its login, so nothing syncs until a new one is entered. */
   loginRefused: boolean;

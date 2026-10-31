@@ -1,5 +1,5 @@
 /**
- * The full player's colours, ported from Flow Android's `MusicPlayerTheme.kt`.
+ * The full player's colours, ported from Aello Android's `MusicPlayerTheme.kt`.
  * Hue and chroma come from the cover; every role sits at a fixed tone and is
  * re-clamped against the surface it is drawn on, so a pale, dark or grey cover
  * never leaves text or controls unreadable.

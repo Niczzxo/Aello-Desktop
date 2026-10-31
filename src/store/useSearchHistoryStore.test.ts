@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const deepFlow = vi.hoisted(() => ({ record: true }));
-vi.mock("../lib/deepFlow", () => ({ shouldRecordWatchHistory: () => deepFlow.record }));
+const deepAello = vi.hoisted(() => ({ record: true }));
+vi.mock("../lib/deepAello", () => ({ shouldRecordWatchHistory: () => deepAello.record }));
 
 import { SEARCH_HISTORY_LIMIT, useSearchHistoryStore } from "./useSearchHistoryStore";
 
@@ -9,7 +9,7 @@ const queries = () => useSearchHistoryStore.getState().entries.map((entry) => en
 
 describe("search history", () => {
   beforeEach(() => {
-    deepFlow.record = true;
+    deepAello.record = true;
     useSearchHistoryStore.getState().clear();
   });
 
@@ -32,8 +32,8 @@ describe("search history", () => {
     expect(queries()[0]).toBe(`q${SEARCH_HISTORY_LIMIT + 4}`);
   });
 
-  it("records nothing while Deep Flow keeps history private", () => {
-    deepFlow.record = false;
+  it("records nothing while Deep Aello keeps history private", () => {
+    deepAello.record = false;
     useSearchHistoryStore.getState().record("secret");
     expect(queries()).toEqual([]);
   });

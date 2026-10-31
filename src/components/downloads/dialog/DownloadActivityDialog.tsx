@@ -213,7 +213,7 @@ export function DownloadActivityDialog({
 
   const copyLogs = async () => {
     const text = [
-      `Flow Desktop download: ${progress?.title ?? id}`,
+      `Aello Desktop download: ${progress?.title ?? id}`,
       `Status: ${progress?.status ?? "unknown"}`,
       `File: ${progress?.filePath ?? "unknown"}`,
       progress?.error ? `Failure: ${progress.error}` : "",

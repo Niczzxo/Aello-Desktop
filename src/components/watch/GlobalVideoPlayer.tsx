@@ -5,7 +5,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useAppSettingsStore } from "../../store/useAppSettingsStore";
 import { usePlayerStore } from "../../store/usePlayerStore";
 import { SETTINGS } from "../../lib/settings/schema";
-import { FlowPlayerCore } from "./FlowPlayerCore";
+import { AelloPlayerCore } from "./AelloPlayerCore";
 import { decideRouteChangePlayerAction, watchVideoIdFromPath } from "../../lib/watchRouteSync";
 import { expandPlayerInOwnerTab } from "../../lib/tabs/tabPlayback";
 import { useTabsStore } from "../../store/useTabsStore";
@@ -257,7 +257,7 @@ export function GlobalVideoPlayer() {
   const playerNode = useMemo(
     () =>
       videoIdForPlayer ? (
-        <FlowPlayerCore videoId={videoIdForPlayer} videoDetails={cachedDetails} />
+        <AelloPlayerCore videoId={videoIdForPlayer} videoDetails={cachedDetails} />
       ) : null,
     [videoIdForPlayer, cachedDetails],
   );

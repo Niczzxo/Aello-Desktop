@@ -2,7 +2,7 @@ import { formatYouTubeRelativeTime } from "./publishedDate";
 import { formatCount } from "./utils";
 import type { VideoMetadata, VideoSummary } from "../types/video";
 
-// Mirrors Flow-Android's PlaylistDetailViewModel stub enrichment.
+// Mirrors Aello-Android's PlaylistDetailViewModel stub enrichment.
 export const ENRICHMENT_TRACK_LIMIT = 50;
 export const ENRICHMENT_CHUNK_SIZE = 5;
 export const ENRICHMENT_CHUNK_DELAY_MS = 300;

@@ -59,7 +59,7 @@ async function saveEveryWindow(target: Profile): Promise<void> {
 }
 
 /**
- * Switches profile by restarting Flow. Refusals (sync running, another switch) throw before
+ * Switches profile by restarting Aello. Refusals (sync running, another switch) throw before
  * anything changes; a failure after that cancels the switch and throws.
  */
 export async function switchProfile(target: Profile): Promise<void> {

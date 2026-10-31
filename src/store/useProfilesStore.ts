@@ -35,7 +35,7 @@ export interface CopyChoice {
 
 export function copyParts(choice: CopyChoice): CopyParts {
   return {
-    // The backend drops in-progress state (Deep Flow, open tabs, SponsorBlock id) from this list.
+    // The backend drops in-progress state (Deep Aello, open tabs, SponsorBlock id) from this list.
     settings: choice.settings
       ? SETTING_DEFINITIONS.filter((definition) => definition.scope === "profile").map((definition) => definition.key)
       : [],

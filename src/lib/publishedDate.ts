@@ -1,6 +1,6 @@
 import type { VideoSummary } from "../types/video";
 
-// Mirrors Flow-Android's DateDisplay.
+// Mirrors Aello-Android's DateDisplay.
 
 const SECOND_MS = 1_000;
 const MINUTE_MS = 60 * SECOND_MS;

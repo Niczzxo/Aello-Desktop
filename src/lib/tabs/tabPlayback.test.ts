@@ -9,7 +9,7 @@ const { activeTab, useTabsStore } = await import("../../store/useTabsStore");
 const { createEntry } = await import("./tabHistory");
 const { closeOtherTabs, closeTabWithPlayback, expandPlayerInOwnerTab, installTabPlaybackSync, switchToTab } = await import("./tabPlayback");
 
-const video = (id: string): VideoSummary => ({ id, title: id, channelName: "Flow" });
+const video = (id: string): VideoSummary => ({ id, title: id, channelName: "Aello" });
 const flush = () => new Promise<void>((resolve) => queueMicrotask(resolve));
 const tabs = () => useTabsStore.getState();
 const pathOf = (id: string) => {

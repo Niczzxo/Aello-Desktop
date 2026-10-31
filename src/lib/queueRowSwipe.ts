@@ -1,4 +1,4 @@
-/** What a swipe on an Up next row does, as Flow for Android stores it. */
+/** What a swipe on an Up next row does, as Aello for Android stores it. */
 export type QueueSwipeAction = "PLAY_NEXT" | "MOVE_TO_END" | "REMOVE";
 
 export const QUEUE_SWIPE_ACTIONS: readonly QueueSwipeAction[] = ["PLAY_NEXT", "MOVE_TO_END", "REMOVE"];

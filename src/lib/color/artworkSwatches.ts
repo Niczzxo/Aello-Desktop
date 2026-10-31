@@ -1,5 +1,5 @@
 /**
- * The two colours Flow Android takes from a cover (`MediaPalette.artworkSwatches`):
+ * The two colours Aello Android takes from a cover (`MediaPalette.artworkSwatches`):
  * a dark one to sit under the player and a vivid one to draw with. Android gets
  * them from AndroidX Palette; this is a port of the parts that decide them, its
  * median-cut quantizer (16 colours, 5 bits a channel), its default filter, and

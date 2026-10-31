@@ -28,7 +28,7 @@ interface SleepTimerPanelProps {
   onDone: () => void;
 }
 
-/** Presets, a custom time, End of song and Quit Flow, for the shared sleep timer. */
+/** Presets, a custom time, End of song and Quit Aello, for the shared sleep timer. */
 export function SleepTimerPanel({ tone, onDone }: SleepTimerPanelProps) {
   const status = useSleepTimerStatus();
   const activeQuit = useSleepTimerStore((s) => s.quitOnExpiry);

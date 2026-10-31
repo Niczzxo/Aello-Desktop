@@ -1,5 +1,5 @@
 import type { VideoSummary } from "../../types/video";
-import { isDeepFlowCurrentlyActive } from "../deepFlow";
+import { isDeepAelloCurrentlyActive } from "../deepAello";
 import { isTauriEnv } from "./env";
 import { invokeBackend } from "./errors";
 import { profileStorage } from "../storage/profileStorage";
@@ -50,10 +50,10 @@ export async function logInteraction(
   interactionType: string,
   percentWatched: number,
 ): Promise<void> {
-  if (isDeepFlowCurrentlyActive()) return;
+  if (isDeepAelloCurrentlyActive()) return;
 
   if (!(await isTauriEnv())) {
-    console.log(`[FlowNeuro Mock Log] ${interactionType} - ${title} (${percentWatched * 100}%)`);
+    console.log(`[AelloNeuro Mock Log] ${interactionType} - ${title} (${percentWatched * 100}%)`);
     return;
   }
   return invokeBackend<void>("log_interaction", {
@@ -87,13 +87,13 @@ export interface WatchReport {
 
 /** Feeds the backend watch session. It turns a whole viewing into one click and one watch or skip. */
 export async function reportWatchProgress(report: WatchReport): Promise<void> {
-  if (isDeepFlowCurrentlyActive() || !(await isTauriEnv())) return;
+  if (isDeepAelloCurrentlyActive() || !(await isTauriEnv())) return;
   return invokeBackend<void>("report_watch_progress", { report });
 }
 
 /** `natural` is a video that played to its end; any other end waits briefly for the video to resume. */
 export async function endWatchSession(report: WatchReport, natural: boolean): Promise<void> {
-  if (isDeepFlowCurrentlyActive() || !(await isTauriEnv())) return;
+  if (isDeepAelloCurrentlyActive() || !(await isTauriEnv())) return;
   return invokeBackend<void>("end_watch_session", { report, natural });
 }
 
@@ -107,10 +107,10 @@ export async function markNotInterested(
   isLive: boolean,
   isShort: boolean,
 ): Promise<void> {
-  if (isDeepFlowCurrentlyActive()) return;
+  if (isDeepAelloCurrentlyActive()) return;
 
   if (!(await isTauriEnv())) {
-    console.log(`[FlowNeuro Mock] Not interested - ${title}`);
+    console.log(`[AelloNeuro Mock] Not interested - ${title}`);
     return;
   }
   return invokeBackend<void>("mark_not_interested", {
@@ -127,7 +127,7 @@ export async function markNotInterested(
 
 /** Cards seen beside a video, kept only for "Hide videos you've already seen". */
 export async function recordSeenVideos(ids: string[]): Promise<void> {
-  if (isDeepFlowCurrentlyActive() || !(await isTauriEnv())) return;
+  if (isDeepAelloCurrentlyActive() || !(await isTauriEnv())) return;
   return invokeBackend<void>("record_seen_videos", { ids });
 }
 
@@ -140,7 +140,7 @@ export async function seenVideoIdsAmong(ids: string[]): Promise<string[]> {
 export async function recordFeedImpressions(
   videos: VideoSummary[],
 ): Promise<void> {
-  if (isDeepFlowCurrentlyActive()) return;
+  if (isDeepAelloCurrentlyActive()) return;
 
   if (!(await isTauriEnv())) {
     return;
@@ -161,13 +161,13 @@ export async function completeOnboarding(preferred: string[]): Promise<void> {
 export async function getOnboardingStatus(): Promise<boolean> {
   if (!(await isTauriEnv())) {
     const status = profileStorage.getItem("mock_setting_onboarded") === "true";
-    console.log("[FlowNeuro Mock Onboarding Status Check]", status);
+    console.log("[AelloNeuro Mock Onboarding Status Check]", status);
     return status;
   }
   return invokeBackend<boolean>("get_onboarding_status");
 }
 
-export async function getFlowPersona(): Promise<PersonaDetails> {
+export async function getAelloPersona(): Promise<PersonaDetails> {
   if (!(await isTauriEnv())) {
     const preferred = profileStorage.getItem("mock_setting_preferred_topics");
     const topics: string[] = preferred ? JSON.parse(preferred) : [];
@@ -187,7 +187,7 @@ export async function getFlowPersona(): Promise<PersonaDetails> {
       icon: "🌌",
     };
   }
-  return invokeBackend<PersonaDetails>("get_flow_persona");
+  return invokeBackend<PersonaDetails>("get_aello_persona");
 }
 
 export interface ContentVector {
@@ -319,7 +319,7 @@ export async function getBrainSnapshot(forceRefresh?: boolean): Promise<UserBrai
 
 /** A typed search is the most explicit interest statement there is; it teaches the engine once. */
 export async function learnFromSearch(query: string): Promise<void> {
-  if (!query.trim() || isDeepFlowCurrentlyActive() || !(await isTauriEnv())) return;
+  if (!query.trim() || isDeepAelloCurrentlyActive() || !(await isTauriEnv())) return;
   await invokeBackend<boolean>("learn_from_search", { query });
   brainCache = null;
 }
@@ -330,13 +330,13 @@ export async function noteSubscription(
   channelName: string,
   subscribed: boolean,
 ): Promise<void> {
-  if (isDeepFlowCurrentlyActive() || !(await isTauriEnv())) return;
+  if (isDeepAelloCurrentlyActive() || !(await isTauriEnv())) return;
   await invokeBackend<void>("note_subscription", { channelId, channelName, subscribed });
 }
 
 /** Upload titles a feed already fetched say what each channel is about. */
 export async function observeChannelUploads(uploads: VideoSummary[]): Promise<void> {
-  if (uploads.length === 0 || isDeepFlowCurrentlyActive() || !(await isTauriEnv())) return;
+  if (uploads.length === 0 || isDeepAelloCurrentlyActive() || !(await isTauriEnv())) return;
   await invokeBackend<void>("observe_channel_uploads", { uploads });
 }
 
@@ -376,7 +376,7 @@ export async function importBrain(brain: unknown): Promise<void> {
 
 export async function unblockTopic(topic: string): Promise<void> {
   if (!(await isTauriEnv())) {
-    console.log(`[FlowNeuro Mock] Unblocking topic: ${topic}`);
+    console.log(`[AelloNeuro Mock] Unblocking topic: ${topic}`);
     if (brainCache) {
       brainCache.blocked_topics = brainCache.blocked_topics.filter(t => t !== topic);
     }
@@ -390,7 +390,7 @@ export async function addBlockedTopic(topic: string): Promise<void> {
   const normalized = topic.trim().toLowerCase();
   if (!normalized) return;
   if (!(await isTauriEnv())) {
-    console.log(`[FlowNeuro Mock] Blocking topic: ${normalized}`);
+    console.log(`[AelloNeuro Mock] Blocking topic: ${normalized}`);
     if (brainCache) {
       brainCache.blocked_topics = [...new Set([...brainCache.blocked_topics, normalized])];
       brainCache.preferred_topics = brainCache.preferred_topics.filter(
@@ -407,7 +407,7 @@ export async function addPreferredTopic(topic: string): Promise<void> {
   const trimmed = topic.trim();
   if (!trimmed) return;
   if (!(await isTauriEnv())) {
-    console.log(`[FlowNeuro Mock] Adding preferred topic: ${trimmed}`);
+    console.log(`[AelloNeuro Mock] Adding preferred topic: ${trimmed}`);
     if (brainCache) {
       brainCache.preferred_topics = [...new Set([...brainCache.preferred_topics, trimmed])];
       brainCache.blocked_topics = brainCache.blocked_topics.filter(
@@ -429,7 +429,7 @@ export async function removePreferredTopic(topic: string): Promise<void> {
   const normalized = topic.trim().toLowerCase();
   if (!normalized) return;
   if (!(await isTauriEnv())) {
-    console.log(`[FlowNeuro Mock] Removing preferred topic: ${topic}`);
+    console.log(`[AelloNeuro Mock] Removing preferred topic: ${topic}`);
     if (brainCache) {
       brainCache.preferred_topics = brainCache.preferred_topics.filter(
         (t) => t.toLowerCase() !== normalized,
@@ -444,7 +444,7 @@ export async function removePreferredTopic(topic: string): Promise<void> {
 
 export async function unblockChannel(channelId: string): Promise<void> {
   if (!(await isTauriEnv())) {
-    console.log(`[FlowNeuro Mock] Unblocking channel: ${channelId}`);
+    console.log(`[AelloNeuro Mock] Unblocking channel: ${channelId}`);
     if (brainCache) {
       brainCache.blocked_channels = brainCache.blocked_channels.filter(c => c !== channelId);
     }
@@ -457,7 +457,7 @@ export async function unblockChannel(channelId: string): Promise<void> {
 /** Blocks a channel; its name is kept so Hidden channels can show it without a lookup. */
 export async function blockChannel(channelId: string, channelName?: string): Promise<void> {
   if (!(await isTauriEnv())) {
-    console.log(`[FlowNeuro Mock] Blocking channel: ${channelId}`);
+    console.log(`[AelloNeuro Mock] Blocking channel: ${channelId}`);
     return;
   }
   await invokeBackend<void>("block_channel", { channelId, channelName: channelName || null });
@@ -466,7 +466,7 @@ export async function blockChannel(channelId: string, channelName?: string): Pro
 
 export async function resetBrain(): Promise<void> {
   if (!(await isTauriEnv())) {
-    console.log(`[FlowNeuro Mock] Resetting brain`);
+    console.log(`[AelloNeuro Mock] Resetting brain`);
     profileStorage.removeItem("mock_setting_onboarded");
     profileStorage.removeItem("mock_setting_preferred_topics");
     brainCache = null;

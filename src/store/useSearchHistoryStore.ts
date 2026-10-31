@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { shouldRecordWatchHistory } from "../lib/deepFlow";
+import { shouldRecordWatchHistory } from "../lib/deepAello";
 import { profileStorage } from "../lib/storage/profileStorage";
 
 const STORAGE_KEY = "flow_search_history";
@@ -36,7 +36,7 @@ const sameQuery = (a: string, b: string) => a.trim().toLowerCase() === b.trim().
 
 interface SearchHistoryState {
   entries: SearchHistoryEntry[];
-  /** Newest first; a repeated query moves to the top. Skipped in Deep Flow unless history is allowed there. */
+  /** Newest first; a repeated query moves to the top. Skipped in Deep Aello unless history is allowed there. */
   record: (query: string) => void;
   remove: (query: string) => void;
   clear: () => void;

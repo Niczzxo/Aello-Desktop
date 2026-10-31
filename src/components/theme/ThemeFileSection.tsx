@@ -15,7 +15,7 @@ const STATUS_LABEL: Record<Exclude<ThemeFileStatus, "loaded">, StringKey> = {
   unreadable: "theme_file_status_unreadable",
 };
 
-/** The custom.css a desktop shell or template tool can write for Flow to follow (#81). */
+/** The custom.css a desktop shell or template tool can write for Aello to follow (#81). */
 export function ThemeFileSection() {
   const { themeId, setTheme } = useTheme();
   const { file, applied, error, create, reveal } = useThemeFile();

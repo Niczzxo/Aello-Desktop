@@ -15,7 +15,7 @@ import type {
   StreamVariant,
   VideoChapter,
 } from "../../types/video";
-import { FlowPlayerControls } from "./FlowPlayerControls";
+import { AelloPlayerControls } from "./AelloPlayerControls";
 import { MiniPlayerControls } from "./MiniPlayerControls";
 import { sponsorBlockCategoryLabel } from "../../lib/sponsorBlockCategories";
 import { usePersistedPlayerVolume } from "../../lib/usePersistedPlayerVolume";
@@ -729,16 +729,16 @@ export const Player: React.FC<PlayerProps> = ({
     if (import.meta.env.DEV) console.log(`[Player] ${event}`, entry);
     recordPlayerEvent(`${event} ${summarizePlayerLogPayload(entry)}`.slice(0, PLAYER_LOG_MAX_CHARS));
     const globalWindow = window as Window & {
-      __FLOW_PLAYER_LOGS__?: Array<{ event: string; payload: Record<string, unknown>; at: string }>;
+      __AELLO_PLAYER_LOGS__?: Array<{ event: string; payload: Record<string, unknown>; at: string }>;
     };
-    globalWindow.__FLOW_PLAYER_LOGS__ = globalWindow.__FLOW_PLAYER_LOGS__ || [];
-    globalWindow.__FLOW_PLAYER_LOGS__.push({
+    globalWindow.__AELLO_PLAYER_LOGS__ = globalWindow.__AELLO_PLAYER_LOGS__ || [];
+    globalWindow.__AELLO_PLAYER_LOGS__.push({
       event,
       payload: entry,
       at: new Date().toISOString(),
     });
-    if (globalWindow.__FLOW_PLAYER_LOGS__.length > 200) {
-      globalWindow.__FLOW_PLAYER_LOGS__.shift();
+    if (globalWindow.__AELLO_PLAYER_LOGS__.length > 200) {
+      globalWindow.__AELLO_PLAYER_LOGS__.shift();
     }
   }, [isDashPlayback, selectedQualityId]);
   const logPlayerEventRef = useRef(logPlayerEvent);
@@ -2816,7 +2816,7 @@ export const Player: React.FC<PlayerProps> = ({
           showNextPrevControls={miniPlayerShowNextPrevControls}
         />
       ) : (
-      <FlowPlayerControls
+      <AelloPlayerControls
         title={title}
         isLoading={isLoading}
         error={error}

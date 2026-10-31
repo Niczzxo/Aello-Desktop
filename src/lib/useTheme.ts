@@ -26,7 +26,7 @@ export function useTheme() {
   const setSettingValue = useAppSettingsStore((state) => state.setSettingValue);
   const fileTheme = useThemeFileStore((state) => (themeId === THEME_FILE_ID ? state.applied : null));
   const chosenVariant: ThemeVariant = isThemeVariant(variantValue) ? variantValue : "dark";
-  // The theme file sets its own light or dark, so a shell switching schemes switches Flow too.
+  // The theme file sets its own light or dark, so a shell switching schemes switches Aello too.
   const variant: ThemeVariant = fileTheme?.scheme ?? chosenVariant;
   const customThemes = useMemo(
     () => parseCustomThemes(serializedCustomThemes),

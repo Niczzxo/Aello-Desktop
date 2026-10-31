@@ -38,7 +38,7 @@ const FIT_POINTS = 96;
 const FIT_PASSES = 4;
 const FIT_SMOOTHING = 6;
 
-/** Ten octave bands, 31 Hz to 16 kHz, all peaking, as on Flow for Android. */
+/** Ten octave bands, 31 Hz to 16 kHz, all peaking, as on Aello for Android. */
 export const GraphicEq = {
   FREQUENCIES: [31, 63, 125, 250, 500, 1_000, 2_000, 4_000, 8_000, 16_000] as const,
   Q: 1.41,

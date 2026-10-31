@@ -24,7 +24,7 @@ function Body() {
   return <LinkedOverview status={status} />;
 }
 
-/** FLOW-SYNC/2: devices that stay in sync through a Flow server. */
+/** FLOW-SYNC/2: devices that stay in sync through a Aello server. */
 export function LinkedDevicesSection() {
   const { init, error } = useLinkedDevicesStore();
   useEffect(() => {

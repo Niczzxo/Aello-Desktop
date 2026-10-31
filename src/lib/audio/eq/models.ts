@@ -1,5 +1,5 @@
 /**
- * The equalizer model shared with Flow for Android (`data/audio/eq/EqModels.kt`). The field names
+ * The equalizer model shared with Aello for Android (`data/audio/eq/EqModels.kt`). The field names
  * and enum spellings are the JSON both apps store and sync, so they must not be renamed.
  */
 export type EqFilterType = "PEAK" | "LOW_SHELF" | "HIGH_SHELF" | "LOW_PASS" | "HIGH_PASS";

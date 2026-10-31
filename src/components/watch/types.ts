@@ -16,7 +16,7 @@ export interface WatchLayoutSlots {
 
 export type WatchLayoutProps = WatchLayoutSlots;
 
-export interface FlowPlayerCoreProps {
+export interface AelloPlayerCoreProps {
   videoId: string;
   videoDetails: VideoDetails | null;
   onEnded?: () => void;

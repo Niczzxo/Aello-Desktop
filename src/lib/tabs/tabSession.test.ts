@@ -5,7 +5,7 @@ import { parseTabSession, restoreTabSession, serializeTabSession } from "./tabSe
 const parked = (videoId: string, positionSeconds: number) => ({
   videoId,
   positionSeconds,
-  queue: [{ id: videoId, title: videoId, channelName: "Flow" }],
+  queue: [{ id: videoId, title: videoId, channelName: "Aello" }],
   currentIndex: 0,
   playlistContext: null,
 });

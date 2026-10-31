@@ -2,7 +2,7 @@ import { getCurrentWindow } from "@tauri-apps/api/window";
 
 // Undecorated windows lose the native resize borders, so we recreate them with
 // thin hit-areas that hand the drag off to the OS. Shared by every undecorated
-// Flow window: the main frame and the pop-out mini player.
+// Aello window: the main frame and the pop-out mini player.
 const RESIZE_EDGES = [
   { dir: "North", cls: "top-0 inset-x-0 h-[3px] cursor-ns-resize" },
   { dir: "South", cls: "bottom-0 inset-x-0 h-[3px] cursor-ns-resize" },
