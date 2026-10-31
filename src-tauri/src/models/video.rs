@@ -1,0 +1,386 @@
+use serde::{Deserialize, Serialize};
+
+use crate::models::rich_text::RichText;
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct VideoSummary {
+    pub id: String,
+    pub title: String,
+    pub channel_name: String,
+    pub channel_id: Option<String>,
+    pub thumbnail_url: Option<String>,
+    pub duration_seconds: Option<u64>,
+    pub published_text: Option<String>,
+    pub view_count_text: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub channel_avatar_url: Option<String>,
+    #[serde(default)]
+    pub is_live: bool,
+    /// The view count as a number, read from `view_count_text`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub view_count: Option<u64>,
+    /// A premiere or scheduled stream that has not started.
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub is_upcoming: bool,
+    /// When an upcoming video starts, in epoch milliseconds.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub upcoming_start_ms: Option<u64>,
+    /// A Short, known from the card itself rather than guessed from its length.
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub is_short: bool,
+    /// The channel carries a verified or verified-artist badge.
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub is_verified: bool,
+    /// Only the channel's members can watch it.
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub is_members_only: bool,
+    /// The card's own badges as the server labels them ("4K", "CC", "New").
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub badges: Vec<String>,
+    /// The channels behind a collaboration, the lead first; empty for one channel.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub collaborators: Vec<Collaborator>,
+    /// The description excerpt search results show.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub snippet: Option<String>,
+}
+
+/// One channel of a collaboration.
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Collaborator {
+    pub channel_id: String,
+    pub name: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub avatar_url: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub handle: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub subscriber_count_text: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct RelatedContentItem {
+    pub id: String,
+    pub item_type: String,
+    pub title: String,
+    pub channel_name: String,
+    pub channel_id: Option<String>,
+    pub thumbnail_url: Option<String>,
+    pub duration_seconds: Option<u64>,
+    pub published_text: Option<String>,
+    pub view_count_text: Option<String>,
+    pub video_id: Option<String>,
+    pub playlist_id: Option<String>,
+    pub is_mix: bool,
+    #[serde(default)]
+    pub is_live: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub channel_avatar_url: Option<String>,
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub is_upcoming: bool,
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub is_verified: bool,
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub is_members_only: bool,
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub is_short: bool,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub badges: Vec<String>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub collaborators: Vec<Collaborator>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct VideoChapter {
+    pub title: String,
+    pub start_seconds: u64,
+    pub end_seconds: u64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub thumbnail_url: Option<String>,
+}
+
+/// One slice of the "most replayed" graph above the seek bar: how often
+/// `start_ms..start_ms + duration_ms` is replayed, from 0 to 1.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct HeatmapMarker {
+    pub start_ms: u64,
+    pub duration_ms: u64,
+    pub intensity: f64,
+}
+
+/// The structured part of a description: the headline numbers, the songs in
+/// the video, and the creator's own links.
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct DescriptionExtras {
+    pub factoids: Vec<Factoid>,
+    pub music: Vec<MusicCard>,
+    pub links: Vec<CreatorLink>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Factoid {
+    /// "19M".
+    pub value: String,
+    /// "Likes".
+    pub label: String,
+}
+
+/// A song credited in the video. The card names it but carries no id, so the
+/// music player finds it by title and artist.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct MusicCard {
+    pub title: String,
+    pub artist: Option<String>,
+    pub album: Option<String>,
+    pub thumbnail_url: Option<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CreatorLink {
+    pub title: String,
+    pub url: String,
+}
+
+/// One page of the watch page's related lane, and the token for the next.
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct RelatedPage {
+    pub items: Vec<RelatedContentItem>,
+    pub continuation: Option<String>,
+}
+
+/// What a listed video is, from one small player request: enough to fill in a
+/// stored track without the full details lookup.
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct VideoMetadata {
+    pub title: String,
+    pub channel_name: String,
+    pub channel_id: Option<String>,
+    pub duration_seconds: Option<u64>,
+    pub view_count: Option<u64>,
+    /// The upload time, exact, in epoch milliseconds.
+    pub published_at_ms: Option<i64>,
+    pub is_live: bool,
+    pub category: Option<String>,
+}
+
+/// What a feed needs to fill in for a listed video, without the full details
+/// lookup and its `next` request.
+#[derive(Debug, Clone, Default)]
+pub struct VideoBasics {
+    pub channel_id: Option<String>,
+    pub duration_seconds: Option<u64>,
+    /// Whether it is a Short, told by its frame; `None` when no format says.
+    pub is_short: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct VideoDetails {
+    pub id: String,
+    pub title: String,
+    pub channel_name: String,
+    pub channel_id: Option<String>,
+    pub description: Option<String>,
+    pub thumbnail_url: Option<String>,
+    pub duration_seconds: Option<u64>,
+    pub like_count_text: Option<String>,
+    pub view_count_text: Option<String>,
+    pub published_text: Option<String>,
+    pub chapters: Vec<VideoChapter>,
+    #[serde(default)]
+    pub is_live: bool,
+    /// YouTube's category ("Gaming", "Education") from the player's microformat.
+    #[serde(default)]
+    pub category: Option<String>,
+    /// "16 years ago", next to the absolute `published_text`.
+    #[serde(default)]
+    pub relative_published_text: Option<String>,
+    #[serde(default)]
+    pub channel_avatar_url: Option<String>,
+    #[serde(default)]
+    pub subscriber_count_text: Option<String>,
+    /// "verified" or "artist".
+    #[serde(default)]
+    pub channel_badge: Option<String>,
+    /// The channels of a collaboration, the uploader first; empty otherwise.
+    #[serde(default)]
+    pub collaborators: Vec<Collaborator>,
+    /// The hashtags shown above the title.
+    #[serde(default)]
+    pub hashtags: Vec<String>,
+    /// Labels such as "Unlisted" or "Members only" under the title.
+    #[serde(default)]
+    pub badges: Vec<String>,
+    /// Whether the chapters were generated rather than written by the creator.
+    #[serde(default)]
+    pub auto_chapters: bool,
+    #[serde(default)]
+    pub heatmap: Vec<HeatmapMarker>,
+    /// The video the site would autoplay next.
+    #[serde(default)]
+    pub autoplay_video_id: Option<String>,
+    /// A finished stream whose chat can be replayed alongside it.
+    #[serde(default)]
+    pub has_chat_replay: bool,
+    /// The description with its links, when the watch answer's text is the
+    /// same as `description`.
+    #[serde(default)]
+    pub description_rich: Option<RichText>,
+    #[serde(default)]
+    pub description_extras: DescriptionExtras,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct StreamInfo {
+    pub stream_id: String,
+    pub local_url: String,
+    pub expires_at: String,
+    pub variants: Vec<StreamVariant>,
+    pub captions: Vec<CaptionTrack>,
+    pub audio_tracks: Vec<AudioTrack>,
+    #[serde(skip)]
+    pub download_audio_tracks: Vec<AudioTrack>,
+    pub hls_manifest_url: Option<String>,
+    pub dash_manifest_url: Option<String>,
+    #[serde(default)]
+    pub is_live: bool,
+    // SABR availability + (once a session is prepared) a local manifest URL.
+    // `None` when extraction found no SABR metadata at all.
+    #[serde(default)]
+    pub sabr: Option<SabrStreamInfo>,
+    /// How many dB louder than the site's target the video plays.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub loudness_db: Option<f64>,
+    /// Seek-bar preview sheets, one entry per resolution, smallest first.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub storyboard: Vec<StoryboardLevel>,
+    // Internal: everything needed to spin up a SABR session. Never serialized;
+    // consumed by the command layer to register a session with the proxy.
+    #[serde(skip)]
+    pub sabr_descriptor: Option<crate::streaming::sabr::SabrSessionDescriptor>,
+}
+
+/// One resolution of a video's preview frames: sprite sheets of `columns` ×
+/// `rows` frames, one every `interval_ms`. `$M` in the template numbers the sheet.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct StoryboardLevel {
+    pub width: u32,
+    pub height: u32,
+    pub count: u32,
+    pub columns: u32,
+    pub rows: u32,
+    pub interval_ms: u64,
+    pub url_template: String,
+}
+
+// Frontend-facing SABR metadata. Mirrors `src/types/video.ts`.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SabrStreamInfo {
+    pub available: bool,
+    pub manifest_url: Option<String>,
+    pub audio_url: Option<String>,
+    pub video_url: Option<String>,
+    pub selected_audio_itag: Option<i32>,
+    pub selected_video_itag: Option<i32>,
+    pub expires_in_seconds: Option<u64>,
+    pub requires_po_token: bool,
+    pub reason_unavailable: Option<String>,
+}
+
+impl Default for SabrStreamInfo {
+    fn default() -> Self {
+        Self {
+            available: false,
+            manifest_url: None,
+            audio_url: None,
+            video_url: None,
+            selected_audio_itag: None,
+            selected_video_itag: None,
+            expires_in_seconds: None,
+            requires_po_token: false,
+            reason_unavailable: None,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct StreamVariant {
+    pub id: String,
+    pub local_url: String,
+    pub quality_label: String,
+    pub mime_type: Option<String>,
+    pub width: Option<u64>,
+    pub height: Option<u64>,
+    pub fps: Option<u64>,
+    pub bitrate: Option<u64>,
+    pub content_length: Option<u64>,
+    pub is_default: bool,
+    pub is_playable: bool,
+    pub has_audio: bool,
+    pub is_video_only: bool,
+    pub delivery_method: String,
+    pub init_range_start: Option<u64>,
+    pub init_range_end: Option<u64>,
+    pub index_range_start: Option<u64>,
+    pub index_range_end: Option<u64>,
+    pub approx_duration_ms: Option<u64>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CaptionTrack {
+    pub id: String,
+    pub label: String,
+    pub language_code: String,
+    pub url: String,
+    pub is_auto_generated: bool,
+    /// A machine translation of another track, offered under Auto-translate.
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub is_translation: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AudioTrack {
+    pub id: String,
+    pub label: String,
+    pub language_code: Option<String>,
+    pub audio_track_type: Option<String>,
+    pub local_url: String,
+    pub mime_type: Option<String>,
+    pub bitrate: Option<u64>,
+    pub content_length: Option<u64>,
+    pub is_default: bool,
+    pub available: bool,
+    pub init_range_start: Option<u64>,
+    pub init_range_end: Option<u64>,
+    pub index_range_start: Option<u64>,
+    pub index_range_end: Option<u64>,
+    pub approx_duration_ms: Option<u64>,
+    #[serde(skip)]
+    pub user_agent: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct MusicHomeChip {
+    pub title: String,
+    pub browse_id: Option<String>,
+    pub params: Option<String>,
+    pub order_by: i32,
+}

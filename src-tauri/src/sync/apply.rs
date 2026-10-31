@@ -1,0 +1,975 @@
+//! The atomic apply pipeline for Flow Local Sync.
+//!
+//! Given the staged canonical payload from a received session ([`protocol::ReceivedPayload`]), this:
+//!  1. takes a **pre-merge backup snapshot** of the affected collections (the safety net for a
+//!     logic bug — `apply` itself is atomic, but the backup lets a human recover even from a bad
+//!     merge result);
+//!  2. opens **one transaction**;
+//!  3. for each collection: skips a brain payload a FLOW-SYNC/1 session already applied (the
+//!     `sync_log` idempotency guard), else loads the local canonical state, merges (CRDT), and
+//!     writes the result back — collecting per-collection stats;
+//!  4. records the apply in `sync_log` and **commits**. Any error drops the transaction →
+//!     full rollback, leaving the database untouched and the backup intact.
+//!
+
+use std::collections::{BTreeMap, BTreeSet, HashMap};
+
+use sqlx::{Sqlite, SqlitePool, Transaction};
+
+use crate::flow_neuro::key_migration::{after_sync, spelled_before};
+use crate::flow_neuro::scoring::UserBrain;
+use crate::music_brain::model::MusicBrain;
+use crate::sync::brain_attrib::{
+    self, MUSIC_BASELINE_KEY, MusicBaseline, NEURO_BASELINE_KEY, NeuroBaseline, attribution,
+};
+use crate::sync::brain_rekey;
+use crate::sync::brainmap;
+use crate::sync::canonical::{
+    Collection, FlowNeuroBrainSnapshot, GroupMember, Hlc, Like, LikeState, MusicBrainSnapshot,
+    Playlist, PlaylistItem, SettingEntry, SubscribedChannel, SubscriptionGroup, WatchHistoryRecord,
+};
+use crate::sync::changes::{self, Change};
+use crate::sync::clock;
+use crate::sync::error::SyncError;
+use crate::sync::mapping::{self, WatchInsert, WatchRow};
+use crate::sync::merge::{self, MergedFlowNeuroBrain, MergedMusicBrain};
+use crate::sync::protocol::StagedCollection;
+use crate::sync::settings_map;
+use crate::sync::tombstones;
+
+pub(crate) const NEURO_BRAIN_KEY: &str = "user_neuro_brain";
+pub(crate) const NEURO_MERGED_KEY: &str = "sync_neuro_merged";
+pub(crate) const MUSIC_BRAIN_KEY: &str = "user_music_brain";
+pub(crate) const MUSIC_MERGED_KEY: &str = "sync_music_merged";
+
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct ApplyStats {
+    pub collection_key: String,
+    pub added: u64,
+    pub updated: u64,
+    pub skipped: u64,
+    pub tombstoned: u64,
+}
+
+#[derive(Debug, Clone)]
+pub struct ApplyReport {
+    pub stats: Vec<ApplyStats>,
+    /// A JSON snapshot of the affected collections taken before the merge (for recovery).
+    pub backup: String,
+}
+
+const WATCH_SELECT: &str = "SELECT video_id, title, channel_name, channel_id, watch_date, \
+     watch_duration_seconds, total_duration_seconds, is_music, is_short, updated_hlc \
+     FROM watch_history";
+
+/// Apply a payload received in a FLOW-SYNC/1 session atomically. See the module docs for the
+/// guarantees.
+pub async fn apply_payload(
+    pool: &SqlitePool,
+    our_device_id: &str,
+    peer_device_id: &str,
+    staged: &[StagedCollection],
+) -> Result<ApplyReport, SyncError> {
+    apply(pool, our_device_id, peer_device_id, staged, true).await
+}
+
+/// [`apply_payload`] for FLOW-SYNC/2 batches, which stream positions already keep from applying
+/// twice: a brain payload seen before (after a reset, or through another group) applies again.
+pub async fn apply_stream_payload(
+    pool: &SqlitePool,
+    our_device_id: &str,
+    peer_device_id: &str,
+    staged: &[StagedCollection],
+) -> Result<ApplyReport, SyncError> {
+    apply(pool, our_device_id, peer_device_id, staged, false).await
+}
+
+async fn apply(
+    pool: &SqlitePool,
+    our_device_id: &str,
+    peer_device_id: &str,
+    staged: &[StagedCollection],
+    brains_once: bool,
+) -> Result<ApplyReport, SyncError> {
+    let backup = backup_snapshot(pool, staged).await?;
+
+    let mut tx = pool.begin().await?;
+    let mut stats = Vec::with_capacity(staged.len());
+
+    for sc in staged {
+        let key = sc.collection.key();
+
+        // A brain payload is applied at most once per (peer, payload). Data collections merge
+        // again: the merges are idempotent, and a payload seen before still restores rows this
+        // device lost since (a backup restore, a reset), which skipping it never could.
+        let already: Option<i64> = if !brains_once || !is_brain(sc.collection) {
+            None
+        } else {
+            sqlx::query_scalar(
+            "SELECT 1 FROM sync_log WHERE peer_device_id = ? AND collection = ? AND payload_hash = ? LIMIT 1",
+        )
+        .bind(peer_device_id)
+        .bind(key)
+        .bind(&sc.hash)
+        .fetch_optional(&mut *tx)
+        .await?
+        };
+        if already.is_some() {
+            stats.push(ApplyStats {
+                collection_key: key.to_string(),
+                skipped: sc.record_count,
+                ..Default::default()
+            });
+            continue;
+        }
+
+        let (stat, applied) = match sc.collection {
+            Collection::WatchHistory => (
+                apply_watch_history(&mut tx, our_device_id, &sc.ndjson).await?,
+                true,
+            ),
+            Collection::Likes => (apply_likes(&mut tx, our_device_id, &sc.ndjson).await?, true),
+            Collection::Playlists => (
+                apply_playlists(&mut tx, our_device_id, &sc.ndjson).await?,
+                true,
+            ),
+            Collection::Settings => (
+                apply_settings(&mut tx, our_device_id, &sc.ndjson).await?,
+                true,
+            ),
+            Collection::FlowNeuroBrain => (
+                apply_flow_neuro(&mut tx, our_device_id, &sc.ndjson).await?,
+                true,
+            ),
+            Collection::MusicBrain => {
+                (apply_music(&mut tx, our_device_id, &sc.ndjson).await?, true)
+            }
+            Collection::Subscriptions => (
+                apply_subscriptions(&mut tx, our_device_id, &sc.ndjson).await?,
+                true,
+            ),
+            Collection::SubscribedChannels => (
+                apply_subscribed_channels(&mut tx, our_device_id, &sc.ndjson).await?,
+                true,
+            ),
+
+            #[allow(unreachable_patterns)]
+            _ => (
+                ApplyStats {
+                    collection_key: key.to_string(),
+                    skipped: sc.record_count,
+                    ..Default::default()
+                },
+                false,
+            ),
+        };
+
+        if applied {
+            clock::observe(&mut tx, clock::highest_stamp(&sc.ndjson)).await?;
+            sqlx::query(
+                "INSERT OR IGNORE INTO sync_log (peer_device_id, collection, payload_hash, applied_at, hwm_hlc)
+                 VALUES (?, ?, ?, ?, ?)",
+            )
+            .bind(peer_device_id)
+            .bind(key)
+            .bind(&sc.hash)
+            .bind(now_iso())
+            .bind(Option::<String>::None)
+            .execute(&mut *tx)
+            .await?;
+        }
+
+        stats.push(stat);
+    }
+
+    tx.commit().await?;
+    Ok(ApplyReport { stats, backup })
+}
+
+fn is_brain(collection: Collection) -> bool {
+    matches!(
+        collection,
+        Collection::FlowNeuroBrain | Collection::MusicBrain
+    )
+}
+
+async fn apply_watch_history(
+    tx: &mut Transaction<'_, Sqlite>,
+    device_id: &str,
+    ndjson: &[u8],
+) -> Result<ApplyStats, SyncError> {
+    // The desktop keeps no thumbnail, so one sent along can't make a record differ.
+    let incoming: Vec<WatchHistoryRecord> = parse_ndjson::<WatchHistoryRecord>(ndjson)?
+        .into_iter()
+        .map(|record| WatchHistoryRecord {
+            thumbnail_url: None,
+            ..record
+        })
+        .collect();
+
+    let rows: Vec<WatchRow> = sqlx::query_as::<_, WatchRow>(WATCH_SELECT)
+        .fetch_all(&mut **tx)
+        .await?;
+    let mut local: Vec<WatchHistoryRecord> =
+        rows.iter().map(|r| r.to_canonical(device_id)).collect();
+    let live: BTreeSet<String> = local.iter().map(|r| r.video_id.clone()).collect();
+    let stamps = changes::load(tx, changes::WATCH_HISTORY, now_ms()).await?;
+    local.extend(tombstones::watch_history(&stamps, &live, device_id));
+    let local_map: BTreeMap<String, WatchHistoryRecord> = local
+        .iter()
+        .map(|r| (r.video_id.clone(), r.clone()))
+        .collect();
+
+    let merged = merge::merge_watch_history(local, incoming);
+
+    let mut stat = ApplyStats {
+        collection_key: Collection::WatchHistory.key().to_string(),
+        ..Default::default()
+    };
+
+    for rec in &merged {
+        let before = local_map.get(&rec.video_id);
+        if before == Some(rec) {
+            stat.skipped += 1;
+            continue;
+        }
+        note_merge(
+            tx,
+            changes::WATCH_HISTORY,
+            &rec.video_id,
+            rec,
+            rec.deleted,
+            &rec.hlc,
+        )
+        .await?;
+        let had_row = before.is_some_and(|b| !b.deleted);
+        match (rec.deleted, had_row) {
+            (true, true) => {
+                delete_watch(tx, &rec.video_id).await?;
+                stat.tombstoned += 1;
+            }
+            // A tombstone for a row we never had: nothing to delete, but it is kept for relay.
+            (true, false) => stat.skipped += 1,
+            (false, true) => {
+                delete_watch(tx, &rec.video_id).await?;
+                insert_watch(tx, rec).await?;
+                stat.updated += 1;
+            }
+            (false, false) => {
+                insert_watch(tx, rec).await?;
+                stat.added += 1;
+            }
+        }
+    }
+
+    Ok(stat)
+}
+
+/// [`note_merge`] for a playlist and each of its tracks that the merge changed.
+async fn note_playlist_merge(
+    tx: &mut Transaction<'_, Sqlite>,
+    rec: &Playlist,
+    before: Option<&Playlist>,
+) -> Result<(), SyncError> {
+    let header = |p: &Playlist| Playlist {
+        items: Vec::new(),
+        ..p.clone()
+    };
+    if before.map(header) != Some(header(rec)) {
+        let record = header(rec);
+        note_merge(
+            tx,
+            changes::PLAYLISTS,
+            &rec.sync_id,
+            &record,
+            rec.deleted,
+            &rec.updated_hlc,
+        )
+        .await?;
+    }
+    if rec.deleted {
+        return Ok(());
+    }
+    let old_items: BTreeMap<&str, &PlaylistItem> = before
+        .map(|b| b.items.iter().map(|i| (i.video_id.as_str(), i)).collect())
+        .unwrap_or_default();
+    for item in &rec.items {
+        if old_items.get(item.video_id.as_str()) == Some(&item) {
+            continue;
+        }
+        let key = changes::item_key(&rec.sync_id, &item.video_id);
+        note_merge(
+            tx,
+            changes::PLAYLIST_ITEMS,
+            &key,
+            item,
+            item.deleted,
+            &item.hlc,
+        )
+        .await?;
+    }
+    Ok(())
+}
+
+/// [`note_merge`] for a group and each of its channels that the merge changed.
+async fn note_group_merge(
+    tx: &mut Transaction<'_, Sqlite>,
+    rec: &SubscriptionGroup,
+    before: Option<&SubscriptionGroup>,
+) -> Result<(), SyncError> {
+    let header = |g: &SubscriptionGroup| SubscriptionGroup {
+        members: Vec::new(),
+        ..g.clone()
+    };
+    if before.map(header) != Some(header(rec)) {
+        note_merge(
+            tx,
+            changes::GROUPS,
+            &rec.name,
+            &header(rec),
+            rec.deleted,
+            &rec.hlc,
+        )
+        .await?;
+    }
+    let old: BTreeMap<&str, &GroupMember> = before
+        .map(|b| {
+            b.members
+                .iter()
+                .map(|m| (m.channel_id.as_str(), m))
+                .collect()
+        })
+        .unwrap_or_default();
+    for member in &rec.members {
+        if old.get(member.channel_id.as_str()) != Some(&member) {
+            let key = changes::item_key(&rec.name, &member.channel_id);
+            note_merge(
+                tx,
+                changes::GROUP_MEMBERS,
+                &key,
+                member,
+                member.deleted,
+                &member.hlc,
+            )
+            .await?;
+        }
+    }
+    Ok(())
+}
+
+/// Bring `sync_changes` in line with a merge result that differs from the local record: keep a
+/// peer's tombstone so it reaches devices that never talked to that peer, or record when the peer
+/// changed a live record (which also retires any older local tombstone for it).
+async fn note_merge<T: serde::Serialize>(
+    tx: &mut Transaction<'_, Sqlite>,
+    collection: &'static str,
+    key: &str,
+    record: &T,
+    deleted: bool,
+    hlc: &Hlc,
+) -> Result<(), SyncError> {
+    if deleted {
+        // This device's own deletion, which the merge only filled in with the older row's fields.
+        if changes::is_own_deletion(tx, collection, key, hlc.physical_ms).await? {
+            return Ok(());
+        }
+        let json = serde_json::to_string(record)?;
+        changes::record_peer_tombstone(tx, collection, key, hlc.physical_ms, json).await
+    } else {
+        changes::record(tx, &[Change::edit(collection, key, hlc.physical_ms)]).await
+    }
+}
+
+async fn apply_likes(
+    tx: &mut Transaction<'_, Sqlite>,
+    device_id: &str,
+    ndjson: &[u8],
+) -> Result<ApplyStats, SyncError> {
+    let mut local = match get_setting(tx, mapping::LIKES_SETTING_KEY).await? {
+        Some(raw) => mapping::parse_likes_blob(&raw, device_id),
+        None => Vec::new(),
+    };
+    let live: BTreeSet<String> = local.iter().map(mapping::like_key).collect();
+    let stamps = changes::load(tx, changes::LIKES, now_ms()).await?;
+    local.extend(tombstones::likes(&stamps, &live, device_id));
+    let incoming = parse_ndjson::<Like>(ndjson)?;
+    let local_map: BTreeMap<String, Like> = local
+        .iter()
+        .map(|l| (mapping::like_key(l), l.clone()))
+        .collect();
+
+    let merged = merge::merge_likes(local, incoming);
+
+    let mut stat = ApplyStats {
+        collection_key: Collection::Likes.key().to_string(),
+        ..Default::default()
+    };
+    for rec in &merged {
+        let key = mapping::like_key(rec);
+        let liked = matches!(rec.state, LikeState::Liked);
+        let before = local_map.get(&key);
+        if before == Some(rec) {
+            stat.skipped += 1;
+            continue;
+        }
+        note_merge(tx, changes::LIKES, &key, rec, !liked, &rec.hlc).await?;
+        let was_liked = before.is_some_and(|b| b.state == LikeState::Liked);
+        match (liked, was_liked) {
+            (true, true) => stat.updated += 1,
+            (true, false) => stat.added += 1,
+            (false, true) => stat.tombstoned += 1,
+            (false, false) => stat.skipped += 1,
+        }
+    }
+
+    set_setting(
+        tx,
+        mapping::LIKES_SETTING_KEY,
+        &mapping::likes_to_blob(&merged),
+    )
+    .await?;
+    Ok(stat)
+}
+
+async fn apply_playlists(
+    tx: &mut Transaction<'_, Sqlite>,
+    device_id: &str,
+    ndjson: &[u8],
+) -> Result<ApplyStats, SyncError> {
+    let mut local = match get_setting(tx, mapping::PLAYLISTS_SETTING_KEY).await? {
+        Some(raw) => mapping::parse_playlists_blob(&raw, device_id),
+        None => Vec::new(),
+    };
+    if let Some(raw) = get_setting(tx, mapping::ALBUMS_SETTING_KEY).await? {
+        local.extend(mapping::parse_albums_blob(&raw, device_id));
+    }
+    let incoming = parse_ndjson::<Playlist>(ndjson)?;
+    for (from, to) in merge::adopt_peer_playlist_ids(&mut local, &incoming) {
+        changes::rename_playlist(tx, &from, &to).await?;
+    }
+    let now = now_ms();
+    let playlist_stamps = changes::load(tx, changes::PLAYLISTS, now).await?;
+    let item_stamps = changes::load(tx, changes::PLAYLIST_ITEMS, now).await?;
+    tombstones::playlists(&mut local, &playlist_stamps, &item_stamps, device_id);
+    let local_map: BTreeMap<String, Playlist> = local
+        .iter()
+        .map(|p| (merge::playlist_merge_key(p), p.clone()))
+        .collect();
+
+    let merged = merge::merge_playlists(local, incoming);
+
+    let mut stat = ApplyStats {
+        collection_key: Collection::Playlists.key().to_string(),
+        ..Default::default()
+    };
+    for rec in &merged {
+        let before = local_map.get(&merge::playlist_merge_key(rec));
+        if before == Some(rec) {
+            stat.skipped += 1;
+            continue;
+        }
+        note_playlist_merge(tx, rec, before).await?;
+        match before {
+            Some(b) if rec.deleted && !b.deleted => stat.tombstoned += 1,
+            Some(b) if !b.deleted => stat.updated += 1,
+            _ if rec.deleted => stat.skipped += 1,
+            _ => stat.added += 1,
+        }
+    }
+
+    let (albums, playlists): (Vec<Playlist>, Vec<Playlist>) =
+        merged.into_iter().partition(mapping::is_album_playlist);
+
+    set_setting(
+        tx,
+        mapping::PLAYLISTS_SETTING_KEY,
+        &mapping::playlists_to_blob(&playlists),
+    )
+    .await?;
+    set_setting(
+        tx,
+        mapping::ALBUMS_SETTING_KEY,
+        &mapping::albums_to_blob(&albums),
+    )
+    .await?;
+    Ok(stat)
+}
+
+async fn apply_settings(
+    tx: &mut Transaction<'_, Sqlite>,
+    device_id: &str,
+    ndjson: &[u8],
+) -> Result<ApplyStats, SyncError> {
+    // Only keys this desktop syncs are accepted, even if a peer sends others.
+    let incoming: Vec<SettingEntry> = parse_ndjson::<SettingEntry>(ndjson)?
+        .into_iter()
+        .filter_map(|mut s| {
+            s.key = settings_map::normalize_wire_key(&s.key)?;
+            Some(s)
+        })
+        .collect();
+
+    let mut local: Vec<SettingEntry> = Vec::new();
+    for key in settings_map::desktop_keys() {
+        if let Some((value, updated)) = get_setting_with_time(tx, key).await? {
+            local.extend(settings_map::local_entry(key, &value, &updated, device_id));
+        }
+    }
+    let local_map: BTreeMap<String, SettingEntry> =
+        local.iter().map(|s| (s.key.clone(), s.clone())).collect();
+
+    let merged = merge::merge_settings(local, incoming);
+
+    let mut stat = ApplyStats {
+        collection_key: Collection::Settings.key().to_string(),
+        ..Default::default()
+    };
+    let mut sb_changed: Vec<&SettingEntry> = Vec::new();
+    for rec in &merged {
+        match local_map.get(&rec.key) {
+            Some(existing) if existing == rec => {
+                stat.skipped += 1;
+                continue;
+            }
+            Some(_) => stat.updated += 1,
+            None => stat.added += 1,
+        }
+        if settings_map::is_sb_action(&rec.key) {
+            sb_changed.push(rec);
+        } else {
+            write_setting_value(tx, rec).await?;
+        }
+    }
+    // The nine SponsorBlock actions share one desktop setting, written once with the newest stamp.
+    if let Some(newest) = sb_changed.iter().map(|rec| rec.hlc.physical_ms).max() {
+        let current = get_setting(tx, settings_map::SB_ACTIONS_KEY).await?;
+        if let Some((key, value)) =
+            settings_map::sb_actions_from_wire(current.as_deref(), sb_changed)
+        {
+            write_setting(tx, key, &value, newest).await?;
+        }
+    }
+    Ok(stat)
+}
+
+async fn apply_flow_neuro(
+    tx: &mut Transaction<'_, Sqlite>,
+    device_id: &str,
+    ndjson: &[u8],
+) -> Result<ApplyStats, SyncError> {
+    let received = parse_ndjson::<FlowNeuroBrainSnapshot>(ndjson)?;
+
+    let mut merged: MergedFlowNeuroBrain = match get_setting(tx, NEURO_MERGED_KEY).await? {
+        Some(s) => serde_json::from_str(&s).unwrap_or_default(),
+        None => MergedFlowNeuroBrain::default(),
+    };
+    let mut base = get_setting(tx, NEURO_BRAIN_KEY)
+        .await?
+        .and_then(|s| serde_json::from_str::<UserBrain>(&s).ok());
+    let mut baseline: Option<NeuroBaseline> = get_setting(tx, NEURO_BASELINE_KEY)
+        .await?
+        .and_then(|s| serde_json::from_str(&s).ok());
+
+    // A peer on an older key spec writes other spellings of this brain's keys; read them first so
+    // they merge into the keys they mean instead of sitting beside them as new topics.
+    let mut reader = brain_rekey::align_flow(base.as_mut(), &mut merged, baseline.as_mut());
+    let mut spelled = HashMap::new();
+    for snap in &received {
+        spelled.extend(spelled_before(
+            &snap.vectors.global_vector.topics,
+            reader.spec(),
+        ));
+    }
+    let incoming: Vec<FlowNeuroBrainSnapshot> =
+        received.iter().map(|snap| reader.snapshot(snap)).collect();
+
+    if let Some(ub) = &base {
+        let prior_applies = prior_applies(tx, Collection::FlowNeuroBrain).await?;
+        brain_attrib::fold_local_flow(
+            &mut merged,
+            ub,
+            device_id,
+            &Hlc::new(now_ms(), 0, device_id),
+            &attribution(baseline.as_ref(), prior_applies),
+        );
+    }
+    brain_attrib::merge_incoming_flow(&mut merged, &incoming, device_id);
+    set_setting(tx, NEURO_MERGED_KEY, &serde_json::to_string(&merged)?).await?;
+
+    // Derive the effective brain for the engine, preserving device-local fields.
+    let base = base.unwrap_or_else(|| {
+        let mut fresh = UserBrain::default();
+        fresh.settle_languages(&reader.spec().key_language);
+        fresh
+    });
+    let mut effective = brainmap::merged_flow_to_userbrain(&merged, &base);
+    after_sync(&mut effective, &spelled);
+    // The merged state keeps every entry any device ever had; this device's limits apply again.
+    crate::flow_neuro::caps::apply_all(&mut effective, now_ms());
+    set_setting(tx, NEURO_BRAIN_KEY, &serde_json::to_string(&effective)?).await?;
+    set_setting(
+        tx,
+        NEURO_BASELINE_KEY,
+        &serde_json::to_string(&NeuroBaseline::of(&effective))?,
+    )
+    .await?;
+
+    Ok(ApplyStats {
+        collection_key: Collection::FlowNeuroBrain.key().to_string(),
+        updated: incoming.len() as u64,
+        ..Default::default()
+    })
+}
+
+async fn apply_music(
+    tx: &mut Transaction<'_, Sqlite>,
+    device_id: &str,
+    ndjson: &[u8],
+) -> Result<ApplyStats, SyncError> {
+    let incoming = parse_ndjson::<MusicBrainSnapshot>(ndjson)?;
+
+    let mut merged: MergedMusicBrain = match get_setting(tx, MUSIC_MERGED_KEY).await? {
+        Some(s) => serde_json::from_str(&s).unwrap_or_default(),
+        None => MergedMusicBrain::default(),
+    };
+    let base = get_setting(tx, MUSIC_BRAIN_KEY)
+        .await?
+        .and_then(|s| serde_json::from_str::<MusicBrain>(&s).ok());
+    let baseline: Option<MusicBaseline> = get_setting(tx, MUSIC_BASELINE_KEY)
+        .await?
+        .and_then(|s| serde_json::from_str(&s).ok());
+
+    if let Some(mb) = &base {
+        let prior_applies = prior_applies(tx, Collection::MusicBrain).await?;
+        brain_attrib::fold_local_music(
+            &mut merged,
+            mb,
+            device_id,
+            &Hlc::new(now_ms(), 0, device_id),
+            &attribution(baseline.as_ref(), prior_applies),
+        );
+    }
+    brain_attrib::merge_incoming_music(&mut merged, &incoming, device_id);
+    set_setting(tx, MUSIC_MERGED_KEY, &serde_json::to_string(&merged)?).await?;
+
+    let effective = brainmap::merged_music_to_musicbrain(&merged, &base.unwrap_or_default());
+    set_setting(tx, MUSIC_BRAIN_KEY, &serde_json::to_string(&effective)?).await?;
+    set_setting(
+        tx,
+        MUSIC_BASELINE_KEY,
+        &serde_json::to_string(&MusicBaseline::of(&effective))?,
+    )
+    .await?;
+
+    Ok(ApplyStats {
+        collection_key: Collection::MusicBrain.key().to_string(),
+        updated: incoming.len() as u64,
+        ..Default::default()
+    })
+}
+
+async fn apply_subscriptions(
+    tx: &mut Transaction<'_, Sqlite>,
+    device_id: &str,
+    ndjson: &[u8],
+) -> Result<ApplyStats, SyncError> {
+    let incoming = parse_ndjson::<SubscriptionGroup>(ndjson)?;
+    let mut local = match get_setting(tx, mapping::SUBSCRIPTION_GROUPS_SETTING_KEY).await? {
+        Some(raw) => mapping::parse_subscription_groups_blob(&raw, &Hlc::default()),
+        None => Vec::new(),
+    };
+    let stamps = changes::load(tx, changes::GROUPS, now_ms()).await?;
+    let member_stamps = changes::load(tx, changes::GROUP_MEMBERS, now_ms()).await?;
+    tombstones::stamp_groups(&mut local, &stamps, &member_stamps, device_id);
+    let live: BTreeSet<String> = local.iter().map(|g| g.name.clone()).collect();
+    local.extend(tombstones::groups(&stamps, &live, device_id));
+    let local_map: BTreeMap<String, SubscriptionGroup> =
+        local.iter().map(|g| (g.name.clone(), g.clone())).collect();
+
+    let merged = merge::merge_subscriptions(local, incoming);
+
+    let mut stat = ApplyStats {
+        collection_key: Collection::Subscriptions.key().to_string(),
+        ..Default::default()
+    };
+    for rec in &merged {
+        let before = local_map.get(&rec.name);
+        note_group_merge(tx, rec, before).await?;
+        match before {
+            Some(existing)
+                if existing.channel_ids == rec.channel_ids && existing.deleted == rec.deleted =>
+            {
+                stat.skipped += 1;
+            }
+            Some(b) if rec.deleted && !b.deleted => stat.tombstoned += 1,
+            Some(b) if !b.deleted => stat.updated += 1,
+            _ if rec.deleted => stat.skipped += 1,
+            _ => stat.added += 1,
+        }
+    }
+
+    set_setting(
+        tx,
+        mapping::SUBSCRIPTION_GROUPS_SETTING_KEY,
+        &mapping::subscription_groups_to_blob(&merged),
+    )
+    .await?;
+    Ok(stat)
+}
+
+async fn apply_subscribed_channels(
+    tx: &mut Transaction<'_, Sqlite>,
+    device_id: &str,
+    ndjson: &[u8],
+) -> Result<ApplyStats, SyncError> {
+    let incoming = parse_ndjson::<SubscribedChannel>(ndjson)?;
+    let now = now_ms();
+    let node = crate::sync::canonical::short_device_id(device_id);
+
+    let existing_raw = get_setting(tx, mapping::SUBSCRIBED_CHANNELS_SETTING_KEY).await?;
+    let tombstones = match get_setting(tx, mapping::SUBSCRIPTION_TOMBSTONES_SETTING_KEY).await? {
+        Some(raw) => mapping::parse_subscription_tombstones(&raw),
+        None => BTreeMap::new(),
+    };
+    let local = mapping::parse_subscribed_channels_blob(
+        existing_raw.as_deref().unwrap_or("[]"),
+        &tombstones,
+        &node,
+    );
+    let local_map: BTreeMap<String, SubscribedChannel> = local
+        .iter()
+        .map(|c| (c.channel_id.clone(), c.clone()))
+        .collect();
+
+    let merged = merge::merge_subscribed_channels(local, incoming);
+
+    let mut stat = ApplyStats {
+        collection_key: Collection::SubscribedChannels.key().to_string(),
+        ..Default::default()
+    };
+    for channel in &merged {
+        match local_map.get(&channel.channel_id) {
+            Some(before) if before == channel => stat.skipped += 1,
+            Some(before) if channel.deleted && !before.deleted => stat.tombstoned += 1,
+            Some(_) => stat.updated += 1,
+            None if channel.deleted => stat.skipped += 1,
+            None => stat.added += 1,
+        }
+    }
+
+    let (live_blob, tombstone_blob) =
+        mapping::subscribed_channels_to_blob(&merged, existing_raw.as_deref(), now);
+    set_setting(tx, mapping::SUBSCRIBED_CHANNELS_SETTING_KEY, &live_blob).await?;
+    set_setting(
+        tx,
+        mapping::SUBSCRIPTION_TOMBSTONES_SETTING_KEY,
+        &tombstone_blob,
+    )
+    .await?;
+    Ok(stat)
+}
+
+/// How many payloads of `collection` this device has applied before, from any peer.
+async fn prior_applies(
+    tx: &mut Transaction<'_, Sqlite>,
+    collection: Collection,
+) -> Result<u64, SyncError> {
+    let n: i64 = sqlx::query_scalar("SELECT COUNT(*) FROM sync_log WHERE collection = ?")
+        .bind(collection.key())
+        .fetch_one(&mut **tx)
+        .await?;
+    Ok(u64::try_from(n).unwrap_or(0))
+}
+
+async fn get_setting_with_time(
+    tx: &mut Transaction<'_, Sqlite>,
+    key: &str,
+) -> Result<Option<(String, String)>, SyncError> {
+    Ok(sqlx::query_as::<_, (String, String)>(
+        "SELECT value, updated_at FROM settings WHERE key = ?",
+    )
+    .bind(key)
+    .fetch_optional(&mut **tx)
+    .await?)
+}
+
+async fn write_setting_value(
+    tx: &mut Transaction<'_, Sqlite>,
+    entry: &SettingEntry,
+) -> Result<(), SyncError> {
+    let Some((desktop_key, value)) = settings_map::from_wire(&entry.key, &entry.value) else {
+        return Ok(());
+    };
+    write_setting(tx, desktop_key, &value, entry.hlc.physical_ms).await
+}
+
+async fn write_setting(
+    tx: &mut Transaction<'_, Sqlite>,
+    desktop_key: &str,
+    value: &str,
+    changed_ms: u64,
+) -> Result<(), SyncError> {
+    let updated = mapping::ms_to_iso(changed_ms);
+    sqlx::query(
+        "INSERT INTO settings (key, value, updated_at) VALUES (?, ?, ?)
+         ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at",
+    )
+    .bind(desktop_key)
+    .bind(value)
+    .bind(updated)
+    .execute(&mut **tx)
+    .await?;
+    Ok(())
+}
+
+async fn get_setting(
+    tx: &mut Transaction<'_, Sqlite>,
+    key: &str,
+) -> Result<Option<String>, SyncError> {
+    Ok(
+        sqlx::query_scalar::<_, String>("SELECT value FROM settings WHERE key = ?")
+            .bind(key)
+            .fetch_optional(&mut **tx)
+            .await?,
+    )
+}
+
+async fn set_setting(
+    tx: &mut Transaction<'_, Sqlite>,
+    key: &str,
+    value: &str,
+) -> Result<(), SyncError> {
+    sqlx::query(
+        "INSERT INTO settings (key, value, updated_at) VALUES (?, ?, ?)
+         ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at",
+    )
+    .bind(key)
+    .bind(value)
+    .bind(now_iso())
+    .execute(&mut **tx)
+    .await?;
+    Ok(())
+}
+
+async fn insert_watch(
+    tx: &mut Transaction<'_, Sqlite>,
+    rec: &WatchHistoryRecord,
+) -> Result<(), SyncError> {
+    let v = WatchInsert::from_canonical(rec);
+    sqlx::query(
+        "INSERT INTO watch_history
+            (video_id, title, channel_name, channel_id, watch_date, watch_duration_seconds,
+             total_duration_seconds, is_music, is_short, updated_hlc)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+    )
+    .bind(v.video_id)
+    .bind(v.title)
+    .bind(v.channel_name)
+    .bind(v.channel_id)
+    .bind(v.watch_date)
+    .bind(v.watch_duration_seconds)
+    .bind(v.total_duration_seconds)
+    .bind(v.is_music)
+    .bind(v.is_short)
+    .bind(v.updated_hlc)
+    .execute(&mut **tx)
+    .await?;
+    Ok(())
+}
+
+async fn delete_watch(tx: &mut Transaction<'_, Sqlite>, video_id: &str) -> Result<(), SyncError> {
+    sqlx::query("DELETE FROM watch_history WHERE video_id = ?")
+        .bind(video_id)
+        .execute(&mut **tx)
+        .await?;
+    Ok(())
+}
+
+/// Snapshot the affected collections to a JSON string before merging (recovery aid).
+async fn backup_snapshot(
+    pool: &SqlitePool,
+    staged: &[StagedCollection],
+) -> Result<String, SyncError> {
+    let mut obj = serde_json::Map::new();
+    for sc in staged {
+        match sc.collection {
+            Collection::WatchHistory => {
+                let rows: Vec<WatchRow> = sqlx::query_as::<_, WatchRow>(WATCH_SELECT)
+                    .fetch_all(pool)
+                    .await?;
+                let canon: Vec<WatchHistoryRecord> =
+                    rows.iter().map(|r| r.to_canonical("")).collect();
+                obj.insert("watch_history".to_string(), serde_json::to_value(canon)?);
+            }
+            Collection::Likes => {
+                let raw = setting_value(pool, mapping::LIKES_SETTING_KEY).await?;
+                obj.insert("liked_items".to_string(), serde_json::json!(raw));
+            }
+            Collection::Playlists => {
+                let raw = setting_value(pool, mapping::PLAYLISTS_SETTING_KEY).await?;
+                obj.insert("user_playlists".to_string(), serde_json::json!(raw));
+                let albums = setting_value(pool, mapping::ALBUMS_SETTING_KEY).await?;
+                obj.insert("saved_albums".to_string(), serde_json::json!(albums));
+            }
+            Collection::Settings => {
+                let mut map = serde_json::Map::new();
+                for key in settings_map::desktop_keys() {
+                    if let Some(v) = setting_value(pool, key).await? {
+                        map.insert(key.to_string(), serde_json::json!(v));
+                    }
+                }
+                obj.insert("settings".to_string(), serde_json::Value::Object(map));
+            }
+            Collection::FlowNeuroBrain => {
+                let raw = setting_value(pool, NEURO_BRAIN_KEY).await?;
+                obj.insert("user_neuro_brain".to_string(), serde_json::json!(raw));
+            }
+            Collection::MusicBrain => {
+                let raw = setting_value(pool, MUSIC_BRAIN_KEY).await?;
+                obj.insert("user_music_brain".to_string(), serde_json::json!(raw));
+            }
+            Collection::Subscriptions => {
+                let raw = setting_value(pool, mapping::SUBSCRIPTION_GROUPS_SETTING_KEY).await?;
+                obj.insert("subscription_groups".to_string(), serde_json::json!(raw));
+            }
+            Collection::SubscribedChannels => {
+                let raw = setting_value(pool, mapping::SUBSCRIBED_CHANNELS_SETTING_KEY).await?;
+                obj.insert("subscriptions".to_string(), serde_json::json!(raw));
+                let tombs =
+                    setting_value(pool, mapping::SUBSCRIPTION_TOMBSTONES_SETTING_KEY).await?;
+                obj.insert(
+                    "subscription_tombstones".to_string(),
+                    serde_json::json!(tombs),
+                );
+            }
+            #[allow(unreachable_patterns)]
+            _ => {}
+        }
+    }
+    Ok(serde_json::Value::Object(obj).to_string())
+}
+
+async fn setting_value(pool: &SqlitePool, key: &str) -> Result<Option<String>, SyncError> {
+    Ok(
+        sqlx::query_scalar::<_, String>("SELECT value FROM settings WHERE key = ?")
+            .bind(key)
+            .fetch_optional(pool)
+            .await?,
+    )
+}
+
+fn parse_ndjson<T: serde::de::DeserializeOwned>(ndjson: &[u8]) -> Result<Vec<T>, SyncError> {
+    ndjson
+        .split(|&b| b == b'\n')
+        .filter(|l| !l.is_empty())
+        .map(|line| serde_json::from_slice::<T>(line).map_err(SyncError::from))
+        .collect()
+}
+
+fn now_iso() -> String {
+    chrono::Utc::now().to_rfc3339()
+}
+
+fn now_ms() -> u64 {
+    chrono::Utc::now().timestamp_millis().max(0) as u64
+}
