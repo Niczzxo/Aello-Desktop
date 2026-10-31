@@ -1,0 +1,364 @@
+// TypeScript mirror of the Rust YouTube Music models
+// (`src-tauri/src/models/music*.rs`). All keys are camelCase to match serde.
+
+export interface Artist {
+  name: string;
+  id: string | null;
+}
+
+export interface Album {
+  name: string;
+  id: string;
+}
+
+export interface SongItem {
+  id: string;
+  title: string;
+  artists: Artist[];
+  album: Album | null;
+  duration: number | null;
+  musicVideoType: string | null;
+  thumbnail: string;
+  explicit: boolean;
+  videoId: string | null;
+  playlistId: string | null;
+  params: string | null;
+  viewsText?: string | null;
+}
+
+export interface AlbumItem {
+  browseId: string;
+  playlistId: string;
+  title: string;
+  artists: Artist[] | null;
+  year: number | null;
+  thumbnail: string;
+  explicit: boolean;
+}
+
+export interface PlaylistItem {
+  id: string;
+  title: string;
+  author: Artist | null;
+  songCountText: string | null;
+  thumbnail: string | null;
+}
+
+export interface ArtistItem {
+  id: string;
+  title: string;
+  thumbnail: string | null;
+  channelId: string | null;
+  /** A plain channel ("Profile"): it opens a channel page, not an artist page. */
+  isProfile?: boolean;
+}
+
+export interface EpisodeItem {
+  id: string;
+  title: string;
+  /** The show, by name. */
+  author: Artist | null;
+  /** The show's playlist id. */
+  podcastId?: string | null;
+  thumbnail: string;
+  explicit: boolean;
+  publishDateText: string | null;
+}
+
+export interface PodcastItem {
+  id: string;
+  title: string;
+  author: Artist | null;
+  episodeCountText: string | null;
+  thumbnail: string | null;
+}
+
+// Internally-tagged enum (`#[serde(tag = "type")]`) — discriminated union.
+export type YTItem =
+  | ({ type: "song" } & SongItem)
+  | ({ type: "album" } & AlbumItem)
+  | ({ type: "playlist" } & PlaylistItem)
+  | ({ type: "artist" } & ArtistItem)
+  | ({ type: "episode" } & EpisodeItem)
+  | ({ type: "podcast" } & PodcastItem);
+
+// --- Sections / pages -----------------------------------------------------
+
+/** What an artist section holds, read by the backend from its structure. */
+export type ArtistSectionKind =
+  | 'topSongs'
+  | 'albums'
+  | 'singles'
+  | 'videos'
+  | 'featuredOn'
+  | 'relatedArtists'
+  | 'other';
+
+export interface ArtistSection {
+  title: string;
+  items: YTItem[];
+  moreEndpointBrowseId: string | null;
+  moreEndpointParams: string | null;
+  kind?: ArtistSectionKind;
+}
+
+/** A queue a header button starts: a playlist id and the params it asks with. */
+export interface MusicWatchTarget {
+  playlistId: string;
+  params: string | null;
+}
+
+/** A linked stretch of a description, in string indices. */
+export interface DescriptionLink {
+  start: number;
+  end: number;
+  url: string;
+}
+
+export interface ArtistPage {
+  artist: ArtistItem;
+  sections: ArtistSection[];
+  description: string | null;
+  descriptionLinks?: DescriptionLink[];
+  /** The site's own Shuffle of the artist's catalogue. */
+  shuffle?: MusicWatchTarget | null;
+  /** The artist's radio station. */
+  radio?: MusicWatchTarget | null;
+  subscriberCountText: string | null;
+  monthlyListenerCount: string | null;
+  isSubscribed: boolean;
+}
+
+export interface MoodAndGenreItem {
+  title: string;
+  stripeColor: number;
+  browseId: string;
+  params: string | null;
+}
+
+export interface MoodAndGenreGroup {
+  title: string;
+  items: MoodAndGenreItem[];
+}
+
+export interface ExplorePage {
+  newReleaseAlbums: AlbumItem[];
+  moodAndGenres: MoodAndGenreItem[];
+}
+
+export interface ChartSection {
+  title: string;
+  items: YTItem[];
+  chartType: 'Songs' | 'Playlists' | 'Artists' | 'NewReleases' | 'Mixed';
+}
+
+export interface ChartsPage {
+  sections: ChartSection[];
+  /** Null when charts fall back to Global. */
+  countryCode: string | null;
+  /** The service's own name for the returned country (or Global). */
+  countryLabel: string | null;
+  continuation: string | null;
+}
+
+export interface MusicHomeChip {
+  title: string;
+  browseId: string | null;
+  params: string | null;
+  orderBy: number;
+}
+
+export interface MusicShelf {
+  title: string;
+  subtitle: string | null;
+  browseId: string | null;
+  params: string | null;
+  items: YTItem[];
+  source?: string;
+}
+
+export interface MusicHomePage {
+  chips: MusicHomeChip[];
+  sections: MusicShelf[];
+  continuation: string | null;
+}
+
+export interface CachedMusicHomePage {
+  page: MusicHomePage;
+  fetchedAt: number;
+}
+
+export interface MusicSearchSection {
+  title: string;
+  items: YTItem[];
+  /** The top-result card and the rows it holds. */
+  isTopResult?: boolean;
+}
+
+export interface MusicSearchResponse {
+  sections: MusicSearchSection[];
+  continuation: string | null;
+  /** The filters offered for this query, in the site's order. */
+  filters?: string[];
+}
+
+export interface SearchSummaryPage {
+  summaries: MusicSearchSection[];
+  /** The filters offered for this query, in the site's order. */
+  filters?: string[];
+}
+
+export interface MusicSearchSuggestions {
+  queries: string[];
+  recommendedItems: YTItem[];
+}
+
+export interface AlbumPage {
+  album: AlbumItem;
+  otherVersions: AlbumItem[];
+  description: string | null;
+  songCount: number | null;
+  durationText: string | null;
+  songs: SongItem[];
+  continuation: string | null;
+}
+
+export interface MusicPlaylistPage {
+  id: string;
+  title: string;
+  author: Artist | null;
+  songCountText: string | null;
+  thumbnail: string | null;
+  description: string | null;
+  songs: SongItem[];
+  continuation: string | null;
+}
+
+export interface RelatedPage {
+  sections: RelatedShelf[];
+  songs: SongItem[];
+  otherPerformances: SongItem[];
+  albums: AlbumItem[];
+  artists: ArtistItem[];
+  playlists: PlaylistItem[];
+}
+
+export type RelatedShelfType =
+  | 'similar'
+  | 'playlists'
+  | 'otherPerformances'
+  | 'similarArtists'
+  | 'moreFromArtist'
+  | 'unknown';
+
+export interface RelatedShelf {
+  shelfType: RelatedShelfType;
+  title: string;
+  artistBrowseId: string | null;
+  items: YTItem[];
+}
+
+/** Artwork shown beside a home section title: the seed artist (round) or track. */
+export interface MusicSeedArt {
+  url: string;
+  round?: boolean;
+}
+
+export type MusicDaySlot = 'morning' | 'afternoon' | 'evening' | 'night';
+
+export interface MusicTimeRotation {
+  slot: MusicDaySlot | null;
+  songs: SongItem[];
+}
+
+/** A Daily Mix cluster from the music brain: a label + seed tracks to expand. */
+export interface DailyMixSeed {
+  label: string;
+  seedTrackIds: string[];
+}
+
+export type MusicMaturity = "cold_start" | "warming" | "mature";
+
+export interface MusicTopArtist {
+  /** Affinity key: a routable browseId when `idKeyed`, else a normalized name. */
+  key: string;
+  /** Display name (resolved from track metadata); falls back to the key. */
+  name: string;
+  score: number;
+  plays: number;
+  liked: boolean;
+  /** Whether `key` can be opened at `/music/artist/:key` (and seed an artist-graph fetch). */
+  idKeyed: boolean;
+}
+
+export interface MusicGenreWeight {
+  genre: string;
+  weight: number;
+}
+
+export interface MusicTimeOfDayBucket {
+  /** PascalCase `TimeBucket` variant name (e.g. `"WeekdayMorning"`). */
+  bucket: string;
+  plays: number;
+  topGenres: MusicGenreWeight[];
+}
+
+export interface MusicTasteProfile {
+  topArtists: MusicTopArtist[];
+  topGenres: MusicGenreWeight[];
+  discoveryAppetite: number;
+  totalPlays: number;
+  distinctArtists: number;
+  trackedTracks: number;
+  onRepeatCount: number;
+  maturity: MusicMaturity;
+  /** Always all 8 buckets, in canonical order (zero-play buckets included). */
+  timeOfDay: MusicTimeOfDayBucket[];
+}
+
+export interface QueuePage {
+  items: SongItem[];
+  currentIndex: number | null;
+  continuation: string | null;
+  lyricsBrowseId: string | null;
+  lyricsParams: string | null;
+  relatedBrowseId: string | null;
+  radioPlaylistId: string | null;
+  /** The params the site's own automix continues with. */
+  radioParams?: string | null;
+}
+
+export interface MoodGenreSection {
+  title: string;
+  items: YTItem[];
+}
+
+export interface MoodGenrePage {
+  title: string;
+  items: YTItem[];
+  continuation: string | null;
+  /** The page's shelves with their titles, when it has more than one. */
+  sections?: MoodGenreSection[];
+}
+
+/** A song's plain lyrics and the credit shown under them. */
+export interface MusicLyrics {
+  text: string;
+  source: string | null;
+}
+
+export interface MusicStreamInfo {
+  videoId: string;
+  audioUrl: string;
+  mimeType: string;
+  itag: number;
+  bitrate: number | null;
+  approxDurationMs: number | null;
+  loudnessDb: number | null;
+  perceptualLoudnessDb: number | null;
+  expiresInSeconds: number;
+  usedClient: string;
+}
+
+/// `(songs, continuation)` tuple returned by album/playlist continuation commands.
+export type SongContinuation = [SongItem[], string | null];
