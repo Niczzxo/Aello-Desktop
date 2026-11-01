@@ -313,7 +313,7 @@ jobs:
         if: runner.os == 'Windows'
         uses: actions/upload-artifact@v7
         with:
-          name: Flow-nightly-${{ matrix.slug }}-${{ github.run_number }}
+          name: Aello-nightly-${{ matrix.slug }}-${{ github.run_number }}
           path: src-tauri/target/${{ matrix.target }}/nightly/bundle/nsis/*.exe
           if-no-files-found: error
           retention-days: 14
@@ -322,7 +322,7 @@ jobs:
         if: runner.os == 'macOS'
         uses: actions/upload-artifact@v7
         with:
-          name: Flow-nightly-${{ matrix.slug }}-${{ github.run_number }}
+          name: Aello-nightly-${{ matrix.slug }}-${{ github.run_number }}
           path: src-tauri/target/${{ matrix.target }}/nightly/bundle/dmg/*.dmg
           if-no-files-found: error
           retention-days: 14
@@ -331,7 +331,7 @@ jobs:
         if: matrix.appimage
         uses: actions/upload-artifact@v7
         with:
-          name: Flow-nightly-${{ matrix.slug }}-appimage-${{ github.run_number }}
+          name: Aello-nightly-${{ matrix.slug }}-appimage-${{ github.run_number }}
           path: src-tauri/target/${{ matrix.target }}/nightly/bundle/appimage/*.AppImage
           if-no-files-found: error
           retention-days: 14
@@ -340,7 +340,7 @@ jobs:
         if: runner.os == 'Linux' && !matrix.appimage
         uses: actions/upload-artifact@v7
         with:
-          name: Flow-nightly-${{ matrix.slug }}-deb-${{ github.run_number }}
+          name: Aello-nightly-${{ matrix.slug }}-deb-${{ github.run_number }}
           path: src-tauri/target/${{ matrix.target }}/nightly/bundle/deb/*.deb
           if-no-files-found: error
           retention-days: 14
@@ -349,7 +349,7 @@ jobs:
         if: runner.os == 'Linux' && !matrix.appimage
         uses: actions/upload-artifact@v7
         with:
-          name: Flow-nightly-${{ matrix.slug }}-rpm-${{ github.run_number }}
+          name: Aello-nightly-${{ matrix.slug }}-rpm-${{ github.run_number }}
           path: src-tauri/target/${{ matrix.target }}/nightly/bundle/rpm/*.rpm
           if-no-files-found: error
           retention-days: 14
@@ -409,8 +409,8 @@ jobs:
       - name: Build the Flatpak bundle
         uses: flatpak/flatpak-github-actions/flatpak-builder@v6
         with:
-          manifest-path: packaging/flatpak/io.github.flow_tube.Flow-Desktop.yml
-          bundle: Flow-Desktop.flatpak
+          manifest-path: packaging/flatpak/io.github.niczzxo.Aello-Desktop.yml
+          bundle: Aello-Desktop.flatpak
           arch: x86_64
           cache-key: flatpak-builder-${{ hashFiles('src-tauri/Cargo.lock', 'pnpm-lock.yaml') }}
-          artifact-name: Flow-nightly-linux-x64-flatpak-${{ github.run_number }}
+          artifact-name: Aello-nightly-linux-x64-flatpak-${{ github.run_number }}

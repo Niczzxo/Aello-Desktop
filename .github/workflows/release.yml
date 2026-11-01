@@ -212,13 +212,13 @@ jobs:
           LASTFM_API_SECRET: ${{ secrets.LASTFM_API_SECRET }}
         with:
           tagName: ${{ needs.prepare.outputs.tag }}
-          releaseName: ${{ needs.prepare.outputs.is_prerelease == 'true' && 'Flow Beta v__VERSION__' || 'Flow v__VERSION__' }}
+          releaseName: ${{ needs.prepare.outputs.is_prerelease == 'true' && 'Aello Beta v__VERSION__' || 'Aello v__VERSION__' }}
           releaseBody: ${{ needs.prepare.outputs.notes }}
           releaseDraft: false
           prerelease: ${{ needs.prepare.outputs.is_prerelease == 'true' }}
           generateReleaseNotes: false
           uploadUpdaterJson: true
-          releaseAssetNamePattern: Flow_[version]_[platform]_[arch][setup][ext]
+          releaseAssetNamePattern: Aello_[version]_[platform]_[arch][setup][ext]
           retryAttempts: 2
           args: >-
             ${{ matrix.args }}
@@ -252,7 +252,7 @@ jobs:
           set -euo pipefail
           tag="${{ needs.prepare.outputs.tag }}"
           rpm="$(ls src-tauri/target/${{ matrix.target }}/release/bundle/rpm/*.rpm | head -n1)"
-          asset="Flow_${{ needs.prepare.outputs.version }}_linux_${{ matrix.rpm }}.rpm"
+          asset="Aello_${{ needs.prepare.outputs.version }}_linux_${{ matrix.rpm }}.rpm"
 
           cp "$rpm" "$asset"
           rm -f "$asset.sig"
@@ -330,7 +330,7 @@ jobs:
         if: runner.os == 'Windows'
         uses: actions/upload-artifact@v7
         with:
-          name: Flow-${{ needs.prepare.outputs.version }}-${{ matrix.slug }}
+          name: Aello-${{ needs.prepare.outputs.version }}-${{ matrix.slug }}
           path: src-tauri/target/${{ matrix.target }}/release/bundle/nsis/*.exe
           if-no-files-found: error
           retention-days: 30
@@ -339,7 +339,7 @@ jobs:
         if: runner.os == 'macOS'
         uses: actions/upload-artifact@v7
         with:
-          name: Flow-${{ needs.prepare.outputs.version }}-${{ matrix.slug }}
+          name: Aello-${{ needs.prepare.outputs.version }}-${{ matrix.slug }}
           path: src-tauri/target/${{ matrix.target }}/release/bundle/dmg/*.dmg
           if-no-files-found: error
           retention-days: 30
@@ -348,7 +348,7 @@ jobs:
         if: matrix.appimage
         uses: actions/upload-artifact@v7
         with:
-          name: Flow-${{ needs.prepare.outputs.version }}-${{ matrix.slug }}-appimage
+          name: Aello-${{ needs.prepare.outputs.version }}-${{ matrix.slug }}-appimage
           path: src-tauri/target/${{ matrix.target }}/release/bundle/appimage/*.AppImage
           if-no-files-found: error
           retention-days: 30
@@ -357,7 +357,7 @@ jobs:
         if: runner.os == 'Linux' && !matrix.appimage
         uses: actions/upload-artifact@v7
         with:
-          name: Flow-${{ needs.prepare.outputs.version }}-${{ matrix.slug }}-deb
+          name: Aello-${{ needs.prepare.outputs.version }}-${{ matrix.slug }}-deb
           path: src-tauri/target/${{ matrix.target }}/release/bundle/deb/*.deb
           if-no-files-found: error
           retention-days: 30
@@ -366,7 +366,7 @@ jobs:
         if: runner.os == 'Linux' && !matrix.appimage
         uses: actions/upload-artifact@v7
         with:
-          name: Flow-${{ needs.prepare.outputs.version }}-${{ matrix.slug }}-rpm
+          name: Aello-${{ needs.prepare.outputs.version }}-${{ matrix.slug }}-rpm
           path: src-tauri/target/${{ matrix.target }}/release/bundle/rpm/*.rpm
           if-no-files-found: error
           retention-days: 30
@@ -420,7 +420,7 @@ jobs:
             esac
             appimage="$(jq -r --arg re "$arch_names" \
               '.assets[].name | select(endswith(".AppImage")) | select(test($re))' assets.json | head -n1)"
-            rpm="Flow_${version}_linux_${arch}.rpm"
+            rpm="Aello_${version}_linux_${arch}.rpm"
 
             # Re-uploading an asset gives it a new id, so the URLs come from the
             # release as it is now, not from what tauri-action recorded.
