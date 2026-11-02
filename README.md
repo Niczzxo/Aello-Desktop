@@ -1,8 +1,5 @@
 <div align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://assets.flow-tube.org/v1/banners/flow-desktop-dark.svg">
-    <img alt="Aello Desktop. Privacy-first YouTube and YouTube Music for Windows, macOS and Linux." src="https://assets.flow-tube.org/v1/banners/flow-desktop-light.svg" width="100%">
-  </picture>
+  <img src="public/logo.png" alt="Aello logo" width="120">
 
   **A privacy-respecting YouTube and YouTube Music client with a native, fully local recommendation engine.**
 
@@ -19,7 +16,7 @@
   <a href="LICENSE"><picture><source media="(prefers-color-scheme: dark)" srcset="https://assets.flow-tube.org/v1/badges/split/license-dark.svg"><img alt="License: GPL-3.0" src="https://assets.flow-tube.org/v1/badges/split/license-light.svg" height="32"></picture></a>
   </p>
 
-  [**Downloads**](https://github.com/AelloNeuro/Aello-Desktop/releases) · [**Android app**](https://github.com/Niczzxo/Aello-Native) · [**Community**](https://www.reddit.com/r/Aello_Official/) · [**Support development**](#support--donations)
+  [**Downloads**](https://github.com/Niczzxo/Aello-Desktop/releases/latest) · [**Android app**](https://github.com/Niczzxo/Aello-Native)
 </div>
 
 > Aello Desktop is under active development. Features and storage formats may change before the first stable release.
@@ -60,11 +57,11 @@ Aello still contacts YouTube and optional services such as SponsorBlock, DeArrow
 
 ## Downloads and supported systems
 
-Release builds are published through [GitHub Releases](https://github.com/AelloNeuro/Aello-Desktop/releases).
+Release builds are published through [GitHub Releases](https://github.com/Niczzxo/Aello-Desktop/releases/latest).
 
 - **Stable:** reviewed releases intended for normal use.
 - **Beta / RC:** public GitHub prereleases for wider testing. These install as **Aello Beta** with isolated application data.
-- **Nightly:** automatic snapshots from `main`. These install as **Aello Nightly**, use isolated data, and may be unstable. Download the latest packages from [GitHub Actions](https://github.com/AelloNeuro/Aello-Desktop/actions/workflows/build.yml) or [nightly.link](https://nightly.link/AelloNeuro/Aello-Desktop/workflows/build/main) without a GitHub account.
+- **Nightly:** automatic snapshots from `main`. These install as **Aello Nightly**, use isolated data, and may be unstable. Download the latest packages from [GitHub Actions](https://github.com/Niczzxo/Aello-Desktop/actions/workflows/build.yml) or [nightly.link](https://nightly.link/Niczzxo/Aello-Desktop/workflows/build/main) without a GitHub account.
 
 | Platform | Supported versions | Architectures | Packages |
 | --- | --- | --- | --- |
@@ -119,59 +116,13 @@ Windows, Linux, and macOS packages are built natively by the GitHub Actions rele
 
 ---
 
-<a id="support--donations"></a>
-## Support & donations
-
-Aello is free and open-source software maintained by an independent developer. Patreon supports card, PayPal, Apple Pay, recurring support, and one-time tips.
-
-<a href="https://opencollective.com/flow-tube"><picture><source media="(prefers-color-scheme: dark)" srcset="https://assets.flow-tube.org/v1/badges/pill/support-opencollective-dark.svg"><img alt="Support Aello on Open Collective" src="https://assets.flow-tube.org/v1/badges/pill/support-opencollective-light.svg" height="60"></picture></a>
-<a href="https://patreon.com/A_EDev"><picture><source media="(prefers-color-scheme: dark)" srcset="https://assets.flow-tube.org/v1/badges/pill/support-patreon-tonal-dark.svg"><img alt="Support Aello on Patreon" src="https://assets.flow-tube.org/v1/badges/pill/support-patreon-tonal-light.svg" height="60"></picture></a>
-
-You can also donate directly with crypto. Scan a QR code using a compatible wallet, or click it where custom wallet links are supported. The address and network are printed below every code — always verify both before sending.
-
-<table>
-  <tr>
-    <td align="center">
-      <strong>USDT · TRC20</strong><br><br>
-      <a href="tron:TRz7VDrTWwCLCfQmYBEJakqcZgbFNWfUMP"><img src="Assets/donations/usdt-trc20.png" alt="USDT TRC20 donation QR code" width="170"></a><br><br>
-      <code>TRz7VDrTWwCLCfQmYBEJakqcZgbFNWfUMP</code>
-    </td>
-    <td align="center">
-      <strong>Bitcoin · BTC</strong><br><br>
-      <a href="bitcoin:bc1qgmkkxxvzvsymtpfazqfl93jw6k4jgy0xmrtnv8?label=Aello%20Development"><img src="Assets/donations/bitcoin.png" alt="Bitcoin donation QR code" width="170"></a><br><br>
-      <code>bc1qgmkkxxvzvsymtpfazqfl93jw6k4jgy0xmrtnv8</code>
-    </td>
-    <td align="center">
-      <strong>Ethereum · ERC-20</strong><br><br>
-      <a href="ethereum:0xfbac6f464fec7fe458e318971a42ba45b305b70e"><img src="Assets/donations/ethereum.png" alt="Ethereum donation QR code" width="170"></a><br><br>
-      <code>0xfbac6f464fec7fe458e318971a42ba45b305b70e</code>
-    </td>
-  </tr>
-  <tr>
-    <td align="center" colspan="2">
-      <strong>Solana · SOL</strong><br><br>
-      <a href="solana:7b3SLgiVPb8qQUvERSPGRWoFoiGEDvkFuY98M1GEngug?label=Aello%20Development"><img src="Assets/donations/solana.png" alt="Solana donation QR code" width="170"></a><br><br>
-      <code>7b3SLgiVPb8qQUvERSPGRWoFoiGEDvkFuY98M1GEngug</code>
-    </td>
-    <td align="center">
-      <strong>Monero · XMR</strong><br><br>
-      <a href="monero:8AgaxZnpEvT8VXJpczpL7BQejwSEw97saJmKYqq4zKErbe9bkYSwUhJ813msPPbdYhF11oz4N7tfEj4Zi6k27fKD83ca1if"><img src="Assets/donations/monero.png" alt="Monero donation QR code" width="170"></a><br><br>
-      <code>8AgaxZnpEvT8VXJpczpL7BQejwSEw97saJmKYqq4zKErbe9bkYSwUhJ813msPPbdYhF11oz4N7tfEj4Zi6k27fKD83ca1if</code>
-    </td>
-  </tr>
-</table>
-
-Wallet URI support varies between wallet applications. Bitcoin, Ethereum, Solana, and Monero QR codes use their standard payment URI formats; the TRC20 code uses a Tron URI and may fall back to displaying the address in wallets that do not register the scheme.
-
----
-
 ## License
 
 Aello Desktop is free software licensed under the [GNU General Public License v3.0](LICENSE).
 
 This license requires that any project using Aello's source code, including the AelloNeuro engine, must also be released as open source under GPLv3. It may not be used in a proprietary or closed-source application.
 
-Copyright © 2025–2026 A-EDev
+Copyright © 2025–2026 Niczzxo
 
 ---
 
