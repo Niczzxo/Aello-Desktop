@@ -47,7 +47,6 @@ import Playlists from "./pages/Playlists";
 import PlaylistDetailsPage from "./pages/PlaylistDetailsPage";
 import Settings from "./pages/Settings";
 import Sync from "./pages/Sync";
-import Donations from "./pages/Donations";
 import ImportData from "./pages/ImportData";
 import ExtensionsPage from "./pages/ExtensionsPage";
 import Channel from "./pages/Channel";
@@ -76,7 +75,6 @@ import { MusicTrayController } from "./components/tray/MusicTrayController";
 import { ScrobbleController } from "./components/scrobbling/ScrobbleController";
 import { DownloadDialog } from "./components/downloads/DownloadDialog";
 import { DownloadActivity } from "./components/downloads/DownloadActivity";
-import { DonationPromptHost } from "./components/donations/DonationPrompt";
 import { UpdateManager } from "./components/updater/UpdateManager";
 import { ThemeController } from "./lib/useTheme";
 import { useTabHistoryShortcuts } from "./lib/tabs/useTabHistoryShortcuts";
@@ -283,9 +281,6 @@ function App() {
           <Route path="sync" element={
             <Sync />
           } />
-          <Route path="support" element={
-            <Donations />
-          } />
           <Route path="settings/import" element={
             <ImportData />
           } />
@@ -329,7 +324,6 @@ function App() {
         <DownloadDialog />
         <DownloadActivity />
       </LayoutGroup>
-      <DonationPromptHost enabled={IS_MAIN_WINDOW && location.pathname !== "/onboarding"} />
       <UpdateManager enabled={IS_MAIN_WINDOW && location.pathname !== "/onboarding"} />
       <ProfileSwitchOverlay />
       <ToastHost />

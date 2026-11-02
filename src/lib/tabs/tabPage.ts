@@ -26,7 +26,6 @@ const NAV_ICONS: Array<[prefix: string, name: SidebarNavIconName]> = [
   ["/settings", "settings"],
   ["/sync", "sync"],
   ["/sponsorblock", "extensions"],
-  ["/support", "support"],
 ];
 
 export function tabIconFor(pathname: string): TabIcon {
